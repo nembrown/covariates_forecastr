@@ -10,8 +10,8 @@ library(patchwork)
 
 # Read in data for PDO and Atnarko example ------------------------------------------------------------
 
-pdo_1854_present<-read.csv("ersst.v5.pdo.csv") %>% as_tibble()
-Atnarko_sample_age<-read.csv("Sample File_with age-specific data.csv") %>% as_tibble()
+pdo_1854_present<-read.csv("Inputs/ersst.v5.pdo.csv") %>% as_tibble()
+Atnarko_sample_age<-read.csv("Inputs/Sample File_with age-specific data.csv") %>% as_tibble()
 Atnarko_sample_age<-Atnarko_sample_age %>% mutate(Run_Year_Lag_1 = Run_Year + 1) %>% 
                                            mutate(Run_Year_Lag_2 = Run_Year + 2) %>% 
                                            mutate(Brood_Year_Lag_1 = Brood_Year + 1) %>% 
@@ -66,6 +66,8 @@ pdo_plots[["PDO_brood_sync"]]
 #
 allpdo_plot <-  wrap_plots( pdo_plots, ncol = 3) + plot_layout(guides = 'collect') 
 allpdo_plot
+ggsave(allpdo_plot, file="Plots/PDO.tiff")
+
 #looks like PDO run_sync and run_lag1 are important for age 4 and 5 fish. 
 
 # Do again with just 3 and 6 year old fish to see if zoomed in the pattern is there
@@ -77,6 +79,7 @@ for(pdo_ in pdo_matches) {
 
 allpdo_plot_3_6 <-  wrap_plots( pdo_plots_age3_6, ncol = 3) + plot_layout(guides = 'collect') 
 allpdo_plot_3_6
+ggsave(allpdo_plot_3_6, file="Plots/PDO_3_6.tiff")
 
 
 # Making forecastR input files --------------------------------------------
@@ -86,6 +89,6 @@ allpdo_plot_3_6
 Atnarko_sample_age_forecastr<- Atnarko_sample_age_pdo_gathered %>% filter(PDO_match == "PDO_run_sync") %>% 
                                rename(Cov_PDO = PDO.summer.av)
 
-write.csv(Atnarko_sample_age_forecastr, file="Atnarko_sample_age_forecastr.csv")
+write.csv(Atnarko_sample_age_forecastr, file="Outputs/Atnarko_sample_age_forecastr.csv")
 
 
