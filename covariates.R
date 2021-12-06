@@ -1,8 +1,14 @@
+
+# Load libraries ----------------------------------------------------------
+
 library(tidyverse)
 install.packages("devtools")
 library(devtools)
 devtools::install_github("thomasp85/patchwork")
 library(patchwork)
+
+
+# Read in data for PDO and Atnarko example ------------------------------------------------------------
 
 pdo_1854_present<-read.csv("ersst.v5.pdo.csv") %>% as_tibble()
 Atnarko_sample_age<-read.csv("Sample File_with age-specific data.csv") %>% as_tibble()
@@ -26,23 +32,27 @@ pdo_brood_lag2<-pdo_1854_present %>% filter(Year >1986)%>% select(Year, PDO.summ
 
 #Make one file with different joins
 Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age, pdo_run_sync, by=c("Run_Year" = "Year"))
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_sync,  by=c("Brood_Year" = "Year"))
 Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_run_lag1, by=c("Run_Year_Lag_1" = "Year"))
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_lag1,  by=c("Brood_Year_Lag_1" = "Year"))
 Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_run_lag2, by=c("Run_Year_Lag_2" = "Year"))
+Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_sync,  by=c("Brood_Year" = "Year"))
+Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_lag1,  by=c("Brood_Year_Lag_1" = "Year"))
 Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_lag2,  by=c("Brood_Year_Lag_2" = "Year"))
 
-Atnarko_sample_age_pdo_gathered<-Atnarko_sample_age_pdo %>% gather(key="PDO_match", value="PDO.summer.av", PDO_run_sync, PDO_brood_sync, PDO_run_lag1, PDO_brood_lag1, PDO_run_lag2, PDO_brood_lag2) %>% 
+Atnarko_sample_age_pdo_gathered<-Atnarko_sample_age_pdo %>% gather(key="PDO_match", value="PDO.summer.av", PDO_run_sync,  PDO_run_lag1,PDO_run_lag2,  PDO_brood_sync, PDO_brood_lag1, PDO_brood_lag2) %>% 
                                                    mutate(Temperature_pattern = ifelse(PDO.summer.av > 0, "Hot years", "Cold Years"))
   
 
 Atnarko_sample_age_pdo_gathered$PDO_match<-as.factor(Atnarko_sample_age_pdo_gathered$PDO_match)
 levels(Atnarko_sample_age_pdo_gathered$PDO_match)
 
-#### Ggplotting before going into forecast to see which ones make sense to use
+
+# Plotting ----------------------------------------------------------------
+
 levels(Atnarko_sample_age_pdo_gathered$PDO_match)
 pdo_matches = unique(Atnarko_sample_age_pdo_gathered$PDO_match)
 pdo_plots = list()
+pdo_plots_age3_6 = list()
+
 
 for(pdo_ in pdo_matches) {
   pdo_plots[[pdo_]] = ggplot(Atnarko_sample_age_pdo_gathered%>% filter(PDO_match == pdo_), aes( x=PDO.summer.av, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
@@ -56,10 +66,26 @@ pdo_plots[["PDO_brood_sync"]]
 #
 allpdo_plot <-  wrap_plots( pdo_plots, ncol = 3) + plot_layout(guides = 'collect') 
 allpdo_plot
+#looks like PDO run_sync and run_lag1 are important for age 4 and 5 fish. 
 
-#looks like PDO run_sync and run_lag1 are important for age 4 and 5 fish.  
+# Do again with just 3 and 6 year old fish to see if zoomed in the pattern is there
+for(pdo_ in pdo_matches) {
+  pdo_plots_age3_6[[pdo_]] = ggplot(Atnarko_sample_age_pdo_gathered%>% filter(PDO_match == pdo_, Age_Class==c(3,6)), aes( x=PDO.summer.av, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+    geom_point(aes(shape=Temperature_pattern)) + geom_smooth()+
+    ggtitle(Atnarko_sample_age_pdo_gathered$PDO_match[Atnarko_sample_age_pdo_gathered$PDO_match== pdo_])
+}
 
-#Altering it for forecastr
-# Atnarko_sample_age_forecastr<- Atnarko_sample_age_pdo_gathered %>% filter(PDO_match == )
+allpdo_plot_3_6 <-  wrap_plots( pdo_plots_age3_6, ncol = 3) + plot_layout(guides = 'collect') 
+allpdo_plot_3_6
+
+
+# Making forecastR input files --------------------------------------------
+
+# Choose the PDO match that best correlates with the data (can pick up to 3)
+#rename the variable "Cov_" so forecastR will read it automatically 
+Atnarko_sample_age_forecastr<- Atnarko_sample_age_pdo_gathered %>% filter(PDO_match == "PDO_run_sync") %>% 
+                               rename(Cov_PDO = PDO.summer.av)
+
+write.csv(Atnarko_sample_age_forecastr, file="Atnarko_sample_age_forecastr.csv")
 
 
