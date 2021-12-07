@@ -2,10 +2,13 @@
 # Load libraries ----------------------------------------------------------
 
 library(tidyverse)
-install.packages("devtools")
+# install.packages("devtools")
 library(devtools)
-devtools::install_github("thomasp85/patchwork")
+# devtools::install_github("thomasp85/patchwork")
 library(patchwork)
+library(ggcorrplot)
+library(corrr)
+library(PerformanceAnalytics)
 
 
 # Read in data for PDO and Atnarko example ------------------------------------------------------------
@@ -48,11 +51,11 @@ levels(Atnarko_sample_age_pdo_gathered$PDO_match)
 
 # Plotting ----------------------------------------------------------------
 
+# Plot pdo vs. Average escapement
 levels(Atnarko_sample_age_pdo_gathered$PDO_match)
 pdo_matches = unique(Atnarko_sample_age_pdo_gathered$PDO_match)
 pdo_plots = list()
 pdo_plots_age3_6 = list()
-
 
 for(pdo_ in pdo_matches) {
   pdo_plots[[pdo_]] = ggplot(Atnarko_sample_age_pdo_gathered%>% filter(PDO_match == pdo_), aes( x=PDO.summer.av, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
@@ -63,7 +66,7 @@ for(pdo_ in pdo_matches) {
 # check plots with 
 pdo_plots[["PDO_brood_sync"]]
 
-#
+#save
 allpdo_plot <-  wrap_plots( pdo_plots, ncol = 3) + plot_layout(guides = 'collect') 
 allpdo_plot
 ggsave(allpdo_plot, file="Plots/PDO.tiff")
@@ -82,13 +85,36 @@ allpdo_plot_3_6
 ggsave(allpdo_plot_3_6, file="Plots/PDO_3_6.tiff")
 
 
+# Correlation plotting, don't use the gathered file use the spread file 
+Atnarko_sample_pdo_correlation<-Atnarko_sample_age_pdo %>% select(Average_Escapement, PDO_run_sync, PDO_run_lag1, PDO_run_lag2, 
+                                                                  PDO_brood_sync, PDO_brood_lag1, PDO_brood_lag2)
+
+# Correlation plot
+corr_Atnarko_sample_pdo <- round(cor(Atnarko_sample_pdo_correlation, use="pairwise.complete.obs"), 1)
+corr_pmat_Atnarko_sample_pdo <- cor_pmat(corr_Atnarko_sample_pdo)
+ggcorrplot(corr_Atnarko_sample_pdo, lab=TRUE,  type = "lower", p.mat = corr_pmat_Atnarko_sample_pdo)
+
+#Network plot
+Atnarko_sample_pdo_correlation %>% correlate() %>%  network_plot()
+
+#using Performance Analytics
+chart.Correlation(Atnarko_sample_pdo_correlation , histogram=TRUE, pch=19)
+
+
+
 # Making forecastR input files --------------------------------------------
 
-# Choose the PDO match that best correlates with the data (can pick up to 3)
-#rename the variable "Cov_" so forecastR will read it automatically 
+# Choose the PDO match that best correlates with the data (can pick up to 3 covariates)
+#rename the variable "Cov_" so forecastR will read it automatically as a covariate
 Atnarko_sample_age_forecastr<- Atnarko_sample_age_pdo_gathered %>% filter(PDO_match == "PDO_run_sync") %>% 
-                               rename(Cov_PDO = PDO.summer.av)
+                               rename(Cov_PDO = PDO.summer.av) %>% select(-c(Run_Year_Lag_1, Run_Year_Lag_2, Brood_Year_Lag_1, Brood_Year_Lag_2, PDO_match, Temperature_pattern))
+# Atnarko_sample_age_forecastr$Stock_Name[1,]<- "Atnarko"
+# Atnarko_sample_age_forecastr$Stock_Species<- "Chinook"
+# Atnarko_sample_age_forecastr$Stock_Abundance<- "Escapement"
+Atnarko_sample_age_forecastr$Forecasting_Year<-2019
+Atnarko_sample_age_forecastr$Forecasting_Year<- as.integer(Atnarko_sample_age_forecastr$Forecasting_Year)
+# 
 
 write.csv(Atnarko_sample_age_forecastr, file="Outputs/Atnarko_sample_age_forecastr.csv")
 
-
+View(Atnarko_sample_age_forecastr)
