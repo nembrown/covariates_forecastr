@@ -13,7 +13,13 @@ library(PerformanceAnalytics)
 
 # Read in data for PDO and Atnarko example ------------------------------------------------------------
 
-pdo_1854_present<-read.csv("Inputs/ersst.v5.pdo.csv") %>% as_tibble()
+pdo_1854_present<-read.table("https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/index/ersst.v5.pdo.dat",  header=TRUE, skip=1, fill=TRUE)
+#Note, the last year of data gets imported with -99 as the values missing appended to the previous month's value
+#Makes for eg. November a character
+#best to exclude these first or if just doing summer and have full data for summer then can ignore
+pdo_1854_present<-pdo_1854_present %>% as_tibble() %>% 
+                  mutate(PDO.summer.av= rowMeans(select(.,May, Jun, Jul, Aug, Sep)))  
+
 Atnarko_sample_age<-read.csv("Inputs/Sample File_with age-specific data.csv") %>% as_tibble()
 Atnarko_sample_age<-Atnarko_sample_age %>% mutate(Run_Year_Lag_1 = Run_Year + 1) %>% 
                                            mutate(Run_Year_Lag_2 = Run_Year + 2) %>% 
@@ -22,24 +28,23 @@ Atnarko_sample_age<-Atnarko_sample_age %>% mutate(Run_Year_Lag_1 = Run_Year + 1)
                                            select(-c(Cov_Variable3, Cov_Hatch_Rel, Cov_Variable2))
 
 
-
 #the sample data is only 1990 to present for run year, just use the summer average
-pdo_run_sync<-pdo_1854_present %>% filter(Year >1989) %>% select(Year, PDO.summer.av) %>% mutate(PDO_run_sync=PDO.summer.av, .keep="unused")
-pdo_run_lag1<-pdo_1854_present %>% filter(Year >1989) %>% select(Year, PDO.summer.av) %>% mutate(PDO_run_lag1=PDO.summer.av, .keep="unused")
-pdo_run_lag2<-pdo_1854_present %>% filter(Year >1989) %>% select(Year, PDO.summer.av) %>% mutate(PDO_run_lag2=PDO.summer.av, .keep="unused")
+pdo_run_sync<-pdo_1854_present  %>% select(Year, PDO.summer.av) %>% mutate(PDO_run_sync=PDO.summer.av, .keep="unused")
+pdo_run_lag1<-pdo_1854_present  %>% select(Year, PDO.summer.av) %>% mutate(PDO_run_lag1=PDO.summer.av, .keep="unused")
+pdo_run_lag2<-pdo_1854_present  %>% select(Year, PDO.summer.av) %>% mutate(PDO_run_lag2=PDO.summer.av, .keep="unused")
 
 #1987 to present for brood year just use the summer average
-pdo_brood_sync<-pdo_1854_present %>% filter(Year >1986)%>% select(Year, PDO.summer.av)%>% mutate(PDO_brood_sync=PDO.summer.av, .keep="unused")
-pdo_brood_lag1<-pdo_1854_present %>% filter(Year >1986)%>% select(Year, PDO.summer.av)%>% mutate(PDO_brood_lag1=PDO.summer.av, .keep="unused")
-pdo_brood_lag2<-pdo_1854_present %>% filter(Year >1986)%>% select(Year, PDO.summer.av)%>% mutate(PDO_brood_lag2=PDO.summer.av, .keep="unused")
+pdo_brood_sync<-pdo_1854_present %>% select(Year, PDO.summer.av)%>% mutate(PDO_brood_sync=PDO.summer.av, .keep="unused")
+pdo_brood_lag1<-pdo_1854_present %>% select(Year, PDO.summer.av)%>% mutate(PDO_brood_lag1=PDO.summer.av, .keep="unused")
+pdo_brood_lag2<-pdo_1854_present %>% select(Year, PDO.summer.av)%>% mutate(PDO_brood_lag2=PDO.summer.av, .keep="unused")
 
 #Make one file with different joins
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age, pdo_run_sync, by=c("Run_Year" = "Year"))
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_run_lag1, by=c("Run_Year_Lag_1" = "Year"))
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_run_lag2, by=c("Run_Year_Lag_2" = "Year"))
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_sync,  by=c("Brood_Year" = "Year"))
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_lag1,  by=c("Brood_Year_Lag_1" = "Year"))
-Atnarko_sample_age_pdo<-inner_join(Atnarko_sample_age_pdo, pdo_brood_lag2,  by=c("Brood_Year_Lag_2" = "Year"))
+Atnarko_sample_age_pdo<-left_join(Atnarko_sample_age, pdo_run_sync, by=c("Run_Year" = "Year"))
+Atnarko_sample_age_pdo<-left_join(Atnarko_sample_age_pdo, pdo_run_lag1, by=c("Run_Year_Lag_1" = "Year"))
+Atnarko_sample_age_pdo<-left_join(Atnarko_sample_age_pdo, pdo_run_lag2, by=c("Run_Year_Lag_2" = "Year"))
+Atnarko_sample_age_pdo<-left_join(Atnarko_sample_age_pdo, pdo_brood_sync,  by=c("Brood_Year" = "Year"))
+Atnarko_sample_age_pdo<-left_join(Atnarko_sample_age_pdo, pdo_brood_lag1,  by=c("Brood_Year_Lag_1" = "Year"))
+Atnarko_sample_age_pdo<-left_join(Atnarko_sample_age_pdo, pdo_brood_lag2,  by=c("Brood_Year_Lag_2" = "Year"))
 
 Atnarko_sample_age_pdo_gathered<-Atnarko_sample_age_pdo %>% gather(key="PDO_match", value="PDO.summer.av", PDO_run_sync,  PDO_run_lag1,PDO_run_lag2,  PDO_brood_sync, PDO_brood_lag1, PDO_brood_lag2) %>% 
                                                    mutate(Temperature_pattern = ifelse(PDO.summer.av > 0, "Hot years", "Cold Years"))
@@ -95,26 +100,24 @@ corr_pmat_Atnarko_sample_pdo <- cor_pmat(corr_Atnarko_sample_pdo)
 ggcorrplot(corr_Atnarko_sample_pdo, lab=TRUE,  type = "lower", p.mat = corr_pmat_Atnarko_sample_pdo)
 
 #Network plot
-Atnarko_sample_pdo_correlation %>% correlate() %>%  network_plot()
+# Atnarko_sample_pdo_correlation %>% correlate() %>%  network_plot()
 
 #using Performance Analytics
 chart.Correlation(Atnarko_sample_pdo_correlation , histogram=TRUE, pch=19)
 
 
 
-# Making forecastR input files --------------------------------------------
+# Making forecastR/shiny app input files --------------------------------------------
 
 # Choose the PDO match that best correlates with the data (can pick up to 3 covariates)
 #rename the variable "Cov_" so forecastR will read it automatically as a covariate
 Atnarko_sample_age_forecastr<- Atnarko_sample_age_pdo_gathered %>% filter(PDO_match == "PDO_run_sync") %>% 
                                rename(Cov_PDO = PDO.summer.av) %>% select(-c(Run_Year_Lag_1, Run_Year_Lag_2, Brood_Year_Lag_1, Brood_Year_Lag_2, PDO_match, Temperature_pattern))
-# Atnarko_sample_age_forecastr$Stock_Name[1,]<- "Atnarko"
-# Atnarko_sample_age_forecastr$Stock_Species<- "Chinook"
-# Atnarko_sample_age_forecastr$Stock_Abundance<- "Escapement"
-Atnarko_sample_age_forecastr$Forecasting_Year<-2019
-Atnarko_sample_age_forecastr$Forecasting_Year<- as.integer(Atnarko_sample_age_forecastr$Forecasting_Year)
-# 
 
-write.csv(Atnarko_sample_age_forecastr, file="Outputs/Atnarko_sample_age_forecastr.csv")
+#The Forecasting year needs to be the last year with data, keep as 2021 if there is 2021 data
+# Atnarko_sample_age_forecastr$Forecasting_Year[Atnarko_sample_age_forecastr$Forecasting_Year==2021]<-2018
+# Atnarko_sample_age_forecastr$Forecasting_Year<- as.integer(Atnarko_sample_age_forecastr$Forecasting_Year)
 
-View(Atnarko_sample_age_forecastr)
+
+write.csv(Atnarko_sample_age_forecastr, file="Outputs/Atnarko_sample_age_forecastr.csv", row.names=FALSE)
+
