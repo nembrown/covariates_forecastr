@@ -9,6 +9,10 @@ library(patchwork)
 library(ggcorrplot)
 library(corrr)
 library(PerformanceAnalytics)
+library(rstatix)
+library(lares)
+
+
 
 
 # Read in data for PDO and Atnarko example ------------------------------------------------------------
@@ -88,16 +92,22 @@ ggsave(allpdo_plot_3_6, file="Plots/PDO_3_6.tiff")
 
 
 # Correlation plotting, don't use the gathered file use the spread file 
-Atnarko_sample_pdo_correlation<-Atnarko_sample_age_pdo %>% select(Average_Escapement, PDO_run_sync, PDO_run_lag1, PDO_run_lag2, 
-                                                                                                                                 PDO_brood_sync, PDO_brood_lag1, PDO_brood_lag2)
+Atnarko_sample_pdo_correlation<-Atnarko_sample_age_pdo %>% select(Average_Escapement, PDO_run_sync, PDO_run_lag1, PDO_run_lag2,  PDO_brood_sync, PDO_brood_lag1, PDO_brood_lag2)
 
-# Correlation plot
-corr_Atnarko_sample_pdo <- round(cor(Atnarko_sample_pdo_correlation, use="pairwise.complete.obs"), 1)
-corr_pmat_Atnarko_sample_pdo <- cor_pmat(corr_Atnarko_sample_pdo)
-ggcorrplot(corr_Atnarko_sample_pdo, lab=TRUE,  type = "lower", p.mat = corr_pmat_Atnarko_sample_pdo)
 
-#Network plot
-# Atnarko_sample_pdo_correlation %>% correlate() %>%  network_plot()
+# Correlation plot of Average escapement vs. all other variables
+corr_Atnarko_sample_pdo <- Atnarko_sample_pdo_correlation %>% correlate() %>% focus(Average_Escapement)
+ggplot(corr_Atnarko_sample_pdo, aes(x = term, y = Average_Escapement)) +
+  geom_bar(stat = "identity") +   geom_col(aes(fill = Average_Escapement >= 0)) + 
+  ylab("Correlation with Average_Escapement") + 
+  xlab("Variable") + coord_flip()
+
+### but want p values - so will use the lares package: 
+corr_pdo<-corr_var(Atnarko_sample_pdo_correlation,Average_Escapement, top = 6, pvalue=TRUE, plot=FALSE)
+corr_pdo_plot<-corr_var(Atnarko_sample_pdo_correlation,Average_Escapement, top = 6, pvalue=TRUE, plot=TRUE)
+
+
+ggsave(corr_pdo_plot, file="Plots/corr_pdo_plot.tiff")
 
 #using Performance Analytics
 chart.Correlation(Atnarko_sample_pdo_correlation , histogram=TRUE, pch=19)
