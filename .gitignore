@@ -45,3 +45,6 @@ vignettes/*.pdf
 *.tiff
 *.jpeg
 *.pdf
+
+#too much to upload raw data
+data-raw/
