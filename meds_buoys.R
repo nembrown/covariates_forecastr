@@ -35,10 +35,12 @@ cioos_pacific_datasets<-ed_datasets(which = "tabledap", url = "https://data.cioo
 rerddap::info('DFO_MEDS_BUOYS', url = "https://data.cioospacific.ca/erddap/")
 
 dfo_meds_buoys<- tabledap('DFO_MEDS_BUOYS',  url = "https://data.cioospacific.ca/erddap/", 
-                          fields = c('latitude', 'longitude', 'time', 'STN_ID', 'SSTP', 'SSTP_flags', 'Q_FLAG'), 
+                          fields = c('latitude', 'longitude', 'time', 'STN_ID', 'SSTP', 'SSTP_flags', 'Q_FLAG', 'SSTP_UQL'), 
                           'time>=1980-01-01', 'SSTP!=NaN', 'SSTP_flags!=1')
 
 dfo_meds_buoys_small <- dfo_meds_buoys %>% as_tibble %>% 
+                                           filter(SSTP_UQL %in% c(1,2)) %>% 
+                                           filter(Q_FLAG != 4) %>% 
                                            mutate(year = lubridate::year(time), 
                                                   month = lubridate::month(time), 
                                                   day = lubridate::day(time), 
@@ -68,7 +70,7 @@ dfo_meds_buoys_stations <- dfo_meds_buoys_small %>% dplyr::select(STN_ID, latitu
 dfo_meds_buoys_small$time<- as_date(dfo_meds_buoys_small$time)
 ggplot(dfo_meds_buoys_year, aes(x=year, y=mean_SSTP, col=STN_ID, group=STN_ID))+geom_point()+geom_line()
 
-ggplot(dfo_meds_buoys_year, aes(x=STN_ID, y=year, col=STN_ID, group=STN_ID))+geom_point()
+ggplot(dfo_meds_buoys_year , aes(x=STN_ID, y=year, col=STN_ID, group=STN_ID))+geom_point()
 
 
 
@@ -153,13 +155,13 @@ loc_matching_BC_offshore<-loc_matching_BC_terminal %>%
 dfo_meds_buoys_matched_terminal<-left_join(loc_matching_BC_terminal, dfo_meds_buoys_combined)
 dfo_meds_buoys_matched_terminal<-dfo_meds_buoys_matched_terminal %>% 
                                  rename(cov_SSTP_terminal_summer = mean_summer_SSTP, 
-                                        cov_SSTP_terminal_year = mean_SSTP) %>% select(-STN_ID)
+                                        cov_SSTP_terminal_year = mean_SSTP) %>% rename(buoy_ID_terminal=STN_ID)
 #Offshore
 dfo_meds_buoys_matched_offshore<-left_join(loc_matching_BC_offshore, dfo_meds_buoys_combined)
 dfo_meds_buoys_matched_offshore<-dfo_meds_buoys_matched_offshore %>% 
                                  rename(cov_SSTP_offshore_summer = mean_summer_SSTP, 
-                                        cov_SSTP_offshore_year = mean_SSTP) %>% select(-STN_ID)
+                                        cov_SSTP_offshore_year = mean_SSTP) %>% rename(buoy_ID_offshore=STN_ID)
 
-dfo_meds_buoys_combined<-merge(dfo_meds_buoys_matched_terminal, dfo_meds_buoys_matched_offshore)
-dfo_meds_buoys_combined
+dfo_meds_buoys_matched_combined<-merge(dfo_meds_buoys_matched_terminal, dfo_meds_buoys_matched_offshore)
+dfo_meds_buoys_matched_combined
 
