@@ -18,11 +18,13 @@ library(lares)
 # Read in data for PDO and Atnarko example ------------------------------------------------------------
 
 pdo_1854_present<-read.table("https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/index/ersst.v5.pdo.dat",  header=TRUE, skip=1, fill=TRUE)
+
 #Note, the last year of data gets imported with -99 as the values missing appended to the previous month's value
 #Makes for eg. November a character
 #best to exclude these first or if just doing summer and have full data for summer then can ignore
-pdo_1854_present<-pdo_1854_present %>% as_tibble() %>% 
-                  mutate(PDO.summer.av= rowMeans(select(.,May, Jun, Jul, Aug, Sep)))  
+pdo_1854_present<-pdo_1854_present %>% as_tibble() %>% filter(Year<2022) %>% 
+                  mutate(PDO.summer.av= rowMeans(select(.,May, Jun, Jul, Aug, Sep)))  %>% 
+                  mutate(cov_PDO_pacific_year = rowMeans(select(.,Jan:Dec)))
 
 Atnarko_sample_age<-read.csv("Inputs/Sample File_with age-specific data.csv") %>% as_tibble()
 Atnarko_sample_age<-Atnarko_sample_age %>% mutate(Run_Year_Lag_1 = Run_Year + 1) %>% 
