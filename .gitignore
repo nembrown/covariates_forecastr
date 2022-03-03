@@ -48,3 +48,6 @@ vignettes/*.pdf
 
 #too much to upload raw data
 data-raw/
+
+#excel files
+*.xlsx
