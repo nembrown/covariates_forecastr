@@ -1,23 +1,29 @@
 
 
-
-
-#pdo #168
+#pdo #52 lines, all years sing 1896
 pdo_simple
 
-#temperature from MEDS buoys #464
-dfo_meds_buoys_matched_combined %>% as_tibble()
+#temperature from MEDS buoys #463, since 1989
+dfo_meds_buoys_matched_combined
 
-#temp and salinity from lightstations #752
+#temp and salinity from lightstations #752, since 1900
 Data_Lightstations_matched
 
-#combining PDO and temperature
+#zooplankton from ios, since 1980
+ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year)
 
-fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year")) %>% as_tibble()
-fcs_covariates<-merge(fcs_covariates, pdo_simple, by=c("year")) %>% as_tibble()
+#join all together 
+
+fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble()
+fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE)
+fcs_covariates<- merge(fcs_covariates, pdo_simple, by=c("year")) %>% as_tibble()
+
+fcs_covariates<- fcs_covariates %>% relocate(where(is.numeric), .after = where(is.character))
 fcs_covariates
+View(fcs_covariates)
 
 
+write.csv(fcs_covariates, "fcs_covariates.csv")
 
 
 
