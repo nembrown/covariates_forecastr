@@ -16,10 +16,8 @@ Lightstations <-
 Lightstations <-
   Lightstations %>%
   dplyr::mutate(LIGHSTATIO = recode(LIGHSTATIO,'LANGARA POINT LIGHTSTATION'='LANGARA ISLAND LIGHTSTATION'))
-plot(Lightstations)
+#plot(Lightstations)
 
-
-View(Lightstations)
 
 nstations <- 12
 nmonths <- 12
@@ -85,7 +83,7 @@ for(filename in list.files('data-raw/DATA_Active_lightstations',pattern = '.csv'
       dplyr::left_join(Data_Lightstations[(count_SST-1)*nyears*nmonths + (1:(nyears*nmonths)),
                                           c('Location','Year','Month','Salinity','Longitude','Latitude')], 
                        tmp) %>%
-      select(Location,Year,Month,SST,Salinity,Longitude,Latitude)
+      dplyr::select(Location,Year,Month,SST,Salinity,Longitude,Latitude)
     
     count_SST <- count_SST + 1
   }
@@ -133,7 +131,7 @@ for(filename in list.files('data-raw/DATA_Active_lightstations',pattern = '.csv'
       dplyr::left_join(Data_Lightstations[(count_salinity-1)*nyears*nmonths + (1:(nyears*nmonths)),
                                           c('Location','Year','Month','SST','Longitude','Latitude')], 
                        tmp) %>%
-      select(Location,Year,Month,SST,Salinity,Longitude,Latitude)
+      dplyr::select(Location,Year,Month,SST,Salinity,Longitude,Latitude)
     
     count_salinity <- count_salinity + 1
   }
@@ -170,24 +168,14 @@ Data_Lightstations_combined<-merge(Data_Lightstations_year, Data_Lightstations_y
 Data_Lightstations_combined<- Data_Lightstations_combined %>% filter(year>1975) %>% as_tibble()
 Data_Lightstations_combined
 
-### Mapping
 
-Data_Lightstations_loc<-Data_Lightstations %>% select(Location, Longitude, Latitude) %>% 
+
+####Matching
+Data_Lightstations_loc<-Data_Lightstations %>% dplyr::select(Location, Longitude, Latitude) %>% 
   rowwise() %>% distinct() %>% 
   rename(long=Longitude, lat = Latitude, Site_name=Location)
 Data_Lightstations_loc$site_type<- "Lighthouse"
 
-
-light_stock<-bind_rows(Data_Lightstations_loc, stocks_loc_simple_BC)
-###Make map
-bbox_marine_light <- make_bbox(stocks_loc_simple_BC$long, stocks_loc_simple_BC$lat, f = 0.1)
-map_marine_light <- get_stamenmap(bbox_marine_light, source="stamen", maptype= "terrain", crop=FALSE, zoom=8)
-
-colorset_map_light = c("ERA Stock"="#FF007F" , "Lighthouse" ="#0000FF" )
-ggmap(map_marine_light) + geom_point(data=light_stock, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map_light)
-
-
-####Matching
 
 coordinates(Data_Lightstations_loc) <- c("long", "lat")
 coordinates(stocks_loc) <- c("long", "lat")             
@@ -215,7 +203,7 @@ loc_matching_light
 loc_matching_light_BC<- loc_matching_light %>% filter(Region == "BC") %>% rename(Location = Site_name)
 loc_matching_light_BC
 
-loc_matching_light_BC_simple<-loc_matching_light_BC %>% select(Stock_ERA, Location)
+loc_matching_light_BC_simple<-loc_matching_light_BC %>% dplyr::select(Stock_ERA, Location)
 
 
 ## Combing the match file to the data file
@@ -230,6 +218,17 @@ Data_Lightstations_matched
 
 
 
+### Mapping
+
+
+
+light_stock<-bind_rows(Data_Lightstations_loc, stocks_loc_simple_BC)
+###Make map
+bbox_marine_light <- make_bbox(stocks_loc_simple_BC$long, stocks_loc_simple_BC$lat, f = 0.1)
+map_marine_light <- get_stamenmap(bbox_marine_light, source="stamen", maptype= "terrain", crop=FALSE, zoom=8)
+
+colorset_map_light = c("ERA Stock"="#FF007F" , "Lighthouse" ="#0000FF" )
+ggmap(map_marine_light) + geom_point(data=light_stock, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map_light)
 
 
 
