@@ -107,9 +107,8 @@ dfo_meds_buoys_matched_terminal<-dfo_meds_buoys_matched_terminal %>%
          cov_SSTP_terminal_year = mean_SSTP) %>% rename(buoy_ID_terminal=STN_ID)
 #Offshore
 dfo_meds_buoys_matched_offshore<-left_join(loc_matching_BC_offshore, dfo_meds_buoys_combined)
-dfo_meds_buoys_matched_offshore<-dfo_meds_buoys_matched_offshore %>% 
-  rename(cov_SSTP_offshore_summer = mean_summer_SSTP, 
-         cov_SSTP_offshore_year = mean_SSTP) %>% rename(buoy_ID_offshore=STN_ID)
+dfo_meds_buoys_matched_offshore<-dfo_meds_buoys_matched_offshore %>% rename(cov_SSTP_offshore_summer = mean_summer_SSTP, 
+                                                                     cov_SSTP_offshore_year = mean_SSTP) %>% rename(buoy_ID_offshore=STN_ID)
 
 dfo_meds_buoys_matched_combined<-merge(dfo_meds_buoys_matched_terminal, dfo_meds_buoys_matched_offshore) %>% as_tibble()
 dfo_meds_buoys_matched_combined
