@@ -26,7 +26,7 @@ library(tidyverse)
 library(dplyr)
 
 #searching erddap for sea surface temperature
-whichSST <- ed_search(query = "SST")
+#whichSST <- ed_search(query = "Zoop")
 
 
 cioos_pacific_datasets<-ed_datasets(which = "tabledap", url = "https://data.cioospacific.ca/erddap/")
