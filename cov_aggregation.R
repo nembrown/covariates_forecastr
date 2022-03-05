@@ -20,18 +20,17 @@ fcs_covariates<- merge(fcs_covariates, pdo_simple, by=c("year")) %>% as_tibble()
 
 fcs_covariates<- fcs_covariates %>% relocate(where(is.numeric), .after = where(is.character))
 fcs_covariates
-View(fcs_covariates)
-
 
 write.csv(fcs_covariates, "fcs_covariates.csv")
 
-
+View(fcs_covariates)
 
 fcs_covariates_long<- fcs_covariates %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
                                          mutate(var_cat = case_when(
                                            str_detect(Covariate, "SST") ~ "Temperature", 
                                            str_detect(Covariate, "PPT") ~ "Salinity",
-                                           str_detect(Covariate, "PDO") ~ "PDO"
+                                           str_detect(Covariate, "PDO") ~ "PDO", 
+                                           str_detect(Covariate, "zoop") ~ "Zooplankton"
                                           )) %>% 
                                         mutate(var_timing = case_when(
                                           str_detect(Covariate, "year") ~ "Year", 
@@ -42,8 +41,9 @@ fcs_covariates_long<- fcs_covariates %>% pivot_longer(cols = starts_with("cov"),
                                           str_detect(Covariate, "terminal") ~ "terminal", 
                                           TRUE ~ "terminal"
                                          ))
-fcs_covariates_long
+unique(fcs_covariates_long$Stock_ERA)
 
-ggplot(fcs_covariates_long %>% filter(Stock_ERA == "RBT", var_cat== "Temperature", var_location=="terminal"), 
+ggplot(fcs_covariates_long %>% filter(var_cat== "Zooplankton", var_timing=="Summer", var_location=="terminal"), 
        aes(x=year, y=value, col=Covariate, group=Covariate))+
-        geom_point()+geom_line()+ggtitle("RBT")
+        geom_point()+geom_line()+facet_wrap(~Stock_ERA, scales="free")
+
