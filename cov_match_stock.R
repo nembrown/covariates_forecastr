@@ -143,7 +143,11 @@ ios_zoop_era_stocks
 
 #Apply matching to data
 ios_zoop_matched <- left_join(ios_zoop_era_stocks, ios_zoop)
-ios_zoop_matched 
+
+#Fixing problems with zeros
+ios_zoop_matched<-ios_zoop_matched %>% mutate(total_zoop_biomass = case_when(total_zoop_biomass == 0 ~ 0.07, TRUE ~ total_zoop_biomass))
+
+View(ios_zoop_matched)
 
 #Transformation of the data by Stock
 ios_zoop_summer<- ios_zoop_matched %>%  filter(season == "summer") %>% 
