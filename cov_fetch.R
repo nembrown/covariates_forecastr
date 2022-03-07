@@ -6,7 +6,7 @@ library(lubridate)
 
 
 
-# PDO from NOAA ---------------------------------------------------------------------
+# PDO (Pacific Decadal Oscillation) from NOAA ---------------------------------------------------------------------
 
 pdo_1854_present<-read.table("https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/index/ersst.v5.pdo.dat",  header=TRUE, skip=1, fill=TRUE) %>% as_tibble()
 
@@ -15,16 +15,45 @@ pdo_1854_present<-read.table("https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/in
 #best to exclude Year 2022 first or if just doing summer and have full data for summer then can ignore
 
 
-pdo_1854_present<-pdo_1854_present %>% filter(Year!= 2022) %>% as_tibble() %>% 
-                  mutate_if(is.character, as.numeric) %>% 
-                  mutate(PDO.summer.av= rowMeans(select(.,May, Jun, Jul, Aug, Sep)))  %>% 
-                  mutate(cov_PDO_pacific_year = rowMeans(select(.,Jan, Feb, Mar, Apr, May, Jun, Jul, Sep, Oct, Nov, Dec)))
+pdo_1854_present<-pdo_1854_present %>% rename(year = Year) %>% 
+                                       filter(year!= 2022) %>% 
+                                       mutate_if(is.character, as.numeric) %>% 
+                                       mutate(cov_PDO_pacific_summer= rowMeans(dplyr::select(.,May, Jun, Jul, Aug, Sep)))  %>% 
+                                       mutate(cov_PDO_pacific_year = rowMeans(dplyr::select(.,Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)))
 
-pdo_simple<- pdo_1854_present %>% select(Year, PDO.summer.av, cov_PDO_pacific_year) %>% 
-                                  rename(year = Year, cov_PDO_pacific_summer = PDO.summer.av) %>% 
+pdo_simple<- pdo_1854_present %>% dplyr::select(year, cov_PDO_pacific_summer, cov_PDO_pacific_year) %>% 
                                   filter(year>1969)
 pdo_simple
 
+
+
+# ONI (Oceanic Nino Index) from NOAA ---------------------------------------------------------------------
+
+oni_1950_present<-read.table("https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",  header=TRUE,  fill=TRUE) %>% as_tibble()
+
+oni_1950_present<-oni_1950_present %>% rename(year = YR) %>% 
+                                       filter(year!= 2022) %>% 
+                                       group_by(year) %>% 
+                                       summarise_if(is.numeric, mean) %>% 
+                                       rename(cov_ONI_yearly_mean= TOTAL, 
+                                              cov_ONI_yearly_anomaly = ANOM)
+
+
+oni_simple<-oni_1950_present %>% filter(year>1969)
+
+# SOI (Southern Oscillation Index) from NOAA ---------------------------------------------------------------------
+
+soi_1951_present<-read.table("https://psl.noaa.gov/gcos_wgsp/Timeseries/Data/soi.long.data",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
+names(soi_1951_present) <- c("year","JAN","FEB","MAR","APR","MAY","JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+
+soi_1951_present<-soi_1951_present %>% filter(year!= 2022) %>% 
+                                       mutate_if(is.character, as.numeric) %>% 
+                                       mutate(cov_soi_pacific_summer= rowMeans(dplyr::select(.,MAY, JUN, JUL, AUG, SEP)))  %>% 
+                                       mutate(cov_soi_pacific_year = rowMeans(dplyr::select(.,JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC)))
+
+soi_simple<- soi_1951_present %>% dplyr::select(year, cov_soi_pacific_summer, cov_soi_pacific_year) %>% 
+                                  filter(year>1969)
+soi_simple
 
 
 # Temp and salinity from Lightstations -----------------------------------------------------------
