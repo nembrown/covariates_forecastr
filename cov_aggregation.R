@@ -1,4 +1,8 @@
+library(tidyverse)
+library(ggplot2)
 
+
+# Check each of the datasets have been calculated properly ----------------
 
 #pdo #52 lines, all years sing 1896
 pdo_simple
@@ -12,7 +16,9 @@ Data_Lightstations_matched
 #zooplankton from ios, since 1980
 ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year)
 
-#join all together 
+
+# Join all together -------------------------------------------------------
+
 
 fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble()
 fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE)
@@ -23,7 +29,10 @@ fcs_covariates
 
 write.csv(fcs_covariates, "fcs_covariates.csv")
 
-View(fcs_covariates)
+
+
+# Plotting covariates by stock --------------------------------------------
+
 
 fcs_covariates_long<- fcs_covariates %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
                                          mutate(var_cat = case_when(
