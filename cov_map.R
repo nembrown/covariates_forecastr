@@ -1,21 +1,18 @@
 
-library(lubridate)
-library(here)
+#load mapping libraries
 library(sf)
 library(raster)
 library(spData)
-library(leaflet) # for interactive maps
 library(mapview) # for interactive maps
 library(ggplot2) # tidyverse vis package
-library(shiny)
-library(rgdal) # spatial/shp reading
 library(viridis) # nice color palette
 library(ggmap) # ggplot functionality for maps ---> dplyr, purr is dependency
-library(ggsn) # for scale bars/north arrows in ggplots
 library(maps)
 library(mapdata)
 require(sp)
 library(tidyverse)
+library(lubridate)
+library(here)
 
 
 # Map variables for stocks ------------------------------------------------
@@ -35,8 +32,8 @@ map_marine_BC<- get_stamenmap(bbox_marine_BC, source="stamen", maptype= "terrain
 
 colorset_map = c("ERA Stock"="#FF007F" , 
                  "Lighthouse" ="#0000FF", 
-                 "MEDS buoy" = "#33F0FF", 
-                 "IOS Zooplankton Station" = "#33FF86")
+                 "MEDS buoy" = "#3399FF", 
+                 "IOS Zooplankton Station" = "#66CCCC")
 
 # Map Lightstations and stocks ------------------------------------------------------
 light_stock<-bind_rows(Data_Lightstations_locations, stocks_loc_map)
