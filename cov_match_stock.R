@@ -2,6 +2,8 @@ library(tidyverse)
 library(sf)
 library(sp)
 
+#This code is only applied to spatially explicit data, like zooplankton, temperature. 
+#PDO and ONI are North-Pacific Ocean wide. 
 
 # ERA Stock Locations -----------------------------------------------------
 stocks_loc<-read.csv("data-raw/stocks.csv") 
@@ -46,14 +48,15 @@ PointAssignTemps_light <- as(Data_Lightstations_loc[closestStock_ERAVec_light,]$
 loc_matching_light = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_light,minDistVec_light,PointAssignTemps_light)
 names(loc_matching_light) <- c("Stock_long","Stock_lat","Stock_ERA","Region","CloseTempIndex","Distance","Site_name")
 
+#All stocks including American
 loc_matching_light<- loc_matching_light %>% arrange(desc(Distance)) %>% as_tibble()
-loc_matching_light
 
-loc_matching_light_BC<- loc_matching_light %>% filter(Region == "BC") %>% rename(Location = Site_name)
-loc_matching_light_BC
+#only BC stocks
+loc_matching_light_BC<- loc_matching_light %>% filter(Region == "BC")
 
-loc_matching_light_BC_simple<-loc_matching_light_BC %>% dplyr::select(Stock_ERA, Location)
-loc_matching_light_BC_simple
+#All stocks, including American within 200km 
+loc_matching_light_simple<-loc_matching_light %>% filter(Distance<200) %>% dplyr::select(Stock_ERA, Site_name) %>% rename(Location = Site_name)
+loc_matching_light_simple
 
 # Combing the match file to the data file (from cov_fetch)
 Data_Lightstations_matched<-left_join(loc_matching_light_BC_simple, Data_Lightstations_combined)
@@ -68,6 +71,8 @@ dfo_meds_buoys_locations <- dfo_meds_buoys_small %>% dplyr::select(STN_ID, latit
                                                     rename(lat= latitude, long= longitude) %>% 
                                                     mutate(lat = as.numeric(lat), long= as.numeric(long)) %>% 
                                                     filter(STN_ID != "C46134") %>% 
+                                                    group_by(STN_ID) %>% 
+                                                    summarise_if(is.numeric, mean) %>% 
                                                     rowwise() %>% 
                                                     distinct() %>% 
                                                     add_column(site_type = "MEDS buoy")
@@ -93,12 +98,36 @@ loc_matching = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock
 names(loc_matching) <- c("Stock_long","Stock_lat","Stock_ERA","Region","CloseTempIndex","Distance","STN_ID")
 
 loc_matching<- loc_matching %>% arrange(desc(Distance)) %>% as_tibble()
-loc_matching_BC<- loc_matching %>% filter(Region == "BC")
-loc_matching_BC_terminal<-loc_matching_BC %>%  dplyr::select(Stock_ERA, STN_ID)
-loc_matching_BC_offshore<-loc_matching_BC_terminal %>% mutate(STN_ID = case_when(
-                                                       Stock_ERA == "KLM/KLY" ~ "C46184",
-                                                       Stock_ERA == "ATN/ATS" ~ "C46004",
-                                                       TRUE ~ "C46036"))
+#loc_matching_BC<- loc_matching %>% filter(Region == "BC")
+
+#All locations match, Within 200km 
+loc_matching_terminal<-loc_matching %>%  filter(Distance < 200) %>% dplyr::select(Stock_ERA, STN_ID) 
+loc_matching_terminal
+
+
+##Offshore matching 
+dfo_meds_buoys_stations_offshore <- dfo_meds_buoys_locations %>% filter(STN_ID %in% c("C46184", "C46004","C46036"))
+coordinates(dfo_meds_buoys_stations_offshore) <- c("long", "lat")
+
+# Define these vectors, used in the loop.
+closestStock_ERAVec_Offshore <- vector(mode = "numeric",length = nrow(stocks_loc_simple))
+minDistVec_Offshore     <- vector(mode = "numeric",length = nrow(stocks_loc_simple))
+
+for (i in 1 : nrow(stocks_loc_simple))
+{
+  distVec_Offshore <- spDistsN1(dfo_meds_buoys_stations_offshore,stocks_loc_simple[i,],longlat = TRUE)
+  minDistVec_Offshore[i] <- min(distVec_Offshore)
+  closestStock_ERAVec_Offshore[i] <- which.min(distVec_Offshore)
+}
+
+PointAssignTemps_Offshore <- as(dfo_meds_buoys_stations_offshore[closestStock_ERAVec_Offshore,]$STN_ID,"character")
+
+loc_matching_offshore = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_Offshore,minDistVec_Offshore,PointAssignTemps_Offshore)
+names(loc_matching_offshore) <- c("Stock_long","Stock_lat","Stock_ERA","Region","CloseTempIndex","Distance","STN_ID")
+
+#All locations match, since offshore, okay if they are far away
+loc_matching_offshore<- loc_matching_offshore %>% arrange(desc(Distance)) %>% as_tibble()
+
 
 # Combing the match file to the data file (from cov_fetch)
 #Terminal
@@ -106,8 +135,9 @@ dfo_meds_buoys_matched_terminal<-left_join(loc_matching_BC_terminal, dfo_meds_bu
 dfo_meds_buoys_matched_terminal<-dfo_meds_buoys_matched_terminal %>% 
   rename(cov_SSTP_terminal_summer = mean_summer_SSTP, 
          cov_SSTP_terminal_year = mean_SSTP) %>% rename(buoy_ID_terminal=STN_ID)
+
 #Offshore
-dfo_meds_buoys_matched_offshore<-left_join(loc_matching_BC_offshore, dfo_meds_buoys_combined)
+dfo_meds_buoys_matched_offshore<-left_join(loc_matching_offshore, dfo_meds_buoys_combined)
 dfo_meds_buoys_matched_offshore<-dfo_meds_buoys_matched_offshore %>% rename(cov_SSTP_offshore_summer = mean_summer_SSTP, 
                                                                      cov_SSTP_offshore_year = mean_SSTP) %>% rename(buoy_ID_offshore=STN_ID)
 
