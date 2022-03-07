@@ -15,15 +15,23 @@ library(lubridate)
 library(here)
 
 
+
 # Map variables for stocks ------------------------------------------------
 
 stocks_loc_map<-stocks_loc %>% dplyr::select(Stock_ERA, lat, long) %>% rename(Site_name = Stock_ERA) %>% add_column(site_type = "ERA Stock")
 stocks_loc_map_BC<-stocks_loc %>% filter(MapRegion == "BC") %>% dplyr::select(Stock_ERA, lat, long) %>% rename(Site_name = Stock_ERA)  %>% add_column(site_type = "ERA Stock")
 
+#combining all stocks and stations
+all_stations_stocks<- bind_rows(ios_zoop_stations_simple,dfo_meds_buoys_locations, Data_Lightstations_locations, stocks_loc_map)
 
+
+#Just meds buoy
+dfo_meds_buoys_locations<- dfo_meds_buoys_locations %>% rename(Site_name = STN_ID)
+dfo_meds_buoys_era_stocks<- bind_rows(stocks_loc_map, dfo_meds_buoys_locations) 
+dfo_meds_buoys_era_stocks
 
 # Map boxes ---------------------------------------------------------------
-bbox_marine<- make_bbox(stocks_loc_map$long, stocks_loc_map$lat, f = 0.1)
+bbox_marine<- make_bbox(dfo_meds_buoys_era_stocks$long, dfo_meds_buoys_era_stocks$lat, f = 0.01)
 map_marine<- get_stamenmap(bbox_marine, source="stamen", maptype= "terrain", crop=FALSE, zoom=7)
 
 bbox_marine_BC<- make_bbox(stocks_loc_map_BC$long, stocks_loc_map_BC$lat, f = 0.1)
@@ -47,7 +55,8 @@ dfo_meds_buoys_locations<- dfo_meds_buoys_locations %>% rename(Site_name = STN_I
 dfo_meds_buoys_era_stocks<- bind_rows(stocks_loc_map, dfo_meds_buoys_locations) 
 dfo_meds_buoys_era_stocks
 
-ggmap(map_marine) + geom_point(data=dfo_meds_buoys_era_stocks, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map)
+ggmap(map_marine) + geom_point(data=dfo_meds_buoys_era_stocks, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map) + 
+  geom_text(data= dfo_meds_buoys_era_stocks, aes(label=Site_name, x = long, y = lat, col=site_type))
 
 
 # Map IOS Zooplankton stations and stocks ---------------------------------
@@ -60,7 +69,6 @@ ios_zoop_era_stocks
 ggmap(map_marine) + geom_point(data=ios_zoop_era_stocks, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map)
 
 # Map all stations and stocks ---------------------------------
-all_stations_stocks<- bind_rows(ios_zoop_stations_simple,dfo_meds_buoys_locations, Data_Lightstations_locations, stocks_loc_map)
 
 ggmap(map_marine) + geom_point(data=all_stations_stocks, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map)
 
