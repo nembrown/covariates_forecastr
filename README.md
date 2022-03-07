@@ -9,3 +9,6 @@ Use the scripts in this order:
 3. [cov_aggregation.R](https://github.com/nembrown/covariates_forecastr/blob/main/cov_aggregation.R) - Use this code to merge all covariates by ERA Stock and year into a long-format file. This file (fcs_covariates.csv) can be filtered by stock for use in forecastR. Match the covariate to either brood year or run year with a 0, 1, or 2 year time lag. This is demonstrated with the PDO data in [shiny_formatting.R](https://github.com/nembrown/covariates_forecastr/blob/main/shiny_formatting.R). 
 
 4. [cov_map.R](https://github.com/nembrown/covariates_forecastr/blob/main/cov_map.R) - use this code to map the coordinates of stations and ERA stocks. 
+
+
+Some of the code used here is borrowed from the [PACea](https://github.com/pbs-assess/PACea) initiative. 
