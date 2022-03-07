@@ -4,12 +4,15 @@ library(ggplot2)
 
 # Check each of the datasets have been calculated properly ----------------
 
-#NOAA pacific basin-wide variables: pdo, oni, soi
+#Pacific basin-wide variables: pdo, oni, soi, npgo, npi, alpi
 pdo_simple
 oni_simple
 soi_simple
+npi_simple
+npgo_simple
+alpi_simple
+epnp_simple
 
-View(pdo_simple)
 #temperature from MEDS buoys #464, since 1989
 dfo_meds_buoys_matched_combined
 
@@ -27,10 +30,16 @@ fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combin
 fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE)
 fcs_covariates<- merge(fcs_covariates, soi_simple, by=c("year")) %>% as_tibble()
 fcs_covariates<- merge(fcs_covariates, oni_simple, by=c("year")) %>% as_tibble()
+fcs_covariates<- merge(fcs_covariates, npi_simple, by=c("year")) %>% as_tibble()
 fcs_covariates<- merge(fcs_covariates, pdo_simple, by=c("year")) %>% as_tibble()
+fcs_covariates<- merge(fcs_covariates, npgo_simple, by=c("year")) %>% as_tibble()
+fcs_covariates<- merge(fcs_covariates, alpi_simple, by=c("year")) %>% as_tibble()
+fcs_covariates<- merge(fcs_covariates, epnp_simple, by=c("year")) %>% as_tibble()
 
 
-fcs_covariates<- fcs_covariates %>% relocate(where(is.numeric), .after = where(is.character)) %>% arrange(Stock_ERA, year)
+fcs_covariates<- fcs_covariates %>% relocate(where(is.numeric), .after = where(is.character)) %>% 
+                                    arrange(Stock_ERA, year) %>% 
+                                    dplyr::select(- c(Lightstation,buoy_ID_terminal, Region, buoy_ID_offshore))
 fcs_covariates
 
 write.csv(fcs_covariates, "fcs_covariates.csv")
