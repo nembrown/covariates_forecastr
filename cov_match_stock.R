@@ -126,20 +126,22 @@ loc_matching_offshore = data.frame(coordinates(stocks_loc_simple),stocks_loc_sim
 names(loc_matching_offshore) <- c("Stock_long","Stock_lat","Stock_ERA","Region","CloseTempIndex","Distance","STN_ID")
 
 #All locations match, since offshore, okay if they are far away
-loc_matching_offshore<- loc_matching_offshore %>% arrange(desc(Distance)) %>% as_tibble()
+loc_matching_offshore<- loc_matching_offshore  %>% dplyr::select(Stock_ERA, STN_ID) %>% as_tibble
+loc_matching_offshore
 
 
 # Combing the match file to the data file (from cov_fetch)
 #Terminal
-dfo_meds_buoys_matched_terminal<-left_join(loc_matching_BC_terminal, dfo_meds_buoys_combined)
-dfo_meds_buoys_matched_terminal<-dfo_meds_buoys_matched_terminal %>% 
-  rename(cov_SSTP_terminal_summer = mean_summer_SSTP, 
-         cov_SSTP_terminal_year = mean_SSTP) %>% rename(buoy_ID_terminal=STN_ID)
+dfo_meds_buoys_matched_terminal<-left_join(loc_matching_terminal, dfo_meds_buoys_combined)
+dfo_meds_buoys_matched_terminal<-dfo_meds_buoys_matched_terminal %>%  rename(cov_SST_MEDS_terminal_summer_mean = mean_summer_SSTP, 
+                                                                             cov_SST_MEDS_terminal_yearly_mean = mean_SSTP,
+                                                                             buoy_ID_terminal=STN_ID)
 
 #Offshore
 dfo_meds_buoys_matched_offshore<-left_join(loc_matching_offshore, dfo_meds_buoys_combined)
-dfo_meds_buoys_matched_offshore<-dfo_meds_buoys_matched_offshore %>% rename(cov_SSTP_offshore_summer = mean_summer_SSTP, 
-                                                                     cov_SSTP_offshore_year = mean_SSTP) %>% rename(buoy_ID_offshore=STN_ID)
+dfo_meds_buoys_matched_offshore<-dfo_meds_buoys_matched_offshore %>% rename(cov_SST_MEDS_offshore_summer_mean = mean_summer_SSTP, 
+                                                                            cov_SST_MEDS_offshore_yearly_mean = mean_SSTP, 
+                                                                            buoy_ID_offshore=STN_ID)
 
 dfo_meds_buoys_matched_combined<-merge(dfo_meds_buoys_matched_terminal, dfo_meds_buoys_matched_offshore) %>% as_tibble()
 dfo_meds_buoys_matched_combined
