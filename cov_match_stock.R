@@ -46,7 +46,7 @@ for (i in 1 : nrow(stocks_loc_simple))
 PointAssignTemps_light <- as(Data_Lightstations_loc[closestStock_ERAVec_light,]$Site_name,"character")
 
 loc_matching_light = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_light,minDistVec_light,PointAssignTemps_light)
-names(loc_matching_light) <- c("Stock_long","Stock_lat","Stock_ERA","Region","CloseTempIndex","Distance","Site_name")
+names(loc_matching_light) <- c("Stock_long","Stock_lat","Stock_ERA","Region","closestStock_ERAVec_light","Distance","Site_name")
 
 #All stocks including American
 loc_matching_light<- loc_matching_light %>% arrange(desc(Distance)) %>% as_tibble()
@@ -59,7 +59,7 @@ loc_matching_light_simple<-loc_matching_light %>% filter(Distance<200) %>% dplyr
 loc_matching_light_simple
 
 # Combing the match file to the data file (from cov_fetch)
-Data_Lightstations_matched<-left_join(loc_matching_light_BC_simple, Data_Lightstations_combined)
+Data_Lightstations_matched<-left_join(loc_matching_light_simple, Data_Lightstations_combined)
 Data_Lightstations_matched<- Data_Lightstations_matched %>% rename(Lightstation = Location)
 Data_Lightstations_matched
 
@@ -95,7 +95,7 @@ for (i in 1 : nrow(stocks_loc_simple))
 PointAssignTemps <- as(dfo_meds_buoys_stations[closestStock_ERAVec,]$STN_ID,"character")
 
 loc_matching = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec,minDistVec,PointAssignTemps)
-names(loc_matching) <- c("Stock_long","Stock_lat","Stock_ERA","Region","CloseTempIndex","Distance","STN_ID")
+names(loc_matching) <- c("Stock_long","Stock_lat","Stock_ERA","Region","closestStock_ERAVec","Distance","STN_ID")
 
 loc_matching<- loc_matching %>% arrange(desc(Distance)) %>% as_tibble()
 #loc_matching_BC<- loc_matching %>% filter(Region == "BC")
@@ -122,11 +122,11 @@ for (i in 1 : nrow(stocks_loc_simple))
 
 PointAssignTemps_Offshore <- as(dfo_meds_buoys_stations_offshore[closestStock_ERAVec_Offshore,]$STN_ID,"character")
 
-loc_matching_offshore = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_Offshore,minDistVec_Offshore,PointAssignTemps_Offshore)
-names(loc_matching_offshore) <- c("Stock_long","Stock_lat","Stock_ERA","Region","CloseTempIndex","Distance","STN_ID")
+loc_matching_offshore_1 = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_Offshore,minDistVec_Offshore,PointAssignTemps_Offshore)
+names(loc_matching_offshore_1) <- c("Stock_long","Stock_lat","Stock_ERA","Region","closestStock_ERAVec_Offshore","Distance","STN_ID")
 
 #All locations match, since offshore, okay if they are far away
-loc_matching_offshore<- loc_matching_offshore  %>% dplyr::select(Stock_ERA, STN_ID) %>% as_tibble
+loc_matching_offshore<- loc_matching_offshore_1  %>% dplyr::select(Stock_ERA, STN_ID) %>% as_tibble
 loc_matching_offshore
 
 
