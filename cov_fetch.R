@@ -70,7 +70,7 @@ npi_simple1<-npi_1899_present %>% filter(year!= 2022) %>%
                                   filter(year>1969) %>% 
                                   dplyr::select(-month)
 
-npi_simple2<-npi_1899_present %>% filter(year!= 2022, month %in% c(5,6,7,8)) %>% 
+npi_simple2<-npi_1899_present %>% filter(year!= 2022, month %in% c(5,6,7,8, 9)) %>% 
                                   group_by(year) %>% 
                                   summarise_if(is.numeric, mean) %>% 
                                   rename(cov_NPI_summer_mean= NPI)%>% 
@@ -87,7 +87,7 @@ npi_anomaly_simple<- npi_anomaly_1899_present %>% filter(year>1969)
 npi_simple<-merge(npi_simple, npi_anomaly_simple) %>% as_tibble
 npi_simple  
 
-# NPGO (North Pacific Index) from E. Di Lorenzo ---------------------------------------------------------------------
+# NPGO (North Pacific Gyre Oscillation) from E. Di Lorenzo ---------------------------------------------------------------------
 npgo_1950_present<-read.table("http://www.o3d.org/npgo/npgo.php",  header=FALSE, skip = 22, fill=TRUE) %>% as_tibble()
 names(npgo_1950_present)<-c("year", "month", "cov_NPGO_yearly_mean")
 npgo_1950_present<-npgo_1950_present %>% mutate(year = as.numeric(year)) 
@@ -113,14 +113,14 @@ npgo_simple
 epnp_1950_present<-read.table("https://ftp.cpc.ncep.noaa.gov/wd52dg/data/indices/epnp_index.tim",  header=TRUE, skip = 8, fill=TRUE) %>% as_tibble()
 
 epnp_simple1<-epnp_1950_present %>% filter(YEAR!= 2022) %>% 
-                                    rename(year = YEAR, cov_epnp_yearly_mean=INDEX) %>% 
+                                    rename(year = YEAR, cov_EPNP_yearly_mean=INDEX) %>% 
                                     group_by(year) %>% 
                                     summarise_if(is.numeric, mean) %>% 
                                     dplyr::select(-MONTH) %>% 
                                     filter(year>1969)
 
-epnp_simple2<-epnp_1950_present %>% filter(YEAR!= 2022, MONTH %in% c(5,6,7,8)) %>% 
-                                    rename(year = YEAR, cov_epnp_summer_mean=INDEX) %>% 
+epnp_simple2<-epnp_1950_present %>% filter(YEAR!= 2022, MONTH %in% c(5,6,7,8, 9)) %>% 
+                                    rename(year = YEAR, cov_EPNP_summer_mean=INDEX) %>% 
                                     group_by(year) %>% 
                                     summarise_if(is.numeric, mean) %>% 
                                     dplyr::select(-MONTH) %>% 
@@ -134,7 +134,7 @@ epnp_simple
 #data only available by year
 alpi_1900_2015<-read.csv(curl('https://open.canada.ca/data/dataset/4bb821ce-bef7-46d3-95d2-064065f1bda4/resource/d7406b43-7e64-4dbe-9cf1-b932e88a3a14/download/alpi_1900_2015_en.csv')) %>%  as_tibble()
 alpi_simple <- alpi_1900_2015 %>% rename(year = YEAR, 
-                                            cov_ALPI_yearly = ALEUTIAN.LOW.PRESSURE.INDEX..ALPI.) %>% 
+                                            cov_ALPI_yearly_mean = ALEUTIAN.LOW.PRESSURE.INDEX..ALPI.) %>% 
                                             filter(year>1969)
 
 alpi_simple 
@@ -285,14 +285,14 @@ Data_Lightstations <-
 Data_Lightstations_year_summer<- Data_Lightstations %>%  filter(Month %in% c(5,6,7,8,9)) %>% 
   rename(year = Year) %>% 
   group_by(Location, year) %>% 
-  dplyr::summarise(cov_SST_lighthouse_summer = mean(SST, na.rm=TRUE), 
-                   cov_PPT_lighthouse_summer = mean(Salinity, na.rm=TRUE))
+  dplyr::summarise(cov_SST_lighthouse_summer_mean = mean(SST, na.rm=TRUE), 
+                   cov_PPT_lighthouse_summer_mean = mean(Salinity, na.rm=TRUE))
 
 Data_Lightstations_year<- Data_Lightstations  %>% 
   rename(year = Year) %>%   
   group_by(Location, year) %>% 
-  dplyr::summarise(cov_SST_lighthouse_year = mean(SST, na.rm=TRUE), 
-                   cov_PPT_lighthouse_year = mean(Salinity, na.rm=TRUE))
+  dplyr::summarise(cov_SST_lighthouse_yearly_mean = mean(SST, na.rm=TRUE), 
+                   cov_PPT_lighthouse_yearly_mean = mean(Salinity, na.rm=TRUE))
 
 Data_Lightstations_combined<-merge(Data_Lightstations_year, Data_Lightstations_year_summer)
 Data_Lightstations_combined<- Data_Lightstations_combined %>% filter(year>1975) %>% as_tibble()
