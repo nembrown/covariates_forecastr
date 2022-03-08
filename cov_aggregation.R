@@ -10,39 +10,51 @@ oni_simple
 soi_simple
 npi_simple
 npgo_simple
-alpi_simple
 epnp_simple
+alpi_simple
+
 
 #take out the station ID parts
 #temperature from MEDS buoys #464, since 1989
-dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore))
+dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore)) %>% filter(year!=2022)
 
 #temp and salinity from lightstations #752, since 1900 but active lighthouses since 1976
-Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lightstation)
+Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lightstation) %>% filter(year!=2022)
 
 #zooplankton from ios, since 1980
-ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year)
+ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2022)
 
 
 # Join all together -------------------------------------------------------
 
+#start with atmospheric bc longer time series usually and no stocks
+fcs_covariates_atm<- merge(oni_simple, soi_simple, by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_atm<- merge(fcs_covariates_atm, npi_simple, by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_atm<- merge(fcs_covariates_atm, pdo_simple, by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_atm<- merge(fcs_covariates_atm, npgo_simple, by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_atm<- merge(fcs_covariates_atm, epnp_simple, by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_atm<- merge(fcs_covariates_atm, alpi_simple, by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_atm
 
+#Then join stock-wise
 fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE)
-fcs_covariates<- merge(fcs_covariates, soi_simple, by=c("year")) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates, oni_simple, by=c("year")) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates, npi_simple, by=c("year")) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates, pdo_simple, by=c("year")) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates, npgo_simple, by=c("year")) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates, alpi_simple, by=c("year")) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates, epnp_simple, by=c("year")) %>% as_tibble()
-
-
-fcs_covariates<- fcs_covariates %>% relocate(where(is.numeric), .after = where(is.character)) %>% 
-                                    arrange(Stock_ERA, year) 
+fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates
 
-write.csv(fcs_covariates, "fcs_covariates.csv", row.names = FALSE)
+
+#then combine atmospheric and by-stock - data frame year and stock 
+stocks_year <- stocks_loc_simple_1 %>% dplyr::select(-c(lat, long)) %>% add_column(year = c(1970:2024))
+stocks_year <- stocks_year %>% expand(Stock_ERA, year) %>% filter(year<2022)
+stocks_year 
+
+fcs_covariates_combined<-merge(stocks_year, fcs_covariates, all=TRUE) %>% as_tibble()
+fcs_covariates_combined<-merge(fcs_covariates_combined, fcs_covariates_atm , by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_combined
+
+fcs_covariates_combined<- fcs_covariates_combined %>% relocate(Stock_ERA, year) %>% arrange(Stock_ERA, year) 
+fcs_covariates_combined
+
+write.csv(fcs_covariates_combined, "fcs_covariates.csv", row.names = FALSE)
 
 # Add in metadata------------------------------------------------------
 
@@ -91,12 +103,34 @@ cov_meta <- cov_meta  %>%
   
 
 
+# Metadata locations ------------------------------------------------------
+#Lightstations
+loc_matching_light_meta<- merge(loc_matching_light, Data_Lightstations_locations) %>% dplyr::select(-closestStock_ERAVec_light) %>% as_tibble
+loc_matching_light_meta
 
-cov_sheet_list<-list(Metadata=cov_meta,
-                 "fcs_covariates"=fcs_covariates)
+#Offshore meds buoys
+dfo_meds_buoys_locations_offshore<-dfo_meds_buoys_locations %>% filter(STN_ID %in% c("C46184", "C46004","C46036"))
+loc_matching_offshore_meta <- merge(loc_matching_offshore_1, dfo_meds_buoys_locations_offshore) %>%  dplyr::select(-closestStock_ERAVec_Offshore)  %>% mutate(site_type= "Offshore MEDS buoy") %>%  rename(Site_name = STN_ID)%>% as_tibble
+loc_matching_offshore_meta
+
+#Terminal meds buoys
+loc_matching_meta <- merge(loc_matching, dfo_meds_buoys_locations) %>% dplyr::select(-closestStock_ERAVec)  %>%  rename(Site_name = STN_ID) %>% as_tibble
+loc_matching_meta
+
+stations_meta<-bind_rows(loc_matching_light_meta, loc_matching_offshore_meta, loc_matching_meta)
+stations_meta<- stations_meta %>% relocate(Region, Stock_ERA, Stock_long, Stock_lat, site_type, Site_name, long, lat, Distance ) %>% arrange(Region, Stock_ERA)
+stations_meta
+
+
+# Writing to excel file --------------------------------------------------------
+
+
+cov_sheet_list<-list("Covariate Metadata"=cov_meta,
+                     "Station Metadata"=stations_meta,
+                     "fcs_covariates"=fcs_covariates_combined
+                     )
 
 
 
 writexl::write_xlsx(cov_sheet_list, "fcs_covariates_meta.xlsx")
-
 
