@@ -13,11 +13,12 @@ npgo_simple
 alpi_simple
 epnp_simple
 
+#take out the station ID parts
 #temperature from MEDS buoys #464, since 1989
-dfo_meds_buoys_matched_combined
+dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore))
 
 #temp and salinity from lightstations #752, since 1900 but active lighthouses since 1976
-Data_Lightstations_matched
+Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lightstation)
 
 #zooplankton from ios, since 1980
 ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year)
@@ -38,36 +39,64 @@ fcs_covariates<- merge(fcs_covariates, epnp_simple, by=c("year")) %>% as_tibble(
 
 
 fcs_covariates<- fcs_covariates %>% relocate(where(is.numeric), .after = where(is.character)) %>% 
-                                    arrange(Stock_ERA, year) %>% 
-                                    dplyr::select(- c(Lightstation,buoy_ID_terminal, Region, buoy_ID_offshore))
+                                    arrange(Stock_ERA, year) 
 fcs_covariates
 
-write.csv(fcs_covariates, "fcs_covariates.csv")
+write.csv(fcs_covariates, "fcs_covariates.csv", row.names = FALSE)
+
+# Add in metadata------------------------------------------------------
+
+#Summary table
+cov_meta <- data.frame(cov_name=character(), 
+                       cov_type=character(), 
+                       cov_source_station_type=character(), 
+                       cov_source_method=character(), 
+                       cov_source=character(), 
+                       cov_temporal=character(),
+                       cov_unit=character(),
+                       match_type=character(), 
+                       match_spatial=character(), 
+                       date_range=character(), stringsAsFactors=FALSE)
+
+cov_meta <- cov_meta  %>% 
+            add_row(cov_name="cov_SST_lighthouse_yearly_mean",  cov_type="Temperature", cov_source_station_type="Lighthouse", cov_source="DFO", cov_temporal="Year", cov_unit="Sea surface temperature",match_type="Point", match_spatial="terminal", date_range= "1914-present") %>% 
+            add_row(cov_name="cov_PPT_lighthouse_yearly_mean",  cov_type="Salinity", cov_source_station_type="Lighthouse", cov_source="DFO", cov_temporal="Year", cov_unit="Salinity parts per thousand",match_type="Point", match_spatial="terminal", date_range= "1914-present") %>% 
+            add_row(cov_name="cov_SST_lighthouse_summer_mean",  cov_type="Temperature", cov_source_station_type="Lighthouse", cov_source="DFO", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Sea surface temperature",match_type="Point", match_spatial="terminal", date_range= "1914-present") %>% 
+            add_row(cov_name="cov_PPT_lighthouse_summer_mean",  cov_type="Salinity", cov_source_station_type="Lighthouse", cov_source="DFO", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Salinity parts per thousand",match_type="Point", match_spatial="terminal", date_range= "1914-present")  %>% 
+            add_row(cov_name="cov_SST_MEDS_terminal_yearly_mean",  cov_type="Temperature", cov_source_station_type="MEDS buoys", cov_source="DFO", cov_temporal="Year", cov_unit="Sea surface temperature",match_type="Point", match_spatial="terminal", date_range= "1989-present")  %>% 
+            add_row(cov_name="cov_SST_MEDS_terminal_summer_mean",  cov_type="Temperature", cov_source_station_type="MEDS buoys", cov_source="DFO", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Sea surface temperature",match_type="Point", match_spatial="terminal", date_range= "1989-present")  %>% 
+            add_row(cov_name="cov_SST_MEDS_offshore_yearly_mean",  cov_type="Temperature", cov_source_station_type="MEDS buoys", cov_source="DFO", cov_temporal="Year", cov_unit="Sea surface temperature",match_type="Point", match_spatial="offshore", date_range= "1989-present")  %>%
+            add_row(cov_name="cov_SST_MEDS_offshore_summer_mean",  cov_type="Temperature", cov_source_station_type="MEDS buoys", cov_source="DFO", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Sea surface temperature",match_type="Point", match_spatial="offshore", date_range= "1989-present")  %>%
+            add_row(cov_name="cov_zoop_winter_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Winter (Dec - Feb inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_spring_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Spring (March - May inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_summer_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Summer (June - Aug inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_fall_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Fall (Sept - Nov inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_year_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Year", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_SOI_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Tahiti and Darwin", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Southern Oscillation Index",match_type="none", match_spatial="basin", date_range= "1951-present")  %>%
+            add_row(cov_name="cov_SOI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Tahiti and Darwin", cov_source="NOAA", cov_temporal="Year", cov_unit="Southern Oscillation Index",match_type="none", match_spatial="basin", date_range= "1951-present")  %>%
+            add_row(cov_name="cov_ONI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Nino 3.4", cov_source="NOAA", cov_temporal="Year", cov_unit="Ocean Nino Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
+            add_row(cov_name="cov_ONI_yearly_anomaly",  cov_type="Atmospheric Index", cov_source_method="Nino 3.4", cov_source="NOAA", cov_temporal="Year", cov_unit="Ocean Nino Index anomaly",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
+            add_row(cov_name="cov_ONI_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Nino 3.4", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Ocean Nino Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
+            add_row(cov_name="cov_ONI_summer_anomaly",  cov_type="Atmospheric Index", cov_source_method="Nino 3.4", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Ocean Nino Index anomaly",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
+            add_row(cov_name="cov_NPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Year", cov_unit="North Pacific Index",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
+            add_row(cov_name="cov_NPI_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Summer (May - Sept inclusive)", cov_unit="North Pacific Index",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
+            add_row(cov_name="cov_NPI_yearly_anomaly",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Year", cov_unit="North Pacific Index anomaly",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
+            add_row(cov_name="cov_PDO_summer_mean",  cov_type="Atmospheric Index", cov_source_method="ERSST Version 5", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Pacific Decadal Oscillation",match_type="none", match_spatial="basin", date_range= "1854-present")  %>%
+            add_row(cov_name="cov_PDO_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="ERSST Version 5", cov_source="NOAA", cov_temporal="Year", cov_unit="Pacific Decadal Oscillation",match_type="none", match_spatial="basin", date_range= "1854-present")  %>%
+            add_row(cov_name="cov_NPGO_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="AVISO Satellite SSHa", cov_source="E. di Loranzo", cov_temporal="Year", cov_unit="North Pacific Gyre Oscillation",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
+            add_row(cov_name="cov_NPGO_summer_mean",  cov_type="Atmospheric Index", cov_source_method="AVISO Satellite SSHa", cov_source="E. di Loranzo", cov_temporal="Summer (May - Sept inclusive)", cov_unit="North Pacific Gyre Oscillation",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
+            add_row(cov_name="cov_ALPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Surry and King", cov_source="DFO", cov_temporal="Year", cov_unit="Aleutian Low Pressure Index",match_type="none", match_spatial="basin", date_range= "1900-2015")  %>%
+            add_row(cov_name="cov_EPNP_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Year", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
+            add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")
+  
 
 
 
-# Plotting covariates by stock --------------------------------------------
+cov_sheet_list<-list(Metadata=cov_meta,
+                 "fcs_covariates"=fcs_covariates)
 
 
-fcs_covariates_long<- fcs_covariates %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
-                                         mutate(var_cat = case_when(
-                                           str_detect(Covariate, "SST") ~ "Temperature", 
-                                           str_detect(Covariate, "PPT") ~ "Salinity",
-                                           str_detect(Covariate, "PDO") ~ "PDO", 
-                                           str_detect(Covariate, "zoop") ~ "Zooplankton"
-                                          )) %>% 
-                                        mutate(var_timing = case_when(
-                                          str_detect(Covariate, "year") ~ "Year", 
-                                          str_detect(Covariate, "summer") ~ "Summer"
-                                           )) %>% 
-                                         mutate(var_location = case_when(
-                                          str_detect(Covariate, "offshore") ~ "offshore", 
-                                          str_detect(Covariate, "terminal") ~ "terminal", 
-                                          TRUE ~ "terminal"
-                                         ))
-unique(fcs_covariates_long$Stock_ERA)
 
-ggplot(fcs_covariates_long %>% filter(var_cat== "Zooplankton", var_timing=="Summer", var_location=="terminal"), 
-       aes(x=year, y=value, col=Covariate, group=Covariate))+
-        geom_point()+geom_line()+facet_wrap(~Stock_ERA, scales="free")
+writexl::write_xlsx(cov_sheet_list, "fcs_covariates_meta.xlsx")
+
 
