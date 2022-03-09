@@ -23,10 +23,10 @@ stocks_loc_simple_1
 
 # Match Light stations to ERA Stocks --------------------------------------------
 #Needs Data_Lightstations from cov_fetch 
-Data_Lightstations_locations<-Data_Lightstations %>% dplyr::select(Location, Longitude, Latitude) %>% 
-                                                     rowwise() %>% distinct() %>% 
-                                                     rename(long=Longitude, lat = Latitude, Site_name=Location) %>% 
-                                                     add_column(site_type = "Lighthouse")
+Data_Lightstations_locations<-Lightstations_location %>% dplyr::select(Station_ID, lat, long) %>% 
+                                                         rowwise() %>% distinct() %>% 
+                                                         rename(Site_name=Station_ID) %>% 
+                                                         add_column(site_type = "Lighthouse")
 
 #new dataframe that can be changed into a spatial object
 Data_Lightstations_loc<-Data_Lightstations_locations
