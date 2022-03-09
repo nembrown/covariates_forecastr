@@ -4,8 +4,7 @@ library(rerddap)
 library(curl)
 library(lubridate)
 library(sf)
-devtools::install_github("r-lib/usethis")
-library(usethis)
+library(data.table)
 
 
 # PDO (Pacific Decadal Oscillation) from NOAA ---------------------------------------------------------------------
@@ -143,169 +142,55 @@ alpi_simple
 
 # Temp and salinity from Lightstations -----------------------------------------------------------
 
+#Extracts and unzips folder into your working directory
 Lightstations_data_temp<-tempfile()
-curl_download('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/BCLightstations/DATA_-_Active_Sites.zip', Lightstations_data_temp)
+download.file('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/BCLightstations/DATA_-_Active_Sites.zip', Lightstations_data_temp)
+unzip(Lightstations_data_temp)
 
 Lightstations_shp_temp<-tempfile()
 download.file('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/BClightstations/BC_Lightstation_Data_SHP_Files.zip', Lightstations_shp_temp, mode="wb")
-Lightstations_shp_temp_2<-tempfile()
-Lightstations_shp_temp_2<-unzip(Lightstations_shp_temp, files= "BC_Lightstation_Data_SHP Files/BC_Lighthouse_DATA.shp")
+unzip(Lightstations_shp_temp)
 
+Lightstations <- sf::st_read(dsn="BC_Lightstation_Data_SHP Files/BC_Lighthouse_DATA.shp")
+Lightstations <-Lightstations %>% dplyr::mutate(LIGHSTATIO = recode(LIGHSTATIO,'LANGARA POINT LIGHTSTATION'='LANGARA ISLAND LIGHTSTATION')) %>% st_drop_geometry()
+Lightstations_location<-Lightstations %>% rename(Station_ID = LIGHSTATIO, lat = LATITUDE__, long= LONGITUDE) %>% 
+                                          filter(DATA_COLLE == "ACTIVE") %>% 
+                                          select(Station_ID, lat, long)  %>% as_tibble
 
-list.files(Lightstations_shp_temp)
+list_of_files<-list.files('DATA_-_Active_Sites', pattern='Sea_Surface_Temperature_and_Salinity.+2021.csv', recursive=TRUE, full.names = T)
+station_names<-list(Lightstations_location$Station_ID)
 
-?getURL
-?unz
-?unzip
-?download.file
-Lightstations_shp<-
+#could do this cleaner with a loop
+names(list_of_files)[1]<-station_names[[1]][1]
+names(list_of_files)[2]<-station_names[[1]][2]
+names(list_of_files)[3]<-station_names[[1]][3]
+names(list_of_files)[4]<-station_names[[1]][4]
+names(list_of_files)[5]<-station_names[[1]][5]
+names(list_of_files)[6]<-station_names[[1]][6]
+names(list_of_files)[7]<-station_names[[1]][7]
+names(list_of_files)[8]<-station_names[[1]][8]
+names(list_of_files)[9]<-station_names[[1]][9]
+names(list_of_files)[10]<-station_names[[1]][10]
+names(list_of_files)[11]<-station_names[[1]][11]
+names(list_of_files)[12]<-station_names[[1]][12]
 
-dataset_commonname <-
-  c('SST_Monthly_BC_Lightstation',
-    'Salinity_Monthly_BC_Lightstation')
-?st_read
-
-Lightstations <- sf::st_read(dsn=Lightstations_shp_temp_2)
-
-list.files(Lightstations_shp_temp)
-
-
-file.path(Lightstations_shp_temp, "BC_Lighthouse_DATA.shp")
-?list.files
-#"BC_Lightstation_DATA_SHP Files",
-
-paste(Lightstations_shp_temp,"BC_Lightstation_DATA_SHP Files", "BC_Lighthouse_DATA.shp", sep="/")
-
-paste(Lightstations_shp_temp)
-Lightstations <-
-  Lightstations %>%
-  dplyr::mutate(LIGHSTATIO = recode(LIGHSTATIO,'LANGARA POINT LIGHTSTATION'='LANGARA ISLAND LIGHTSTATION'))
-
-nstations <- 12
-nmonths <- 12
-# 1914 is the year the first 'active' buoy went online
-nyears <- length(1914:lubridate::year(Sys.Date()))
-
-# Create a 'complete' data.frame skeleton to fill in 
-Data_Lightstations <- data.frame(Location=rep(NA,nstations*nyears*nmonths),
-                                 Year=rep(rep(1914:lubridate::year(Sys.Date()),
-                                              each=nmonths),times=nstations), 
-                                 Month=rep(1:12, times=nyears*nstations), 
-                                 SST=rep(NA, nstations*nyears*nmonths),
-                                 Salinity=rep(NA, nstations*nyears*nmonths),
-                                 Longitude=NA,
-                                 Latitude=NA)
-
-# Loop through the currently active stations and obtain SST and salinity
-count_SST <- 1
-count_salinity <- 1
-for(filename in list.files(Lightstations_data_temp,pattern = '.csv') )
-{
-  if(grepl(filename, pattern = 'Temperatures'))
-  {
-    Data_Lightstations$Location[
-      (count_SST-1)*nyears*nmonths + (1:(nyears*nmonths))
-    ] <-
-      substr(filename, start=1, stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1)
-    
-    # Extract the lat/lon coords of the buoy
-    Data_Lightstations$Longitude[
-      (count_SST-1)*nyears*nmonths + (1:(nyears*nmonths))
-    ] <- as.numeric(
-      Lightstations$LONGITUDE[grepl(
-        pattern=substr(filename, start=1, stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1),
-        gsub(Lightstations$LIGHSTATIO, pattern = ' ', replacement = '_'),
-        ignore.case = T)])
-    Data_Lightstations$Latitude[
-      (count_SST-1)*nyears*nmonths + (1:(nyears*nmonths))
-    ] <- as.numeric(
-      Lightstations$LATITUDE__[grepl(
-        pattern=substr(filename, start=1, stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1),
-        gsub(Lightstations$LIGHSTATIO, pattern = ' ', replacement = '_'),
-        ignore.case = T)])
-    
-    # read the csv data and merge by Location Year Month
-    tmp <- read.csv(paste0('data-raw/DATA_Active_Lightstations/', filename), 
-                    header = T, skip = 1)
-    tmp <- tmp %>%
-      dplyr::select(YEAR, JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC) %>%
-      tidyr::pivot_longer(
-        cols=c('JAN','FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'),
-        names_to = 'Month',
-        values_to = 'SST'
-      ) %>%
-      dplyr::mutate(Month=recode(Month, JAN=1, FEB=2, MAR=3,
-                                 APR=4, MAY=5, JUN=6, JUL=7, AUG=8,
-                                 SEP=9, OCT=10, NOV=11, DEC=12),
-                    Location=substr(filename, start=1, 
-                                    stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1)) %>%
-      dplyr::rename(Year=YEAR)
-    
-    Data_Lightstations[(count_SST-1)*nyears*nmonths + (1:(nyears*nmonths)),] <-
-      dplyr::left_join(Data_Lightstations[(count_SST-1)*nyears*nmonths + (1:(nyears*nmonths)),
-                                          c('Location','Year','Month','Salinity','Longitude','Latitude')], 
-                       tmp) %>%
-      dplyr::select(Location,Year,Month,SST,Salinity,Longitude,Latitude)
-    
-    count_SST <- count_SST + 1
-  }
-  if(grepl(filename, pattern = 'Salinities'))
-  {
-    Data_Lightstations$Location[
-      (count_salinity-1)*nyears*nmonths + (1:(nyears*nmonths))
-    ] <-
-      substr(filename, start=1, stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1)
-    
-    # Extract the lat/lon coords of the buoy
-    Data_Lightstations$Longitude[
-      (count_SST-1)*nyears*nmonths + (1:(nyears*nmonths))
-    ] <- as.numeric(
-      Lightstations$LONGITUDE[grepl(
-        pattern=substr(filename, start=1, stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1),
-        gsub(Lightstations$LIGHSTATIO, pattern = ' ', replacement = '_'),
-        ignore.case = T)])
-    Data_Lightstations$Latitude[
-      (count_SST-1)*nyears*nmonths + (1:(nyears*nmonths))
-    ] <- as.numeric(
-      Lightstations$LATITUDE__[grepl(
-        pattern=substr(filename, start=1, stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1),
-        gsub(Lightstations$LIGHSTATIO, pattern = ' ', replacement = '_'),
-        ignore.case = T)])
-    
-    # read the data and merge by Location, Year and Month
-    tmp <- read.csv(paste0('data-raw/DATA_Active_Lightstations/', filename), 
-                    header = T, skip = 1)
-    tmp <- tmp %>%
-      dplyr::select(YEAR, JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC) %>%
-      tidyr::pivot_longer(
-        cols=c('JAN','FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'),
-        names_to = 'Month',
-        values_to = 'Salinity'
-      ) %>%
-      dplyr::mutate(Month=recode(Month, JAN=1, FEB=2, MAR=3,
-                                 APR=4, MAY=5, JUN=6, JUL=7, AUG=8,
-                                 SEP=9, OCT=10, NOV=11, DEC=12),
-                    Location=substr(filename, start=1, 
-                                    stop = stringr::str_locate_all(filename,'_')[[1]][2,]-1)) %>%
-      rename(Year=YEAR)
-    
-    Data_Lightstations[(count_salinity-1)*nyears*nmonths + (1:(nyears*nmonths)),] <-
-      dplyr::left_join(Data_Lightstations[(count_salinity-1)*nyears*nmonths + (1:(nyears*nmonths)),
-                                          c('Location','Year','Month','SST','Longitude','Latitude')], 
-                       tmp) %>%
-      dplyr::select(Location,Year,Month,SST,Salinity,Longitude,Latitude)
-    
-    count_salinity <- count_salinity + 1
-  }
-}
+Lightstation_data <- list_of_files %>% map_dfr(~fread(., skip=1), .id = "Location") %>% as_tibble 
+Lightstation_data<- Lightstation_data %>% rename(Date = `DATE (YYYY-MM-DD)`, 
+                                                 Salinity = `SALINITY (PSU)`, 
+                                                 SST = `TEMPERATURE ( C )`, 
+                                                 Latitude = `LATITUDE (DECIMAL DEGREES)`, 
+                                                 Longitude = `LONGITUDE (DECIMAL DEGREES)`) %>% 
+                                          select(Location, Date, Salinity, SST, Latitude, Longitude) %>% 
+                                          mutate(Date = as_date(Date),
+                                                 Year = lubridate::year(Date), 
+                                                 Month = lubridate::month(Date), 
+                                                 Day = lubridate::day(Date)) 
 
 # Set all 999.99 values to NA
-Data_Lightstations <-
-  Data_Lightstations %>%
-  dplyr::mutate(SST=ifelse(SST==999.99, NA, SST),
-                Salinity=ifelse(Salinity==999.99, NA, Salinity),
-                Longitude=ifelse(Longitude==999.99, NA, Longitude),
-                Latitude=ifelse(Latitude==999.99, NA, Latitude))
+Data_Lightstations <- Lightstation_data %>% dplyr::mutate(SST=ifelse(SST==999.99, NA, SST),
+                                                          Salinity=ifelse(Salinity==999.99, NA, Salinity),
+                                                          Longitude=ifelse(Longitude==999.99, NA, Longitude),
+                                                          Latitude=ifelse(Latitude==999.99, NA, Latitude))
 
 ### Yearly and summer data
 Data_Lightstations_year_summer<- Data_Lightstations %>%  filter(Month %in% c(5,6,7,8,9)) %>% 
