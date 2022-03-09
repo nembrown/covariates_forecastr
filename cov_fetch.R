@@ -3,7 +3,9 @@ library(PACea)
 library(rerddap)
 library(curl)
 library(lubridate)
-
+library(sf)
+devtools::install_github("r-lib/usethis")
+library(usethis)
 
 
 # PDO (Pacific Decadal Oscillation) from NOAA ---------------------------------------------------------------------
@@ -140,20 +142,44 @@ alpi_simple <- alpi_1900_2015 %>% rename(year = YEAR,
 alpi_simple 
 
 # Temp and salinity from Lightstations -----------------------------------------------------------
+
+Lightstations_data_temp<-tempfile()
+curl_download('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/BCLightstations/DATA_-_Active_Sites.zip', Lightstations_data_temp)
+
+Lightstations_shp_temp<-tempfile()
+download.file('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/BClightstations/BC_Lightstation_Data_SHP_Files.zip', Lightstations_shp_temp, mode="wb")
+Lightstations_shp_temp_2<-tempfile()
+Lightstations_shp_temp_2<-unzip(Lightstations_shp_temp, files= "BC_Lightstation_Data_SHP Files/BC_Lighthouse_DATA.shp")
+
+
+list.files(Lightstations_shp_temp)
+
+?getURL
+?unz
+?unzip
+?download.file
+Lightstations_shp<-
+
 dataset_commonname <-
   c('SST_Monthly_BC_Lightstation',
     'Salinity_Monthly_BC_Lightstation')
+?st_read
 
-Lightstations <-
-  sf::st_read(
-    dsn=here::here('data-raw/BC_Lightstation_Data_SHP_Files/BC_Lighthouse_DATA.shp')
-  )
+Lightstations <- sf::st_read(dsn=Lightstations_shp_temp_2)
 
+list.files(Lightstations_shp_temp)
+
+
+file.path(Lightstations_shp_temp, "BC_Lighthouse_DATA.shp")
+?list.files
+#"BC_Lightstation_DATA_SHP Files",
+
+paste(Lightstations_shp_temp,"BC_Lightstation_DATA_SHP Files", "BC_Lighthouse_DATA.shp", sep="/")
+
+paste(Lightstations_shp_temp)
 Lightstations <-
   Lightstations %>%
   dplyr::mutate(LIGHSTATIO = recode(LIGHSTATIO,'LANGARA POINT LIGHTSTATION'='LANGARA ISLAND LIGHTSTATION'))
-#plot(Lightstations)
-
 
 nstations <- 12
 nmonths <- 12
@@ -173,7 +199,7 @@ Data_Lightstations <- data.frame(Location=rep(NA,nstations*nyears*nmonths),
 # Loop through the currently active stations and obtain SST and salinity
 count_SST <- 1
 count_salinity <- 1
-for(filename in list.files('data-raw/DATA_Active_lightstations',pattern = '.csv') )
+for(filename in list.files(Lightstations_data_temp,pattern = '.csv') )
 {
   if(grepl(filename, pattern = 'Temperatures'))
   {
