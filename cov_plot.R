@@ -33,11 +33,11 @@ ggplot(fcs_covariates_long %>% filter(var_cat== "Zooplankton", var_timing=="Summ
        aes(x=year, y=value, col=Covariate, group=Covariate))+
        geom_point()+geom_line()+facet_wrap(~Stock_ERA, scales="free")
 
-View(stations_meta)
+
 
 fcs_covariates_long_meta<- merge(fcs_covariates_long, cov_meta, by.x=c("Covariate"), by.y=c("cov_name")) %>% as_tibble
-fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA)) %>% as_tibble
-fcs_covariates_long_meta<- fcs_covariates_long_meta %>%  fct_relevel(var_cat, "Zooplankton", "Temperature", "Salinity", "PDO", "ONI", "SOI", "NPI", "EPNP", "NPGO", "ALPI")
+fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA))  %>% as_tibble
+fcs_covariates_long_meta$var_cat <- factor(fcs_covariates_long_meta$var_cat, levels = c("Zooplankton", "Temperature", "Salinity", "PDO", "ONI", "SOI", "NPI", "EPNP", "NPGO", "ALPI"))
 fcs_covariates_long_meta
 
 #BC
@@ -59,6 +59,10 @@ ggplot(fcs_covariates_long_meta %>% filter(Region == "OR"), aes(x=year, y=var_ca
 #CR
 ggplot(fcs_covariates_long_meta %>% filter(Region == "CR"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free")+ ggtitle("CR")
+
+#PS
+ggplot(fcs_covariates_long_meta %>% filter(Region == "PS"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free")+ ggtitle("PS")
 
 
 
