@@ -48,6 +48,9 @@ vignettes/*.pdf
 
 #too much to upload raw data
 data-raw/
+BC_Lightstation_Data_SHP Files/
 
 #excel files
 *.xlsx
+
+*.pptx
