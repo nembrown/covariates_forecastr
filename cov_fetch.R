@@ -186,11 +186,12 @@ Lightstation_data<- Lightstation_data %>% rename(Date = `DATE (YYYY-MM-DD)`,
                                                  Month = lubridate::month(Date), 
                                                  Day = lubridate::day(Date)) 
 
+View(Data_Lightstations)
 # Set all 999.99 values to NA
-Data_Lightstations <- Lightstation_data %>% dplyr::mutate(SST=ifelse(SST==999.99, NA, SST),
-                                                          Salinity=ifelse(Salinity==999.99, NA, Salinity),
-                                                          Longitude=ifelse(Longitude==999.99, NA, Longitude),
-                                                          Latitude=ifelse(Latitude==999.99, NA, Latitude))
+Data_Lightstations <- Lightstation_data %>% dplyr::mutate(SST=ifelse(SST==999.9, NA, SST),
+                                                          Salinity=ifelse(Salinity==999.9, NA, Salinity),
+                                                          Longitude=ifelse(Longitude==999.9, NA, Longitude),
+                                                          Latitude=ifelse(Latitude==999.9, NA, Latitude))
 
 ### Yearly and summer data
 Data_Lightstations_year_summer<- Data_Lightstations %>%  filter(Month %in% c(5,6,7,8,9)) %>% 
