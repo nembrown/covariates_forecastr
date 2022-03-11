@@ -244,7 +244,8 @@ dfo_meds_buoys_combined
 
 ios_zoop_base<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Zooplankton/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv')) %>%  as_tibble()
 
-ios_zoop <- ios_zoop_base  %>% mutate(Euphausiacea = case_when(Twilight == "Daylight" ~ Euphausiacea*3), 
+ios_zoop <- ios_zoop_base  %>% filter(Mesh...U.00B5.m. <300) %>% 
+                               mutate(Euphausiacea = case_when(Twilight == "Daylight" ~ Euphausiacea*3), 
                                       total_zoop_biomass = rowSums(across(Polychaeta:Animalia), na.rm=TRUE), 
                                       Date = as_date(Date),
                                       year = lubridate::year(Date), 
@@ -255,7 +256,7 @@ ios_zoop <- ios_zoop_base  %>% mutate(Euphausiacea = case_when(Twilight == "Dayl
                                                          month %in% c(6, 7, 8) ~ "summer", 
                                                          month %in% c(9, 10, 11) ~ "fall"), 
                                       calc_year = case_when(month == 12 ~ (year + 1), TRUE ~ year)) %>%                                         
-  mutate(region_station = paste(Region_name, Station, sep="-"))
+                                mutate(region_station = paste(Region_name, Station, sep="-"))
 
 ios_zoop
 
