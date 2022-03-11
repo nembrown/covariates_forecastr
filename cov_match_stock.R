@@ -167,8 +167,8 @@ stocks_loc_simple.sf <- st_as_sf(stocks_loc_simple_1, coords = c("long", "lat"),
 stocks_loc_simple.sf<-stocks_loc_simple.sf %>% st_transform(3035)
 stocks_loc_simple.sf
 
-#Buffer circles of 100000m, i.e. 100km  -- creates polygons around the stocks
-dat_circles <- st_buffer(stocks_loc_simple.sf, dist = 100000)
+#Buffer circles of 200000m, i.e. 200km  -- creates polygons around the stocks
+dat_circles <- st_buffer(stocks_loc_simple.sf, dist = 200000)
 
 #which of the region_stations fall within 100km radius of each stock
 ios_zoop_era_stocks<- st_join(ios_zoop_stations.sf, dat_circles, left=FALSE) %>% st_set_geometry(NULL) %>% as_tibble()
@@ -178,7 +178,7 @@ ios_zoop_era_stocks
 ios_zoop_matched <- left_join(ios_zoop_era_stocks, ios_zoop)
 
 #Fixing problems with zeros
-ios_zoop_matched<-ios_zoop_matched %>% mutate(total_zoop_biomass = case_when(total_zoop_biomass == 0 ~ 0.07, TRUE ~ total_zoop_biomass))
+ios_zoop_matched<-ios_zoop_matched %>% mutate(total_zoop_biomass = case_when(total_zoop_biomass == 0 ~ runif(1, min=0, max=0.15087), TRUE ~ total_zoop_biomass))
 
 View(ios_zoop_matched)
 
@@ -221,4 +221,3 @@ ios_zoop_allseasons<- ios_zoop_allseasons %>% mutate(cov_zoop_winter_anomaly = l
 ios_zoop_anomalies<-ios_zoop_allseasons %>% dplyr::select(Stock_ERA, calc_year, cov_zoop_winter_anomaly, cov_zoop_spring_anomaly, cov_zoop_summer_anomaly, cov_zoop_fall_anomaly) %>% 
                                             mutate(cov_zoop_yearly_anomaly = rowMeans(across(cov_zoop_winter_anomaly:cov_zoop_fall_anomaly), na.rm=TRUE))
 ios_zoop_anomalies
-
