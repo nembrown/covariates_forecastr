@@ -49,7 +49,8 @@ oni_simple
 soi_1951_present<-read.table("https://psl.noaa.gov/gcos_wgsp/Timeseries/Data/soi.long.data",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
 names(soi_1951_present) <- c("year","JAN","FEB","MAR","APR","MAY","JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
 
-soi_1951_present<-soi_1951_present %>% filter(year!= 2022) %>% 
+#Last updated sept 2021, so took out 2021, check website to see if updated
+soi_1951_present<-soi_1951_present %>% filter(year < 2021) %>% 
                                        mutate_if(is.character, as.numeric) %>% 
                                        mutate(cov_SOI_summer_mean= rowMeans(dplyr::select(.,MAY, JUN, JUL, AUG, SEP)))  %>% 
                                        mutate(cov_SOI_yearly_mean = rowMeans(dplyr::select(.,JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC)))
@@ -57,21 +58,21 @@ soi_1951_present<-soi_1951_present %>% filter(year!= 2022) %>%
 soi_simple<- soi_1951_present %>% dplyr::select(year, cov_SOI_summer_mean, cov_SOI_yearly_mean) %>% 
                                   filter(year>1969)
 soi_simple
-
 # NPI (North Pacific Index) from NOAA ---------------------------------------------------------------------
 npi_1899_present<-read.table("https://climatedataguide.ucar.edu/sites/default/files/npindex_monthly.txt",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
+#This is only updated to 2021 April, so cut out 2022
 names(npi_1899_present)<-c("year_month", "NPI")
 npi_1899_present<- npi_1899_present %>% separate(year_month, c("year", "month"), sep=4) %>% 
                                         mutate_if(is.character, as.numeric) 
 
-npi_simple1<-npi_1899_present %>% filter(year!= 2022) %>% 
+npi_simple1<-npi_1899_present %>% filter(year < 2021) %>% 
                                   group_by(year) %>% 
                                   summarise_if(is.numeric, mean) %>% 
                                   rename(cov_NPI_yearly_mean= NPI)%>% 
                                   filter(year>1969) %>% 
                                   dplyr::select(-month)
 
-npi_simple2<-npi_1899_present %>% filter(year!= 2022, month %in% c(5,6,7,8, 9)) %>% 
+npi_simple2<-npi_1899_present %>% filter(year < 2021, month %in% c(5,6,7,8, 9)) %>% 
                                   group_by(year) %>% 
                                   summarise_if(is.numeric, mean) %>% 
                                   rename(cov_NPI_summer_mean= NPI)%>% 
@@ -257,7 +258,6 @@ ios_zoop <- ios_zoop_base  %>% mutate(Euphausiacea = case_when(Twilight == "Dayl
   mutate(region_station = paste(Region_name, Station, sep="-"))
 
 ios_zoop
-
 
 
 
