@@ -121,7 +121,6 @@ stations_meta<-bind_rows(loc_matching_light_meta, loc_matching_offshore_meta, lo
 stations_meta<- stations_meta %>% relocate(Region, Stock_ERA, Stock_long, Stock_lat, site_type, Site_name, long, lat, Distance ) %>% arrange(Region, Stock_ERA)
 stations_meta
 
-
 # Writing to excel file --------------------------------------------------------
 
 
