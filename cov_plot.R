@@ -43,28 +43,35 @@ fcs_covariates_long_meta
 #BC
 ggplot(fcs_covariates_long_meta %>% filter(Region == "BC"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free") + ggtitle("BC")
+ggsave("Plots/BC_coverage.tiff")
 
 #AK
 ggplot(fcs_covariates_long_meta %>% filter(Region == "AK"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free") + ggtitle("AK")
+ggsave("Plots/AK_coverage.tiff")
 
 #WA
 ggplot(fcs_covariates_long_meta %>% filter(Region == "WA"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free") + ggtitle("WA")
+ggsave("Plots/WA_coverage.tiff")
 
 #OR
 ggplot(fcs_covariates_long_meta %>% filter(Region == "OR"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free")+ ggtitle("OR")
+ggsave("Plots/OR_coverage.tiff")
 
 #CR
 ggplot(fcs_covariates_long_meta %>% filter(Region == "CR"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free")+ ggtitle("CR")
+ggsave("Plots/CR_coverage.tiff")
 
 #PS
 ggplot(fcs_covariates_long_meta %>% filter(Region == "PS"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free")+ ggtitle("PS")
+ggsave("Plots/PS_coverage.tiff")
 
 
-
-
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "COW"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("COW") + theme_bw()
+ggsave("COW_coverage.tiff")
 
