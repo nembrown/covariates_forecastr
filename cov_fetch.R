@@ -181,34 +181,64 @@ Lightstation_data<- Lightstation_data %>% rename(Date = `DATE (YYYY-MM-DD)`,
                                                  SST = `TEMPERATURE ( C )`, 
                                                  Latitude = `LATITUDE (DECIMAL DEGREES)`, 
                                                  Longitude = `LONGITUDE (DECIMAL DEGREES)`) %>% 
-                                          select(Location, Date, Salinity, SST, Latitude, Longitude) %>% 
+                                          dplyr::select(Location, Date, Salinity, SST, Latitude, Longitude) %>% 
                                           mutate(Date = as_date(Date),
                                                  Year = lubridate::year(Date), 
                                                  Month = lubridate::month(Date), 
                                                  Day = lubridate::day(Date)) 
 
-View(Data_Lightstations)
 # Set all 999.99 values to NA
 Data_Lightstations <- Lightstation_data %>% dplyr::mutate(SST=ifelse(SST==999.9, NA, SST),
                                                           Salinity=ifelse(Salinity==999.9, NA, Salinity),
                                                           Longitude=ifelse(Longitude==999.9, NA, Longitude),
-                                                          Latitude=ifelse(Latitude==999.9, NA, Latitude))
+                                                          Latitude=ifelse(Latitude==999.9, NA, Latitude)) %>% 
+                                            rename(year = Year) 
 
-### Yearly and summer data
-Data_Lightstations_year_summer<- Data_Lightstations %>%  filter(Month %in% c(5,6,7,8,9)) %>% 
-  rename(year = Year) %>% 
-  group_by(Location, year) %>% 
-  dplyr::summarise(cov_SST_lighthouse_summer_mean = mean(SST, na.rm=TRUE), 
-                   cov_PPT_lighthouse_summer_mean = mean(Salinity, na.rm=TRUE))
+### Yearly and summer data - summarized by month first then only use complete months 
 
-Data_Lightstations_year<- Data_Lightstations  %>% 
-  rename(year = Year) %>%   
-  group_by(Location, year) %>% 
-  dplyr::summarise(cov_SST_lighthouse_yearly_mean = mean(SST, na.rm=TRUE), 
-                   cov_PPT_lighthouse_yearly_mean = mean(Salinity, na.rm=TRUE))
+Data_Lightstations_month<-  Data_Lightstations %>%  group_by(Location, year, Month) %>% 
+                                                    dplyr::summarise(monthly_SST = mean(SST, na.rm=TRUE), 
+                                                                     monthly_PPT = mean(Salinity, na.rm=TRUE))
 
-Data_Lightstations_combined<-merge(Data_Lightstations_year, Data_Lightstations_year_summer)
-Data_Lightstations_combined<- Data_Lightstations_combined %>% filter(year>1975) %>% as_tibble()
+Data_Lightstations_month_PPT<-  Data_Lightstations_month %>%  dplyr::select(Location, year, Month, monthly_PPT) %>% drop_na()
+Data_Lightstations_year_summer_PPT<-  Data_Lightstations_month_PPT %>%  
+                                      filter(Month %in% c(5,6,7,8,9)) %>% 
+                                      dplyr::select(-Month) %>% 
+                                      group_by(Location, year) %>% 
+                                      dplyr::summarise(cov_PPT_lighthouse_summer_mean = mean(monthly_PPT, na.rm=TRUE), n_month = n()) %>% 
+                                      filter(n_month == 5)  %>% 
+                                      dplyr::select(-n_month)
+
+Data_Lightstations_year_PPT<- Data_Lightstations_month_PPT %>%  
+                              dplyr::select(-Month) %>% 
+                              group_by(Location, year) %>% 
+                              dplyr::summarise(cov_PPT_lighthouse_yearly_mean = mean(monthly_PPT, na.rm=TRUE), n_month = n()) %>% 
+                              filter(n_month == 12)  %>% 
+                              dplyr::select(-n_month)
+                                      
+Data_Lightstations_month_SST<-  Data_Lightstations_month %>%  dplyr::select(Location, year, Month, monthly_SST) %>% drop_na()
+Data_Lightstations_year_summer_SST<-  Data_Lightstations_month_SST %>%  
+                                      filter(Month %in% c(5,6,7,8,9)) %>% 
+                                      dplyr::select(-Month) %>% 
+                                      group_by(Location, year) %>% 
+                                      dplyr::summarise(cov_SST_lighthouse_summer_mean = mean(monthly_SST, na.rm=TRUE), n_month = n()) %>% 
+                                      filter(n_month == 5)  %>% 
+                                      dplyr::select(-n_month)
+
+Data_Lightstations_year_SST<- Data_Lightstations_month_SST %>%  
+                              dplyr::select(-Month) %>% 
+                              group_by(Location, year) %>% 
+                              dplyr::summarise(cov_SST_lighthouse_yearly_mean = mean(monthly_SST, na.rm=TRUE), n_month = n()) %>% 
+                              filter(n_month == 12)  %>% 
+                              dplyr::select(-n_month)
+
+
+
+Data_Lightstations_SST_combined<-merge(Data_Lightstations_year_SST, Data_Lightstations_year_summer_SST, all=TRUE)
+Data_Lightstations_PPT_combined<-merge(Data_Lightstations_year_PPT, Data_Lightstations_year_summer_PPT, all=TRUE)
+
+Data_Lightstations_combined<-merge(Data_Lightstations_PPT_combined, Data_Lightstations_SST_combined, all=TRUE)
+Data_Lightstations_combined<- Data_Lightstations_combined %>% filter(year>1969) %>% as_tibble()
 Data_Lightstations_combined
 
 
@@ -225,20 +255,24 @@ dfo_meds_buoys_small <- dfo_meds_buoys %>% as_tibble %>%
                                                   day = lubridate::day(time), 
                                                   SSTP = as.numeric(SSTP))
 
+#want to do yearly sums of only complete monthly data, so first summarize by month
 dfo_meds_buoys_month<- dfo_meds_buoys_small %>%  group_by(STN_ID, year, month) %>% 
-                                                 dplyr::summarise(mean_SSTP = mean(SSTP, na.rm=TRUE))
+                                                 dplyr::summarise(monthly_SSTP = mean(SSTP, na.rm=TRUE))  %>% 
+                                                 drop_na()
 
-dfo_meds_buoys_year_summer<- dfo_meds_buoys_small %>%  filter(month %in% c(5,6,7,8,9)) %>% 
+dfo_meds_buoys_year_summer<- dfo_meds_buoys_month %>%  filter(month %in% c(5,6,7,8,9)) %>% 
                                                        group_by(STN_ID, year) %>% 
-                                                       dplyr::summarise(mean_summer_SSTP = mean(SSTP, na.rm=TRUE))
+                                                       dplyr::summarise(mean_summer_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
+                                                       filter(n_month == 5) %>% 
+                                                       dplyr::select(-n_month)
 
-dfo_meds_buoys_year<- dfo_meds_buoys_small  %>% group_by(STN_ID, year) %>% 
-                                                dplyr::summarise(mean_SSTP = mean(SSTP, na.rm=TRUE))
+dfo_meds_buoys_year<- dfo_meds_buoys_month  %>% group_by(STN_ID, year) %>% 
+                                                dplyr::summarise(mean_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
+                                                filter(n_month == 12) %>% 
+                                                dplyr::select(-n_month)
 
 dfo_meds_buoys_combined<-merge(dfo_meds_buoys_year, dfo_meds_buoys_year_summer) %>% as_tibble()
 dfo_meds_buoys_combined
-
-
 
 # Zooplankton biomass from IOS --------------------------------------------
 
