@@ -26,6 +26,9 @@ pdo_1854_present<-pdo_1854_present %>% as_tibble() %>% filter(Year<2022) %>%
                   mutate(PDO.summer.av= rowMeans(select(.,May, Jun, Jul, Aug, Sep)))  %>% 
                   mutate(cov_PDO_pacific_year = rowMeans(select(.,Jan:Dec)))
 
+####
+
+
 Atnarko_sample_age<-read.csv("Inputs/Sample File_with age-specific data.csv") %>% as_tibble()
 Atnarko_sample_age<-Atnarko_sample_age %>% mutate(Run_Year_Lag_1 = Run_Year + 1) %>% 
                                            mutate(Run_Year_Lag_2 = Run_Year + 2) %>% 
