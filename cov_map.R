@@ -73,3 +73,13 @@ ggmap(map_marine) + geom_point(data=ios_zoop_era_stocks, aes(x = long, y = lat, 
 ggmap(map_marine) + geom_point(data=all_stations_stocks, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map)
 
 
+# Map specific stock and stations ---------------------------------
+COW_stations_stock<- all_stations_stocks %>% filter(Site_name %in% c("C46146", "COW", "RACE ROCKS LIGHTSTATION"))
+
+#small_map
+bbox_marine_small<- make_bbox(COW_stations_stock$long, COW_stations_stock$lat, f = 0.5)
+map_marine_small<- get_stamenmap(bbox_marine_small, source="stamen", maptype= "terrain", crop=FALSE, zoom=8)
+
+
+ggmap(map_marine_small) + geom_point(data=COW_stations_stock, aes(x = long, y = lat, col=site_type), size=3) +  scale_colour_manual(values=colorset_map)
+
