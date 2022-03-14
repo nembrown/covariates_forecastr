@@ -46,7 +46,7 @@ fcs_covariates_combined_COW<-fcs_covariates_combined %>% filter(Stock_ERA == "CO
 
 #Load in Escapement data
 LGS_sample_age<-read.csv("Inputs/LGS_ESc_upto2021.csv") %>% as_tibble()
-LGS_sample_age<-LGS_sample_age %>%  dplyr::select(-c(Cov_Variable3, Cov_Variable2, cov_zoop_winter_anomaly)) %>% 
+LGS_sample_age<-LGS_sample_age %>%  dplyr::select(Run_Year, Brood_Year, Age_Class, Average_Escapement) %>% 
                                     mutate(Run_Year_Lag_1 = Run_Year + 1) %>% 
                                     mutate(Run_Year_Lag_2 = Run_Year + 2) %>% 
                                     mutate(Brood_Year_Lag_1 = Brood_Year + 1) %>% 
@@ -90,82 +90,31 @@ corr_LGS_brood_lag2_year<-LGS_sample_age_covariates_wide_brood_lag2_year %>% sel
 
 #Full correlations
 corr_var(corr_LGS_run_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/corr_LGS_run_year.tiff")
+ggsave(file="Plots/LGS/corr_LGS_run_year.tiff")
 corr_var(corr_LGS_run_lag1_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/corr_LGS_run_year_lag1.tiff")
+ggsave(file="Plots/LGS/corr_LGS_run_year_lag1.tiff")
 corr_var(corr_LGS_run_lag2_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/corr_LGS_run_year_lag2.tiff")
+ggsave(file="Plots/LGS/corr_LGS_run_year_lag2.tiff")
 corr_var(corr_LGS_brood_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/corr_LGS_brood_year.tiff")
+ggsave(file="Plots/LGS/corr_LGS_brood_year.tiff")
 corr_var(corr_LGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/corr_LGS_brood_year_lag1.tiff")
+ggsave(file="Plots/LGS/corr_LGS_brood_year_lag1.tiff")
 corr_var(corr_LGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/corr_LGS_brood_year_lag2.tiff")
+ggsave(file="Plots/LGS/corr_LGS_brood_year_lag2.tiff")
 
 #Significant p-values only 
 corr_var(corr_LGS_run_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/corr_LGS_run_year_sigp.tiff")
+ggsave(file="Plots/LGS/corr_LGS_run_year_sigp.tiff")
 corr_var(corr_LGS_run_lag1_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/corr_LGS_run_year_lag1_sigp.tiff")
+ggsave(file="Plots/LGS/corr_LGS_run_year_lag1_sigp.tiff")
 corr_var(corr_LGS_run_lag2_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/corr_LGS_run_year_lag2_sigp.tiff")
+ggsave(file="Plots/LGS/corr_LGS_run_year_lag2_sigp.tiff")
 corr_var(corr_LGS_brood_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/corr_LGS_brood_year_sigp.tiff")
+ggsave(file="Plots/LGS/corr_LGS_brood_year_sigp.tiff")
 corr_var(corr_LGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/corr_LGS_brood_year_lag1_sigp.tiff")
+ggsave(file="Plots/LGS/corr_LGS_brood_year_lag1_sigp.tiff")
 corr_var(corr_LGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/corr_LGS_brood_year_lag2_sigp.tiff")
-
-
-
-
-### but want p values - so will use the lares package: 
-corr_pdo<-corr_var(corr_LGS_run_year,Average_Escapement, plot=TRUE)
-corr_pdo
-
-corr_var(corr_LGS_sample_age_covariates_wide_run_year,Average_Escapement, top = 29, pvalue=TRUE, plot=TRUE)
-corr_pdo_plot
-ggsave(corr_pdo_plot, file="Plots/corr_Covariate_plot_2.tiff")
-
-corr_pdo_plot_p<-corr_var(LGS_sample_Covariate_correlation,Average_Escapement, max_pvalue=0.05, pvalue=TRUE, plot=TRUE)
-corr_pdo_plot_p
-ggsave(corr_pdo_plot_p, file="Plots/corr_Covariate_plot_sig_p.tiff")
-
-
-#using Performance Analytics
-chart.Correlation(LGS_sample_Covariate_correlation , histogram=TRUE, pch=19)
-
-# Correlation plot of Average escapement vs. all other variables
-ggplot(corr_LGS_run_year, aes(x = term, y = Average_Escapement)) +
-  geom_bar(stat = "identity") +   geom_col(aes(fill = Average_Escapement >= 0)) + 
-  ylab("Correlation with Average_Escapement") + 
-  xlab("Variable") + coord_flip()
-ggsave(file="Plots/corr_Covariate_plot.tiff")
-
-
-####Unused
-
-#the sample data is only 1990 to present for run year, just use the summer average
-Covariate_run_sync<-Covariate_1854_present  %>% select(Year, value) %>% mutate(PDO_run_sync=value, .keep="unused")
-Covariate_run_lag1<-Covariate_1854_present  %>% select(Year, value) %>% mutate(PDO_run_lag1=value, .keep="unused")
-Covariate_run_lag2<-Covariate_1854_present  %>% select(Year, value) %>% mutate(PDO_run_lag2=value, .keep="unused")
-
-#1987 to present for brood year just use the summer average
-Covariate_brood_sync<-Covariate_1854_present %>% select(Year, value)%>% mutate(PDO_brood_sync=value, .keep="unused")
-Covariate_brood_lag1<-Covariate_1854_present %>% select(Year, value)%>% mutate(PDO_brood_lag1=value, .keep="unused")
-Covariate_brood_lag2<-Covariate_1854_present %>% select(Year, value)%>% mutate(PDO_brood_lag2=value, .keep="unused")
-
-#Make one file with different joins
-LGS_sample_age_pdo<-left_join(LGS_sample_age, Covariate_run_sync, by=c("Run_Year" = "Year"))
-LGS_sample_age_pdo<-left_join(LGS_sample_age_pdo, Covariate_run_lag1, by=c("Run_Year_Lag_1" = "Year"))
-LGS_sample_age_pdo<-left_join(LGS_sample_age_pdo, Covariate_run_lag2, by=c("Run_Year_Lag_2" = "Year"))
-LGS_sample_age_pdo<-left_join(LGS_sample_age_pdo, Covariate_brood_sync,  by=c("Brood_Year" = "Year"))
-LGS_sample_age_pdo<-left_join(LGS_sample_age_pdo, Covariate_brood_lag1,  by=c("Brood_Year_Lag_1" = "Year"))
-LGS_sample_age_pdo<-left_join(LGS_sample_age_pdo, Covariate_brood_lag2,  by=c("Brood_Year_Lag_2" = "Year"))
-
-LGS_sample_age_covariates_run_year<-LGS_sample_age_pdo %>% pivot_longer(names_to="Covariate", values_to="value", cols=c(PDO_run_sync,  PDO_run_lag1,PDO_run_lag2,  PDO_brood_sync, PDO_brood_lag1, PDO_brood_lag2)) %>% 
-  mutate(Temperature_pattern = ifelse(value > 0, "Hot years", "Cold Years"))
-
+ggsave(file="Plots/LGS/corr_LGS_brood_year_lag2_sigp.tiff")
 
 
 
@@ -189,7 +138,7 @@ Covariate_plots[["cov_PDO_yearly_mean"]]
 #Group plots
 
 
-#could do this ina list but somehow can't figure that out
+#could do this in a list but somehow can't figure that out
 #save
 #all oceanic
 oceanicCovariate_plot <-  pluck(Covariate_plots, "cov_PDO_summer_mean") + 
