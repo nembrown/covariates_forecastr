@@ -16,8 +16,6 @@ library(purrr)
 
 # Read in data for covariate and Av escapement  ------------------------------------------------------------
 
-unique(fcs_covariates_combined$Stock_ERA)
-
 fcs_covariates_combined<-read.csv("fcs_covariates.csv") %>% as_tibble()
 
 fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
@@ -45,7 +43,7 @@ fcs_covariates_long_COW<-fcs_covariates_long %>% filter(Stock_ERA == "COW")
 fcs_covariates_combined_COW<-fcs_covariates_combined %>% filter(Stock_ERA == "COW")
 
 #Load in Escapement data
-LGS_HATCH_sample_age<-read.csv("Inputs/LGS_HATCH_ESc_upto2021.csv") %>% as_tibble()
+LGS_HATCH_sample_age<-read.csv("Inputs/LGS_H_Esc_upto2021.csv") %>% as_tibble()
 LGS_HATCH_sample_age<-LGS_HATCH_sample_age %>%  dplyr::select(Run_Year, Brood_Year, Age_Class, Average_Escapement) %>% 
                                     mutate(Run_Year_Lead_1 = Run_Year - 1) %>% 
                                     mutate(Run_Year_Lead_2 = Run_Year - 2) %>% 
