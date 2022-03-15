@@ -16,8 +16,6 @@ library(purrr)
 
 # Read in data for covariate and Av escapement  ------------------------------------------------------------
 
-unique(fcs_covariates_combined$Stock_ERA)
-
 fcs_covariates_combined<-read.csv("fcs_covariates.csv") %>% as_tibble()
 
 fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
@@ -185,24 +183,6 @@ for(Covariate_ in macthes_LGS_NAT_brood_lag2_year) {
     geom_point() + geom_smooth()+
     ggtitle(LGS_NAT_sample_age_covariates_brood_lag2_year$Covariate[LGS_NAT_sample_age_covariates_brood_lag2_year$Covariate== Covariate_])
 }
-
-
-# check plots with 
-Covariate_plots_LGS_NAT_run_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_NAT_run_lead1_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_NAT_run_lead2_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_NAT_brood_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_NAT_brood_lag1_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_NAT_brood_lag2_year[["cov_PDO_yearly_mean"]]
-
-
-#Group plots
-Covariate_plots_LGS_NAT_run_year
-Covariate_plots_LGS_NAT_run_lead1_year = list()
-Covariate_plots_LGS_NAT_run_lead2_year = list()
-Covariate_plots_LGS_NAT_brood_year = list()
-Covariate_plots_LGS_NAT_brood_lag1_year = list()
-Covariate_plots_LGS_NAT_brood_lag2_year = list()
 
 
 ########### Covariate_plots_LGS_NAT_run_year

@@ -185,24 +185,6 @@ for(Covariate_ in macthes_LGS_HATCH_brood_lag2_year) {
 }
 
 
-# check plots with 
-Covariate_plots_LGS_HATCH_run_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_HATCH_run_lead1_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_HATCH_run_lead2_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_HATCH_brood_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_HATCH_brood_lag1_year[["cov_PDO_yearly_mean"]]
-Covariate_plots_LGS_HATCH_brood_lag2_year[["cov_PDO_yearly_mean"]]
-
-
-#Group plots
-Covariate_plots_LGS_HATCH_run_year
-Covariate_plots_LGS_HATCH_run_lead1_year = list()
-Covariate_plots_LGS_HATCH_run_lead2_year = list()
-Covariate_plots_LGS_HATCH_brood_year = list()
-Covariate_plots_LGS_HATCH_brood_lag1_year = list()
-Covariate_plots_LGS_HATCH_brood_lag2_year = list()
-
-
 ########### Covariate_plots_LGS_HATCH_run_year
 #Oceanic indices by year
 oceanic_yearly_Covariate_plots_LGS_HATCH_run_year <- pluck(Covariate_plots_LGS_HATCH_run_year, "cov_PDO_yearly_mean") + 
