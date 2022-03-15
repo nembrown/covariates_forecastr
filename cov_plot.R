@@ -36,7 +36,7 @@ ggplot(fcs_covariates_long %>% filter(var_cat== "Zooplankton", var_timing=="Summ
 
 
 fcs_covariates_long_meta<- merge(fcs_covariates_long, cov_meta, by.x=c("Covariate"), by.y=c("cov_name")) %>% as_tibble
-fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA))  %>% as_tibble
+#fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA))  %>% as_tibble
 fcs_covariates_long_meta$var_cat <- factor(fcs_covariates_long_meta$var_cat, levels = c("Zooplankton", "Temperature", "Salinity", "PDO", "ONI", "SOI", "NPI", "EPNP", "NPGO", "ALPI"))
 fcs_covariates_long_meta
 
@@ -73,7 +73,7 @@ ggsave("Plots/PS_coverage.tiff")
 ##COW,BQR
 ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "COW"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("COW") + theme_bw()
-ggsave(file="Plots/LGS/COW_coverage.tiff")
+ggsave(file="Plots/LGS_NAT/COW_coverage.tiff")
 
 ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "BQR"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("BQR") + theme_bw()
@@ -85,6 +85,11 @@ ggsave("Plots/ATN/ATN_coverage.tiff")
 
 ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "RBT"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("RBT") + theme_bw()
-ggsave("Plots/WCVI/RBT_coverage.tiff")
+ggsave("Plots/WCVI_HATCH/RBT_coverage.tiff")
+ggsave("Plots/WCVI_NAT/RBT_coverage.tiff")
 
+
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "SRH"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("SRH") + theme_bw()
+ggsave("Plots/ALSEA/SHR_coverage.tiff")
 
