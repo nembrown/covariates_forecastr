@@ -53,4 +53,12 @@ BC_Lightstation_Data_SHP Files/
 #excel files
 *.xlsx
 
+#powerpoint files
 *.pptx
+
+#Input folder - just so data isn't uploading 
+Inputs/
+
+#R files from zooplankton 
+IOSzoopl.R
+2022_02_10 SofG Zooplankton manipulation and anomaly calculation program for 2022 SOPO update.R
