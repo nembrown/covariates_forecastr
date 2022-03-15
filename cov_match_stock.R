@@ -167,8 +167,8 @@ stocks_loc_simple.sf <- st_as_sf(stocks_loc_simple_1, coords = c("long", "lat"),
 stocks_loc_simple.sf<-stocks_loc_simple.sf %>% st_transform(3035)
 stocks_loc_simple.sf
 
-#Buffer circles of 200000m, i.e. 200km  -- creates polygons around the stocks
-dat_circles <- st_buffer(stocks_loc_simple.sf, dist = 200000)
+#Buffer circles of 500000m, i.e. 500km  -- creates polygons around the stocks
+dat_circles <- st_buffer(stocks_loc_simple.sf, dist = 500000)
 
 #which of the region_stations fall within 100km radius of each stock
 ios_zoop_era_stocks<- st_join(ios_zoop_stations.sf, dat_circles, left=FALSE) %>% st_set_geometry(NULL) %>% as_tibble()

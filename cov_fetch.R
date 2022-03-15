@@ -156,7 +156,7 @@ Lightstations <- sf::st_read(dsn="BC_Lightstation_Data_SHP Files/BC_Lighthouse_D
 Lightstations <-Lightstations %>% dplyr::mutate(LIGHSTATIO = recode(LIGHSTATIO,'LANGARA POINT LIGHTSTATION'='LANGARA ISLAND LIGHTSTATION')) %>% st_drop_geometry()
 Lightstations_location<-Lightstations %>% rename(Station_ID = LIGHSTATIO, lat = LATITUDE__, long= LONGITUDE) %>% 
                                           filter(DATA_COLLE == "ACTIVE") %>% 
-                                          select(Station_ID, lat, long)  %>% as_tibble
+                                          dplyr::select(Station_ID, lat, long)  %>% as_tibble
 
 list_of_files<-list.files('DATA_-_Active_Sites', pattern='Sea_Surface_Temperature_and_Salinity.+2021.csv', recursive=TRUE, full.names = T)
 station_names<-list(Lightstations_location$Station_ID)
@@ -278,7 +278,7 @@ dfo_meds_buoys_combined
 
 ios_zoop_base<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Zooplankton/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv')) %>%  as_tibble()
 
-ios_zoop <- ios_zoop_base  %>% filter(Mesh...U.00B5.m. <300) %>% 
+ios_zoop <- ios_zoop_base  %>% filter(Mesh...U.00B5.m. <300, Net != "Bongo ONH") %>% 
                                mutate(Euphausiacea = case_when(Twilight == "Daylight" ~ Euphausiacea*3), 
                                       total_zoop_biomass = rowSums(across(Polychaeta:Animalia), na.rm=TRUE), 
                                       Date = as_date(Date),

@@ -70,8 +70,21 @@ ggplot(fcs_covariates_long_meta %>% filter(Region == "PS"), aes(x=year, y=var_ca
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free")+ ggtitle("PS")
 ggsave("Plots/PS_coverage.tiff")
 
-
-ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "COW"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
+##COW,BQR
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "COW"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("COW") + theme_bw()
-ggsave("COW_coverage.tiff")
+ggsave(file="Plots/LGS/COW_coverage.tiff")
+
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "BQR"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("BQR") + theme_bw()
+ggsave("Plots/MGS/BQR_coverage.tiff")
+
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "ATN/ATS"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("ATN") + theme_bw()
+ggsave("Plots/ATN/ATN_coverage.tiff")
+
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "RBT"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("RBT") + theme_bw()
+ggsave("Plots/WCVI/RBT_coverage.tiff")
+
 
