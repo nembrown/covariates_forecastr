@@ -298,3 +298,11 @@ ios_zoop
 
 
 
+
+# Model EVs ---------------------------------------------------------------
+col_names_list<-c("stock", paste(1974:2024))
+model_EVs<-read.table("Inputs/2104B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
+model_stocks<-read.csv("Inputs/stockCodes.csv") %>% rename(Stock_ERA = stockShortName)
+model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
+model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2022)
+model_EVs_stocks
