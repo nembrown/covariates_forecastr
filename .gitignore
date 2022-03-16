@@ -62,3 +62,6 @@ Inputs/
 #R files from zooplankton 
 IOSzoopl.R
 2022_02_10 SofG Zooplankton manipulation and anomaly calculation program for 2022 SOPO update.R
+
+#
+Plots/
