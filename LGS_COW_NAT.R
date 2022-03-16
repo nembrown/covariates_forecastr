@@ -14,6 +14,18 @@ library(lares)
 library(purrr)
 
 
+## create
+# dir.create(path = "Plots/LGS_NAT")
+# dir.create(path = "Plots/LGS_NAT/Brood Year")
+# dir.create(path = "Plots/LGS_NAT/Run Year")
+# dir.create(path = "Plots/LGS_NAT/Brood Year/Sync")
+# dir.create(path = "Plots/LGS_NAT/Brood Year/Lag1")
+# dir.create(path = "Plots/LGS_NAT/Brood Year/Lag2")
+# dir.create(path = "Plots/LGS_NAT/Run Year/Sync")
+# dir.create(path = "Plots/LGS_NAT/Run Year/Lead1")
+# dir.create(path = "Plots/LGS_NAT/Run Year/Lead2")
+
+
 # Read in data for covariate and Av escapement  ------------------------------------------------------------
 
 fcs_covariates_combined<-read.csv("fcs_covariates.csv") %>% as_tibble()
