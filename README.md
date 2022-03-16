@@ -19,13 +19,13 @@ Repository of code for gathering environmental and biological covariates to feed
 
 #### Next, match and plot average escapement of a model stock to covariates from an indicator stock:
 
-[LGS_COW_NAT.R](https://github.com/nembrown/covariates_forecastr/blob/main/LGS_COW_NAT.R) - For example use this code for Lower Georgia Strait, matched to data from Cowichan indicator stock. Before running this script, create directories (as indicated) under a plotting folder. Running this script (and those like it) will match the covariate data to average escapement (or terminal run) by either brood year (with either a synced time series (sync), brood year + 1 (Lag1), or brood year + 2 (Lag2)) or run year (with either a synced time series, run year - 1 (Lead1), or run year - 2 (Lead2)). The script will then spit out plots in corresponding folders. 
+[LGS_COW_NAT.R](https://github.com/nembrown/covariates_forecastr/blob/main/LGS_COW_NAT.R) - For example use this code for Lower Georgia Strait, matched to data from Cowichan indicator stock. Before running this script, create directories (as indicated) under a plotting folder. Running this script (and those like it) will match the covariate data to average escapement (or terminal run) by either brood year (with either a synced time series (sync), brood year + 1 (Lag1), or brood year + 2 (Lag2)) or run year (with either a synced time series, run year - 1 (Lead1), or run year - 2 (Lead2)). The script will then spit out plots in corresponding folders. These plots are intended for visualization and to help select a suite of 3 correlated covariates to use in ForecastR. 
 
 These plots are of two types: 
 
 1. Correlation plots - calculate a correlation coefficient (between 0 and 1) for each covariate against average escapement (or terminal run). These correlation plots can be either the full suite of covariates or a subset that have a significant (p<0.05) correlation to average escapement. 
 
-2. Regression plots - Using geom_smooth and grouping covariates by category and plot Av. escapement on the y axis and the covariate on the x axis to investigate the relationship. These plots are intended for visualization and to help select a suite of 3 correlated covariates to use in ForecastR. 
+2. Regression plots - Using geom_smooth and grouping covariates by category and plot average escapement on the y axis and the covariate on the x axis to investigate the relationship. 
 
 #### After selecting covariates for forecasting, you can create and save a ForecastR-shiny-ready file:
 
