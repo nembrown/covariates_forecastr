@@ -54,7 +54,7 @@ MGS_sample_age<-MGS_sample_age %>%  dplyr::select(Run_Year, Brood_Year, Age_Clas
 # Matching escapement to covariates ---------------------------------------
 
 #1. Wide files - for use in correlation plots
-#matching to run year + time lags
+#matching to Run Year + time lags
 MGS_sample_age_covariates_wide_run_year<-merge(MGS_sample_age, fcs_covariates_combined_BQR, by.x=c("Run_Year"), by.y=c("year")) %>% as_tibble
 MGS_sample_age_covariates_wide_run_lead1_year<-merge(MGS_sample_age, fcs_covariates_combined_BQR, by.x=c("Run_Year_Lead_1"), by.y=c("year")) %>% as_tibble
 MGS_sample_age_covariates_wide_run_lead2_year<-merge(MGS_sample_age, fcs_covariates_combined_BQR, by.x=c("Run_Year_Lead_2"), by.y=c("year")) %>% as_tibble
@@ -65,7 +65,7 @@ MGS_sample_age_covariates_wide_brood_lag1_year<-merge(MGS_sample_age, fcs_covari
 MGS_sample_age_covariates_wide_brood_lag2_year<-merge(MGS_sample_age, fcs_covariates_combined_BQR, by.x=c("Brood_Year_Lag_2"), by.y=c("year")) %>% as_tibble
 
 #2. Long files - for use in visualization plotting 
-#matching to run year + time lags
+#matching to Run Year + time lags
 MGS_sample_age_covariates_run_year<-merge(MGS_sample_age, fcs_covariates_long_BQR, by.x=c("Run_Year"), by.y=c("year")) %>% as_tibble
 MGS_sample_age_covariates_run_lead1_year<-merge(MGS_sample_age, fcs_covariates_long_BQR, by.x=c("Run_Year_Lead_1"), by.y=c("year")) %>% as_tibble
 MGS_sample_age_covariates_run_lead2_year<-merge(MGS_sample_age, fcs_covariates_long_BQR, by.x=c("Run_Year_Lead_2"), by.y=c("year")) %>% as_tibble
@@ -85,34 +85,22 @@ corr_MGS_brood_year<-MGS_sample_age_covariates_wide_brood_year %>% select(Averag
 corr_MGS_brood_lag1_year<-MGS_sample_age_covariates_wide_brood_lag1_year %>% select(Average_Escapement, starts_with("cov"))  
 corr_MGS_brood_lag2_year<-MGS_sample_age_covariates_wide_brood_lag2_year %>% select(Average_Escapement, starts_with("cov")) 
 
+
 #Full correlations
-corr_var(corr_MGS_run_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/MGS/Run year/Sync/corr_MGS_run_year.tiff")
-corr_var(corr_MGS_run_lead1_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/MGS/Run year/Lead1/corr_MGS_run_year_lead1.tiff")
-corr_var(corr_MGS_run_lead2_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/MGS/Run year/Lead2/corr_MGS_run_year_lead2.tiff")
-corr_var(corr_MGS_brood_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/MGS/Brood Year/Sync/corr_MGS_brood_year.tiff")
-corr_var(corr_MGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/MGS/Brood Year/Lag1/corr_MGS_brood_year_lag1.tiff")
-corr_var(corr_MGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=29)
-ggsave(file="Plots/MGS/Brood Year/Lag2/corr_MGS_brood_year_lag2.tiff")
+corr_var(corr_MGS_run_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Run Year/Sync/corr_MGS_run_year.tiff")
+corr_var(corr_MGS_run_lead1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Run Year/Lead1/corr_MGS_run_year_lead1.tiff")
+corr_var(corr_MGS_run_lead2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Run Year/Lead2/corr_MGS_run_year_lead2.tiff")
+corr_var(corr_MGS_brood_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Sync/corr_MGS_brood_year.tiff")
+corr_var(corr_MGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Lag1/corr_MGS_brood_year_lag1.tiff")
+corr_var(corr_MGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Lag2/corr_MGS_brood_year_lag2.tiff")
 
-#Significant p-values only 
-corr_var(corr_MGS_run_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/MGS/Run year/Sync/corr_MGS_run_year_sigp.tiff")
-corr_var(corr_MGS_run_lead1_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/MGS/Run year/Lead1/corr_MGS_run_year_lead1_sigp.tiff")
-corr_var(corr_MGS_run_lead2_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/MGS/Run year/Lead2/corr_MGS_run_year_lead2_sigp.tiff")
-corr_var(corr_MGS_brood_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/MGS/Brood Year/Sync/corr_MGS_brood_year_sigp.tiff")
-corr_var(corr_MGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/MGS/Brood Year/Lag1/corr_MGS_brood_year_lag1_sigp.tiff")
-corr_var(corr_MGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/MGS/Brood Year/Lag2/corr_MGS_brood_year_lag2_sigp.tiff")
-
+#Significant p-values only - need to save the plots
+corr_var(corr_MGS_run_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE, SAVE=TRUE)  %>% ggsave(file="Plots/MGS/Run Year/Sync/corr_MGS_run_year_sigp.png")
+corr_var(corr_MGS_run_lead1_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/MGS/Run Year/Lead1/corr_MGS_run_year_lead1_sigp.png")
+corr_var(corr_MGS_run_lead2_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>%  ggsave(file="Plots/MGS/Run Year/Lead2/corr_MGS_run_year_lead2_sigp.tiff")
+corr_var(corr_MGS_brood_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/MGS/Brood Year/Sync/corr_MGS_brood_year_sigp.tiff")
+corr_var(corr_MGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/MGS/Brood Year/Lag1/corr_MGS_brood_year_lag1_sigp.tiff")
+corr_var(corr_MGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/MGS/Brood Year/Lag2/corr_MGS_brood_year_lag2_sigp.tiff")
 
 
 # Plotting ----------------------------------------------------------------
@@ -140,21 +128,21 @@ Covariate_plots_MGS_brood_lag2_year = list()
 
 #For loops
 
-#Run year
+#Run Year
 for(Covariate_ in macthes_MGS_run_year) {
   Covariate_plots_MGS_run_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_run_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
     geom_point() + geom_smooth()+
     ggtitle(MGS_sample_age_covariates_run_year$Covariate[MGS_sample_age_covariates_run_year$Covariate== Covariate_])
 }
 
-#Run year lead 1
+#Run Year lead 1
 for(Covariate_ in macthes_MGS_run_lead1_year) {
   Covariate_plots_MGS_run_lead1_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_run_lead1_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
     geom_point() + geom_smooth()+
     ggtitle(MGS_sample_age_covariates_run_lead1_year$Covariate[MGS_sample_age_covariates_run_lead1_year$Covariate== Covariate_])
 }
 
-#Run year lead 2
+#Run Year lead 2
 for(Covariate_ in macthes_MGS_run_lead2_year) {
   Covariate_plots_MGS_run_lead2_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_run_lead2_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
     geom_point() + geom_smooth()+
@@ -194,7 +182,9 @@ oceanic_yearly_Covariate_plots_MGS_run_year <- pluck(Covariate_plots_MGS_run_yea
                               pluck(Covariate_plots_MGS_run_year, "cov_NPGO_yearly_mean") +
                               pluck(Covariate_plots_MGS_run_year, "cov_EPNP_yearly_mean") +
                               pluck(Covariate_plots_MGS_run_year, "cov_ALPI_yearly_mean") +
-                              plot_layout(guides = 'collect', ncol=3)
+                              pluck(Covariate_plots_MGS_run_year, "cov_model_EVs") +
+                              guide_area()+
+                              plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_MGS_run_year 
 ggsave(oceanic_yearly_Covariate_plots_MGS_run_year , file="Plots/MGS/Run Year/Sync/oceanic_yearly_Covariate_plots_MGS_run_year.tiff")
@@ -248,7 +238,9 @@ oceanic_yearly_Covariate_plots_MGS_run_lead1_year <- pluck(Covariate_plots_MGS_r
   pluck(Covariate_plots_MGS_run_lead1_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_MGS_run_lead1_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_MGS_run_lead1_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_MGS_run_lead1_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_MGS_run_lead1_year 
 ggsave(oceanic_yearly_Covariate_plots_MGS_run_lead1_year , file="Plots/MGS/Run Year/Lead1/oceanic_yearly_Covariate_plots_MGS_run_lead1_year.tiff")
@@ -303,7 +295,9 @@ oceanic_yearly_Covariate_plots_MGS_run_lead2_year <- pluck(Covariate_plots_MGS_r
   pluck(Covariate_plots_MGS_run_lead2_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_MGS_run_lead2_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_MGS_run_lead2_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_MGS_run_lead2_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_MGS_run_lead2_year 
 ggsave(oceanic_yearly_Covariate_plots_MGS_run_lead2_year , file="Plots/MGS/Run Year/Lead2/oceanic_yearly_Covariate_plots_MGS_run_lead2_year.tiff")
@@ -359,7 +353,9 @@ oceanic_yearly_Covariate_plots_MGS_brood_year <- pluck(Covariate_plots_MGS_brood
   pluck(Covariate_plots_MGS_brood_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_MGS_brood_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_MGS_brood_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_MGS_brood_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_MGS_brood_year 
 ggsave(oceanic_yearly_Covariate_plots_MGS_brood_year , file="Plots/MGS/Brood Year/Sync/oceanic_yearly_Covariate_plots_MGS_brood_year.tiff")
@@ -413,7 +409,9 @@ oceanic_yearly_Covariate_plots_MGS_brood_lag1_year <- pluck(Covariate_plots_MGS_
   pluck(Covariate_plots_MGS_brood_lag1_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_MGS_brood_lag1_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_MGS_brood_lag1_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_MGS_brood_lag1_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_MGS_brood_lag1_year 
 ggsave(oceanic_yearly_Covariate_plots_MGS_brood_lag1_year , file="Plots/MGS/Brood Year/Lag1/oceanic_yearly_Covariate_plots_MGS_brood_lag1_year.tiff")
@@ -468,7 +466,9 @@ oceanic_yearly_Covariate_plots_MGS_brood_lag2_year <- pluck(Covariate_plots_MGS_
   pluck(Covariate_plots_MGS_brood_lag2_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_MGS_brood_lag2_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_MGS_brood_lag2_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_MGS_brood_lag2_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_MGS_brood_lag2_year 
 ggsave(oceanic_yearly_Covariate_plots_MGS_brood_lag2_year , file="Plots/MGS/Brood Year/Lag2/oceanic_yearly_Covariate_plots_MGS_brood_lag2_year.tiff")

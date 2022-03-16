@@ -16,7 +16,6 @@ library(purrr)
 
 # Read in data for covariate and Av escapement  ------------------------------------------------------------
 
-
 fcs_covariates_combined<-read.csv("fcs_covariates.csv") %>% as_tibble()
 
 fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
@@ -60,11 +59,13 @@ ALSEA_sample_age_cov<-ALSEA_sample_age1 %>%  dplyr::select(Run_Year, cov_ONI_JAN
                                              add_column(var_location = "NA") 
   
 fcs_covariates_long_SRH<-bind_rows(fcs_covariates_long_SRH, ALSEA_sample_age_cov)
-
+fcs_covariates_combined_SRH<-merge(fcs_covariates_combined_SRH, ALSEA_sample_age1 %>%  
+                                                                dplyr::select(Run_Year, cov_ONI_JAN_to_JUN, cov_Var_BY_Age_2_surv_transformed, cov_Copepod_richness_SUM) %>% 
+                                                                rename(year = Run_Year), by="year")
 # Matching escapement to covariates ---------------------------------------
 
 #1. Wide files - for use in correlation plots
-#matching to run year + time lags
+#matching to Run Year + time lags
 ALSEA_sample_age_covariates_wide_run_year<-merge(ALSEA_sample_age, fcs_covariates_combined_SRH, by.x=c("Run_Year"), by.y=c("year")) %>% as_tibble
 ALSEA_sample_age_covariates_wide_run_lead1_year<-merge(ALSEA_sample_age, fcs_covariates_combined_SRH, by.x=c("Run_Year_Lead_1"), by.y=c("year")) %>% as_tibble
 ALSEA_sample_age_covariates_wide_run_lead2_year<-merge(ALSEA_sample_age, fcs_covariates_combined_SRH, by.x=c("Run_Year_Lead_2"), by.y=c("year")) %>% as_tibble
@@ -75,10 +76,10 @@ ALSEA_sample_age_covariates_wide_brood_lag1_year<-merge(ALSEA_sample_age, fcs_co
 ALSEA_sample_age_covariates_wide_brood_lag2_year<-merge(ALSEA_sample_age, fcs_covariates_combined_SRH, by.x=c("Brood_Year_Lag_2"), by.y=c("year")) %>% as_tibble
 
 #2. Long files - for use in visualization plotting 
-#matching to run year + time lags
+#matching to Run Year + time lags
 ALSEA_sample_age_covariates_run_year<-merge(ALSEA_sample_age, fcs_covariates_long_SRH, by.x=c("Run_Year"), by.y=c("year")) %>% as_tibble
-ALSEA_sample_age_covariates_run_lead1_year<-merge(ALSEA_sample_age, fcs_covariates_long_SRH, by.x=c("Run_Year_Lead_1"), by.y=c("year"), all = TRUE) %>% as_tibble
-ALSEA_sample_age_covariates_run_lead2_year<-merge(ALSEA_sample_age, fcs_covariates_long_SRH, by.x=c("Run_Year_Lead_2"), by.y=c("year"), all=TRUE) %>% as_tibble
+ALSEA_sample_age_covariates_run_lead1_year<-merge(ALSEA_sample_age, fcs_covariates_long_SRH, by.x=c("Run_Year_Lead_1"), by.y=c("year")) %>% as_tibble
+ALSEA_sample_age_covariates_run_lead2_year<-merge(ALSEA_sample_age, fcs_covariates_long_SRH, by.x=c("Run_Year_Lead_2"), by.y=c("year")) %>% as_tibble
 
 #matching to Brood Year + time lags
 ALSEA_sample_age_covariates_brood_year<-merge(ALSEA_sample_age, fcs_covariates_long_SRH, by.x=c("Brood_Year"), by.y=c("year")) %>% as_tibble
@@ -95,34 +96,20 @@ corr_ALSEA_brood_lag1_year<-ALSEA_sample_age_covariates_wide_brood_lag1_year %>%
 corr_ALSEA_brood_lag2_year<-ALSEA_sample_age_covariates_wide_brood_lag2_year %>% select(Average_Escapement, starts_with("cov")) 
 
 #Full correlations
-corr_var(corr_ALSEA_run_year,Average_Escapement, plot=TRUE, top=32)
-ggsave(file="Plots/ALSEA/Run year/Sync/corr_ALSEA_run_year.tiff")
-corr_var(corr_ALSEA_run_lead1_year,Average_Escapement, plot=TRUE, top=32)
-ggsave(file="Plots/ALSEA/Run year/Lead1/corr_ALSEA_run_year_lead1.tiff")
-corr_var(corr_ALSEA_run_lead2_year,Average_Escapement, plot=TRUE, top=32)
-ggsave(file="Plots/ALSEA/Run year/Lead2/corr_ALSEA_run_year_lead2.tiff")
-corr_var(corr_ALSEA_brood_year,Average_Escapement, plot=TRUE, top=32)
-ggsave(file="Plots/ALSEA/Brood Year/Sync/corr_ALSEA_brood_year.tiff")
-corr_var(corr_ALSEA_brood_lag1_year,Average_Escapement, plot=TRUE, top=32)
-ggsave(file="Plots/ALSEA/Brood Year/Lag1/corr_ALSEA_brood_year_lag1.tiff")
-corr_var(corr_ALSEA_brood_lag2_year,Average_Escapement, plot=TRUE, top=32)
-ggsave(file="Plots/ALSEA/Brood Year/Lag2/corr_ALSEA_brood_year_lag2.tiff")
+corr_var(corr_ALSEA_run_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/ALSEA/Run Year/Sync/corr_ALSEA_run_year.tiff")
+corr_var(corr_ALSEA_run_lead1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/ALSEA/Run Year/Lead1/corr_ALSEA_run_year_lead1.tiff")
+corr_var(corr_ALSEA_run_lead2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/ALSEA/Run Year/Lead2/corr_ALSEA_run_year_lead2.tiff")
+corr_var(corr_ALSEA_brood_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/ALSEA/Brood Year/Sync/corr_ALSEA_brood_year.tiff")
+corr_var(corr_ALSEA_brood_lag1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/ALSEA/Brood Year/Lag1/corr_ALSEA_brood_year_lag1.tiff")
+corr_var(corr_ALSEA_brood_lag2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/ALSEA/Brood Year/Lag2/corr_ALSEA_brood_year_lag2.tiff")
 
-#Significant p-values only 
-corr_var(corr_ALSEA_run_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/ALSEA/Run year/Sync/corr_ALSEA_run_year_sigp.tiff")
-corr_var(corr_ALSEA_run_lead1_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/ALSEA/Run year/Lead1/corr_ALSEA_run_year_lead1_sigp.tiff")
-corr_var(corr_ALSEA_run_lead2_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/ALSEA/Run year/Lead2/corr_ALSEA_run_year_lead2_sigp.tiff")
-corr_var(corr_ALSEA_brood_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/ALSEA/Brood Year/Sync/corr_ALSEA_brood_year_sigp.tiff")
-corr_var(corr_ALSEA_brood_lag1_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/ALSEA/Brood Year/Lag1/corr_ALSEA_brood_year_lag1_sigp.tiff")
-corr_var(corr_ALSEA_brood_lag2_year,Average_Escapement, plot=TRUE, top=29, max_pvalue=0.05, pvalue=TRUE)
-ggsave(file="Plots/ALSEA/Brood Year/Lag2/corr_ALSEA_brood_year_lag2_sigp.tiff")
-
-
+#Significant p-values only - need to save the plots
+corr_var(corr_ALSEA_run_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE, SAVE=TRUE)  %>% ggsave(file="Plots/ALSEA/Run Year/Sync/corr_ALSEA_run_year_sigp.png")
+corr_var(corr_ALSEA_run_lead1_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/ALSEA/Run Year/Lead1/corr_ALSEA_run_year_lead1_sigp.png")
+corr_var(corr_ALSEA_run_lead2_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>%  ggsave(file="Plots/ALSEA/Run Year/Lead2/corr_ALSEA_run_year_lead2_sigp.tiff")
+corr_var(corr_ALSEA_brood_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/ALSEA/Brood Year/Sync/corr_ALSEA_brood_year_sigp.tiff")
+corr_var(corr_ALSEA_brood_lag1_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/ALSEA/Brood Year/Lag1/corr_ALSEA_brood_year_lag1_sigp.tiff")
+corr_var(corr_ALSEA_brood_lag2_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE) %>% ggsave(file="Plots/ALSEA/Brood Year/Lag2/corr_ALSEA_brood_year_lag2_sigp.tiff")
 
 # Plotting ----------------------------------------------------------------
 ##Adding in Ethan's covariate
@@ -151,21 +138,21 @@ Covariate_plots_ALSEA_brood_lag2_year = list()
 
 #For loops
 
-#Run year
+#Run Year
 for(Covariate_ in macthes_ALSEA_run_year) {
   Covariate_plots_ALSEA_run_year[[Covariate_]] = ggplot(ALSEA_sample_age_covariates_run_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
     geom_point() + geom_smooth()+
     ggtitle(ALSEA_sample_age_covariates_run_year$Covariate[ALSEA_sample_age_covariates_run_year$Covariate== Covariate_])
 }
 
-#Run year lead 1
+#Run Year lead 1
 for(Covariate_ in macthes_ALSEA_run_lead1_year) {
   Covariate_plots_ALSEA_run_lead1_year[[Covariate_]] = ggplot(ALSEA_sample_age_covariates_run_lead1_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
     geom_point() + geom_smooth()+
     ggtitle(ALSEA_sample_age_covariates_run_lead1_year$Covariate[ALSEA_sample_age_covariates_run_lead1_year$Covariate== Covariate_])
 }
 
-#Run year lead 2
+#Run Year lead 2
 for(Covariate_ in macthes_ALSEA_run_lead2_year) {
   Covariate_plots_ALSEA_run_lead2_year[[Covariate_]] = ggplot(ALSEA_sample_age_covariates_run_lead2_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
     geom_point() + geom_smooth()+
@@ -214,7 +201,9 @@ oceanic_yearly_Covariate_plots_ALSEA_run_year <- pluck(Covariate_plots_ALSEA_run
   pluck(Covariate_plots_ALSEA_run_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_ALSEA_run_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_ALSEA_run_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_ALSEA_run_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_ALSEA_run_year 
 ggsave(oceanic_yearly_Covariate_plots_ALSEA_run_year , file="Plots/ALSEA/Run Year/Sync/oceanic_yearly_Covariate_plots_ALSEA_run_year.tiff")
@@ -279,7 +268,9 @@ oceanic_yearly_Covariate_plots_ALSEA_run_lead1_year <- pluck(Covariate_plots_ALS
   pluck(Covariate_plots_ALSEA_run_lead1_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_ALSEA_run_lead1_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_ALSEA_run_lead1_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_ALSEA_run_lead1_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_ALSEA_run_lead1_year 
 ggsave(oceanic_yearly_Covariate_plots_ALSEA_run_lead1_year , file="Plots/ALSEA/Run Year/Lead1/oceanic_yearly_Covariate_plots_ALSEA_run_lead1_year.tiff")
@@ -345,7 +336,9 @@ oceanic_yearly_Covariate_plots_ALSEA_run_lead2_year <- pluck(Covariate_plots_ALS
   pluck(Covariate_plots_ALSEA_run_lead2_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_ALSEA_run_lead2_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_ALSEA_run_lead2_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_ALSEA_run_lead2_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_ALSEA_run_lead2_year 
 ggsave(oceanic_yearly_Covariate_plots_ALSEA_run_lead2_year , file="Plots/ALSEA/Run Year/Lead2/oceanic_yearly_Covariate_plots_ALSEA_run_lead2_year.tiff")
@@ -410,7 +403,9 @@ oceanic_yearly_Covariate_plots_ALSEA_brood_year <- pluck(Covariate_plots_ALSEA_b
   pluck(Covariate_plots_ALSEA_brood_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_ALSEA_brood_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_ALSEA_brood_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_ALSEA_brood_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_ALSEA_brood_year 
 ggsave(oceanic_yearly_Covariate_plots_ALSEA_brood_year , file="Plots/ALSEA/Brood Year/Sync/oceanic_yearly_Covariate_plots_ALSEA_brood_year.tiff")
@@ -473,7 +468,9 @@ oceanic_yearly_Covariate_plots_ALSEA_brood_lag1_year <- pluck(Covariate_plots_AL
   pluck(Covariate_plots_ALSEA_brood_lag1_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_ALSEA_brood_lag1_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_ALSEA_brood_lag1_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_ALSEA_brood_lag1_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_ALSEA_brood_lag1_year 
 ggsave(oceanic_yearly_Covariate_plots_ALSEA_brood_lag1_year , file="Plots/ALSEA/Brood Year/Lag1/oceanic_yearly_Covariate_plots_ALSEA_brood_lag1_year.tiff")
@@ -539,7 +536,9 @@ oceanic_yearly_Covariate_plots_ALSEA_brood_lag2_year <- pluck(Covariate_plots_AL
   pluck(Covariate_plots_ALSEA_brood_lag2_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_ALSEA_brood_lag2_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_ALSEA_brood_lag2_year, "cov_ALPI_yearly_mean") +
-  plot_layout(guides = 'collect', ncol=3)
+  pluck(Covariate_plots_ALSEA_brood_lag2_year, "cov_model_EVs") +
+  guide_area()+
+  plot_layout(guides = 'collect', ncol=4)
 
 oceanic_yearly_Covariate_plots_ALSEA_brood_lag2_year 
 ggsave(oceanic_yearly_Covariate_plots_ALSEA_brood_lag2_year , file="Plots/ALSEA/Brood Year/Lag2/oceanic_yearly_Covariate_plots_ALSEA_brood_lag2_year.tiff")
