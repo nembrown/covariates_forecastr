@@ -4,7 +4,7 @@ Repository of code for gathering environmental and biological covariates to feed
 
 #### To gather and collate covariate data, follow these scripts in the following order: 
 
-1. [cov_fetch.R](https://github.com/nembrown/covariates_forecastr/blob/main/cov_fetch.R) - Use this code to grab covariate data from online sources. so far we have salinity, temperature, zooplankton, chinook model EVs, and various atmospheric/oceanic indices. Where possible, I have linked to the online source so that we have the most up to date data each time the query is run. 
+1. [cov_fetch.R](https://github.com/nembrown/covariates_forecastr/blob/main/cov_fetch.R) - Use this code to grab covariate data from online sources. so far we have salinity, temperature, zooplankton, chinook model EVs, and various atmospheric/oceanic indices. Where possible, I have linked to the online source so that we have the most up to date data each time the query is run. Make sure to check sources for updated data and alter the code as necessary. 
 
 2. [cov_match_stock.R](https://github.com/nembrown/covariates_forecastr/blob/main/cov_match_stock.R) - Use this code to match up spatially explicit data (e.g. from buoys or sampling stations) to a given ERA stock location and summarize the data at the correct scale (i.e. one measurement per year). 
 
@@ -30,4 +30,4 @@ These plots are of two types:
 #### After selecting covariates for forecasting, you can create and save a Forecast-R(shiny)-ready file:
 
 This is demonstrated with an example here: 
-[shiny_formatting.R](https://github.com/nembrown/covariates_forecastr/blob/main/shiny_formatting.R). 
+[shiny_formatting.R](https://github.com/nembrown/covariates_forecastr/blob/main/shiny_formatting.R). Select and rename covariates as desired. Remember to include if the covariate is matched to run or brood year, and any lead or lag of years. Naming convention Cov_ with an uppercase "C" is required for ForecastR to read as a covariate. ForecastR can not tolerate missing values at this time. 
