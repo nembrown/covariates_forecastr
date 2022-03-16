@@ -27,7 +27,7 @@ These plots are of two types:
 
 2. Regression plots - Using geom_smooth and grouping covariates by category and plot Av. escapement on the y axis and the covariate on the x axis to investigate the relationship. These plots are intended for visualization and to help select a suite of 3 correlated covariates to use in ForecastR. 
 
-#### After selecting covariates for forecasting, you can create and save a Forecast-R(shiny)-ready file:
+#### After selecting covariates for forecasting, you can create and save a ForecastR-shiny-ready file:
 
 This is demonstrated with an example here: 
 [shiny_formatting.R](https://github.com/nembrown/covariates_forecastr/blob/main/shiny_formatting.R). Select and rename covariates as desired. Remember to include if the covariate is matched to run or brood year, and any lead or lag of years. Naming convention Cov_ with an uppercase "C" is required for ForecastR to read as a covariate. ForecastR can not tolerate missing values at this time. 
