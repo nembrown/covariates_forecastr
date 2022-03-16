@@ -57,7 +57,6 @@ fcs_covariates_combined<-merge(fcs_covariates_combined, fcs_covariates_atm , by=
 fcs_covariates_combined
 
 fcs_covariates_combined<- fcs_covariates_combined %>% relocate(Stock_ERA, year) %>% arrange(Stock_ERA, year) 
-View(fcs_covariates_combined)
 
 write.csv(fcs_covariates_combined, "fcs_covariates.csv", row.names = FALSE)
 

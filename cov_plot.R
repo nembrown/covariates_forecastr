@@ -17,7 +17,8 @@ fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_wit
     str_detect(Covariate, "ONI") ~ "ONI", 
     str_detect(Covariate, "NPI") ~ "NPI", 
     str_detect(Covariate, "NPGO") ~ "NPGO", 
-    str_detect(Covariate, "EPNP") ~ "EPNP"  )) %>% 
+    str_detect(Covariate, "EPNP") ~ "EPNP", 
+    str_detect(Covariate, "EVs") ~ "Model EVs")) %>% 
   mutate(var_timing = case_when(
     str_detect(Covariate, "year") ~ "Year", 
     str_detect(Covariate, "summer") ~ "Summer")) %>% 
@@ -34,8 +35,8 @@ fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_wit
 #        geom_point()+geom_line()+facet_wrap(~Stock_ERA, scales="free")
 
 fcs_covariates_long_meta<- merge(fcs_covariates_long, cov_meta, by.x=c("Covariate"), by.y=c("cov_name")) %>% as_tibble
-#fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA))  %>% as_tibble
-fcs_covariates_long_meta$var_cat <- factor(fcs_covariates_long_meta$var_cat, levels = c("Zooplankton", "Temperature", "Salinity", "PDO", "ONI", "SOI", "NPI", "EPNP", "NPGO", "ALPI"))
+fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA))  %>% as_tibble
+fcs_covariates_long_meta$var_cat <- factor(fcs_covariates_long_meta$var_cat, levels = c("Zooplankton", "Temperature", "Salinity", "PDO", "ONI", "SOI", "NPI", "EPNP", "NPGO", "ALPI", "Model EVs"))
 fcs_covariates_long_meta
 
 #BC
@@ -100,3 +101,7 @@ ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "ELK"), aes(x=year, y=Co
   scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("ELK") + theme_bw()
 ggsave("Plots/COQUILLE/ELK_coverage.tiff")
 ggsave("Plots/UMPQUA/ELK_coverage.tiff")
+
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "LYF"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("LYF") + theme_bw()
+ggsave("Plots/LYF_coverage.tiff")
