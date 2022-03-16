@@ -276,12 +276,13 @@ dfo_meds_buoys_combined
 
 # Zooplankton biomass from IOS --------------------------------------------
 
-ios_zoop_base<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Zooplankton/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv')) %>%  as_tibble()
+#ios_zoop_base<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Zooplankton/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv')) %>%  as_tibble()
+ios_zoop_base<-read.csv("Inputs/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv")
 
-ios_zoop <- ios_zoop_base  %>% filter(Mesh...U.00B5.m. <300, Net != "Bongo ONH") %>% 
+ios_zoop <- ios_zoop_base  %>% filter(Mesh..µm. <300, Net != "Bongo ONH") %>% 
                                mutate(Euphausiacea = case_when(Twilight == "Daylight" ~ Euphausiacea*3), 
                                       total_zoop_biomass = rowSums(across(Polychaeta:Animalia), na.rm=TRUE), 
-                                      Date = as_date(Date),
+                                      Date = as_date(Date, format = "%m/%d/%Y"),
                                       year = lubridate::year(Date), 
                                       month = lubridate::month(Date), 
                                       day = lubridate::day(Date), 
@@ -290,19 +291,16 @@ ios_zoop <- ios_zoop_base  %>% filter(Mesh...U.00B5.m. <300, Net != "Bongo ONH")
                                                          month %in% c(6, 7, 8) ~ "summer", 
                                                          month %in% c(9, 10, 11) ~ "fall"), 
                                       calc_year = case_when(month == 12 ~ (year + 1), TRUE ~ year)) %>%                                         
-                                mutate(region_station = paste(Region_name, Station, sep="-"))
+                                mutate(region_station = paste(Region_name, Station, sep="-")) %>% 
+                                as_tibble()
 
 ios_zoop
-
-
-
-
 
 
 # Model EVs ---------------------------------------------------------------
 col_names_list<-c("stock", paste(1974:2024))
 model_EVs<-read.table("Inputs/2104B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
-model_stocks<-read.csv("Inputs/stockCodes.csv") %>% rename(Stock_ERA = stockShortName)
+model_stocks<-read.csv("Inputs/stockCodes.csv")
 model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
-model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2022)
+model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2022) %>% as_tibble
 model_EVs_stocks

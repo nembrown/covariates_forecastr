@@ -24,6 +24,8 @@ Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lights
 #zooplankton from ios, since 1980
 ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2022)
 
+#model_EVs_stocks
+model_EVs_stocks
 
 # Join all together -------------------------------------------------------
 
@@ -39,6 +41,7 @@ fcs_covariates_atm
 #Then join stock-wise
 fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble()
 fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
+fcs_covariates<- merge(fcs_covariates,model_EVs_stocks, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates
 
 
@@ -47,12 +50,14 @@ stocks_year <- stocks_loc_simple_1 %>% dplyr::select(-c(lat, long)) %>% add_colu
 stocks_year <- stocks_year %>% expand(Stock_ERA, year) %>% filter(year<2022)
 stocks_year 
 
+unique(stocks_year $Stock_ERA)
+
 fcs_covariates_combined<-merge(stocks_year, fcs_covariates, all=TRUE) %>% as_tibble()
 fcs_covariates_combined<-merge(fcs_covariates_combined, fcs_covariates_atm , by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_combined
 
 fcs_covariates_combined<- fcs_covariates_combined %>% relocate(Stock_ERA, year) %>% arrange(Stock_ERA, year) 
-fcs_covariates_combined
+View(fcs_covariates_combined)
 
 write.csv(fcs_covariates_combined, "fcs_covariates.csv", row.names = FALSE)
 
@@ -99,7 +104,9 @@ cov_meta <- cov_meta  %>%
             add_row(cov_name="cov_NPGO_summer_mean",  cov_type="Atmospheric Index", cov_source_method="AVISO Satellite SSHa", cov_source="E. di Loranzo", cov_temporal="Summer (May - Sept inclusive)", cov_unit="North Pacific Gyre Oscillation",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_ALPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Surry and King", cov_source="DFO", cov_temporal="Year", cov_unit="Aleutian Low Pressure Index",match_type="none", match_spatial="basin", date_range= "1900-2015")  %>%
             add_row(cov_name="cov_EPNP_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Year", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
-            add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")
+            add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present") %>% 
+            add_row(cov_name="cov_model_EVs",  cov_type="Model Evs", cov_source_method="2104B.EVO", cov_source="CTC", cov_temporal="Year", cov_unit="Chinook Model environmental variables",match_type="none", match_spatial="basin", date_range= "1974-present")
+
   
 
 

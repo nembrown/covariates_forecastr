@@ -1,7 +1,7 @@
 
 library(ggplot2)
 library(tidyverse)
-
+library(here)
 
 # Plotting by stock -------------------------------------------------------
 fcs_covariates_combined
@@ -27,13 +27,11 @@ fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_wit
     TRUE ~ "terminal")) 
 
 
-unique(fcs_covariates_long$Stock_ERA)
-
-ggplot(fcs_covariates_long %>% filter(var_cat== "Zooplankton", var_timing=="Summer", var_location=="terminal"), 
-       aes(x=year, y=value, col=Covariate, group=Covariate))+
-       geom_point()+geom_line()+facet_wrap(~Stock_ERA, scales="free")
-
-
+# unique(fcs_covariates_long$Stock_ERA)
+# 
+# ggplot(fcs_covariates_long %>% filter(var_cat== "Zooplankton", var_timing=="Summer", var_location=="terminal"), 
+#        aes(x=year, y=value, col=Covariate, group=Covariate))+
+#        geom_point()+geom_line()+facet_wrap(~Stock_ERA, scales="free")
 
 fcs_covariates_long_meta<- merge(fcs_covariates_long, cov_meta, by.x=c("Covariate"), by.y=c("cov_name")) %>% as_tibble
 #fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA))  %>% as_tibble
@@ -71,6 +69,7 @@ ggplot(fcs_covariates_long_meta %>% filter(Region == "PS"), aes(x=year, y=var_ca
 ggsave("Plots/PS_coverage.tiff")
 
 ##COW,BQR
+
 ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "COW"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("COW") + theme_bw()
 ggsave(file="Plots/LGS_NAT/COW_coverage.tiff")
@@ -91,5 +90,13 @@ ggsave("Plots/WCVI_NAT/RBT_coverage.tiff")
 
 ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "SRH"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("SRH") + theme_bw()
-ggsave("Plots/ALSEA/SHR_coverage.tiff")
+ggsave("Plots/ALSEA/SRH_coverage.tiff")
+ggsave("Plots/NEHALEM/SRH_coverage.tiff")
+ggsave("Plots/SILETZ/SRH_coverage.tiff")
+ggsave("Plots/SISUSLAW/SRH_coverage.tiff")
 
+
+ggplot(fcs_covariates_long_meta %>% filter(Stock_ERA == "ELK"), aes(x=year, y=Covariate, size=value, col=var_cat))+ geom_point() +
+  scale_size(range = c(1,1)) + theme(legend.position = "none") + ggtitle("ELK") + theme_bw()
+ggsave("Plots/COQUILLE/ELK_coverage.tiff")
+ggsave("Plots/UMPQUA/ELK_coverage.tiff")
