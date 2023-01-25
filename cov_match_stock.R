@@ -170,7 +170,7 @@ stocks_loc_simple.sf
 #Buffer circles of 500000m, i.e. 500km  -- creates polygons around the stocks
 dat_circles <- st_buffer(stocks_loc_simple.sf, dist = 500000)
 
-#which of the region_stations fall within 100km radius of each stock
+#which of the region_stations fall within 500km radius of each stock
 ios_zoop_era_stocks<- st_join(ios_zoop_stations.sf, dat_circles, left=FALSE) %>% st_set_geometry(NULL) %>% as_tibble()
 ios_zoop_era_stocks
 
@@ -219,3 +219,37 @@ ios_zoop_allseasons<- ios_zoop_allseasons %>% mutate(cov_zoop_winter_anomaly = l
 ios_zoop_anomalies<-ios_zoop_allseasons %>% dplyr::select(Stock_ERA, calc_year, cov_zoop_winter_anomaly, cov_zoop_spring_anomaly, cov_zoop_summer_anomaly, cov_zoop_fall_anomaly) %>% 
                                             mutate(cov_zoop_yearly_anomaly = rowMeans(across(cov_zoop_winter_anomaly:cov_zoop_fall_anomaly), na.rm=TRUE))
 ios_zoop_anomalies
+
+
+
+# Herring -----------------------------------------------------------------
+herring_spawn_location<- herring_spawn %>% dplyr::select(LocationName, Longitude, Latitude) %>% 
+  rename(lat= Latitude, long= Longitude) %>% 
+  mutate(lat = as.numeric(lat), long= as.numeric(long)) %>% 
+  rowwise() %>% 
+  distinct() %>% 
+  na.omit
+herring_spawn_location
+
+#transforming into sf objects
+herring_spawn_location.sf <- st_as_sf(herring_spawn_location, coords = c("long", "lat"), crs = 4326)
+herring_spawn_location.sf<-herring_spawn_location.sf%>% st_transform(3035)
+herring_spawn_location.sf
+
+stocks_loc_simple.sf <- st_as_sf(stocks_loc_simple_1, coords = c("long", "lat"), crs = 4326)
+stocks_loc_simple.sf<-stocks_loc_simple.sf %>% st_transform(3035)
+stocks_loc_simple.sf
+
+#Buffer circles of 500000m, i.e. 500km  -- creates polygons around the stocks
+dat_circles <- st_buffer(stocks_loc_simple.sf, dist = 500000)
+
+#which of the region_stations fall within 500km radius of each stock
+herring_spawn_stocks<- st_join(herring_spawn_location.sf, dat_circles, left=FALSE) %>% st_set_geometry(NULL) %>% as_tibble()
+herring_spawn_stocks
+
+#Apply matching to data
+herring_spawn_matched <- left_join(herring_spawn_stocks, herring_spawn)
+
+herring_spawn_matched<- herring_spawn_matched %>% group_by(Year, Stock_ERA) %>% mutate(herring_spawn_index = sum(Surface, na.rm=TRUE))
+
+
