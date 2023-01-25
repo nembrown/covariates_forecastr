@@ -1,5 +1,5 @@
 library(tidyverse)
-library(PACea)
+#library(PACea)
 library(rerddap)
 library(curl)
 library(lubridate)
@@ -11,7 +11,7 @@ library(data.table)
 
 pdo_1854_present<-read.table("https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/index/ersst.v5.pdo.dat",  header=TRUE, skip=1, fill=TRUE) %>% as_tibble()
 pdo_1854_present<-pdo_1854_present %>% rename(year = Year) %>% 
-                                       filter(year!= 2022) %>% 
+                                       filter(year!= 2023) %>% 
                                        mutate_if(is.character, as.numeric) %>% 
                                        mutate(cov_PDO_summer_mean= rowMeans(dplyr::select(.,May, Jun, Jul, Aug, Sep)))  %>% 
                                        mutate(cov_PDO_yearly_mean = rowMeans(dplyr::select(.,Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)))
@@ -21,19 +21,18 @@ pdo_simple<- pdo_1854_present %>% dplyr::select(year, cov_PDO_summer_mean, cov_P
 pdo_simple
 
 
-
 # ONI (Oceanic Nino Index) from NOAA ---------------------------------------------------------------------
 
 oni_1950_present<-read.table("https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",  header=TRUE,  fill=TRUE) %>% as_tibble()
 oni_simple1<-oni_1950_present %>% rename(year = YR) %>% 
-                                       filter(year!= 2022) %>% 
+                                       filter(year!= 2023) %>% 
                                        group_by(year) %>% 
                                        summarise_if(is.numeric, mean) %>% 
                                        rename(cov_ONI_yearly_mean= TOTAL, 
                                               cov_ONI_yearly_anomaly = ANOM)%>% 
                                        filter(year>1969)
 oni_simple2<-oni_1950_present %>% rename(year = YR) %>% 
-                                  filter(year!= 2022, SEAS %in% c("MJJ", "JJA", "JAS")) %>% 
+                                  filter(year!= 2023, SEAS %in% c("MJJ", "JJA", "JAS")) %>% 
                                   group_by(year) %>% 
                                   summarise_if(is.numeric, mean) %>% 
                                   rename(cov_ONI_summer_mean= TOTAL, 
@@ -49,16 +48,19 @@ oni_simple
 soi_1951_present<-read.table("https://psl.noaa.gov/gcos_wgsp/Timeseries/Data/soi.long.data",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
 names(soi_1951_present) <- c("year","JAN","FEB","MAR","APR","MAY","JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
 
-#Last updated sept 2021, so took out 2021, check website to see if updated
-soi_1951_present<-soi_1951_present %>% filter(year < 2021) %>% 
+#Last updated oct 2022, so took out 2022, check website to see if updated
+soi_1951_present<-soi_1951_present %>% filter(year < 2023) %>% 
                                        mutate_if(is.character, as.numeric) %>% 
+                                       mutate(NOV=ifelse(NOV==-99.99, NA, NOV)) %>% 
+                                       mutate(DEC=ifelse(DEC==-99.99, NA, DEC)) %>% 
                                        mutate(cov_SOI_summer_mean= rowMeans(dplyr::select(.,MAY, JUN, JUL, AUG, SEP)))  %>% 
                                        mutate(cov_SOI_yearly_mean = rowMeans(dplyr::select(.,JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC)))
 
 soi_simple<- soi_1951_present %>% dplyr::select(year, cov_SOI_summer_mean, cov_SOI_yearly_mean) %>% 
                                   filter(year>1969)
-soi_simple
+
 # NPI (North Pacific Index) from NOAA ---------------------------------------------------------------------
+#note 2023: can't find this - it's a broken link 
 npi_1899_present<-read.table("https://climatedataguide.ucar.edu/sites/default/files/npindex_monthly.txt",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
 #This is only updated to 2021 April, so cut out 2022
 names(npi_1899_present)<-c("year_month", "NPI")
@@ -94,37 +96,41 @@ npgo_1950_present<-read.table("http://www.o3d.org/npgo/npgo.php",  header=FALSE,
 names(npgo_1950_present)<-c("year", "month", "cov_NPGO_yearly_mean")
 npgo_1950_present<-npgo_1950_present %>% mutate(year = as.numeric(year)) 
 
+#updated to sept 2022 so can't use 2022 data for the year but can use for the summer
 npgo_simple1<- npgo_1950_present %>% filter(year!= 2022) %>% 
                                      group_by(year) %>% 
                                      summarise_if(is.numeric, mean) %>% 
                                      dplyr::select(-month) %>% 
                                      filter(year>1969)
 
-npgo_simple2<- npgo_1950_present %>% filter(year!= 2022, month %in% c(5,6,7,8)) %>% 
+npgo_simple2<- npgo_1950_present %>% filter(year!= 2023, month %in% c(5,6,7,8)) %>% 
                                      group_by(year) %>% 
                                      summarise_if(is.numeric, mean) %>% 
                                      rename(cov_NPGO_summer_mean= cov_NPGO_yearly_mean)%>% 
                                      dplyr::select(-month) %>% 
                                      filter(year>1969)
 
-npgo_simple<-merge(npgo_simple1, npgo_simple2) %>% as_tibble
+npgo_simple<-merge(npgo_simple1, npgo_simple2, all=TRUE) %>% as_tibble
 npgo_simple
 
 
 # EPNP (East Pacific - North Pacific Index) from NOAA ---------------------------------------------------------------------
 epnp_1950_present<-read.table("https://ftp.cpc.ncep.noaa.gov/wd52dg/data/indices/epnp_index.tim",  header=TRUE, skip = 8, fill=TRUE) %>% as_tibble()
 
-epnp_simple1<-epnp_1950_present %>% filter(YEAR!= 2022) %>% 
+#take out the -99.90 values
+epnp_simple1<-epnp_1950_present %>% filter(YEAR!= 2023) %>% 
+                                    mutate(INDEX=ifelse(INDEX==-99.90, NA, INDEX)) %>% 
                                     rename(year = YEAR, cov_EPNP_yearly_mean=INDEX) %>% 
                                     group_by(year) %>% 
-                                    summarise_if(is.numeric, mean) %>% 
+                                    summarise_if(is.numeric, mean, na.rm=TRUE) %>% 
                                     dplyr::select(-MONTH) %>% 
                                     filter(year>1969)
 
-epnp_simple2<-epnp_1950_present %>% filter(YEAR!= 2022, MONTH %in% c(5,6,7,8, 9)) %>% 
+epnp_simple2<-epnp_1950_present %>% filter(YEAR!= 2023, MONTH %in% c(5,6,7,8, 9)) %>% 
+                                    mutate(INDEX=ifelse(INDEX==-99.90, NA, INDEX)) %>% 
                                     rename(year = YEAR, cov_EPNP_summer_mean=INDEX) %>% 
                                     group_by(year) %>% 
-                                    summarise_if(is.numeric, mean) %>% 
+                                    summarise_if(is.numeric, mean, na.rm=TRUE) %>% 
                                     dplyr::select(-MONTH) %>% 
                                     filter(year>1969)
 
@@ -133,7 +139,7 @@ epnp_simple
 
 
 # ALPI (Aleutian Low Pressure Index) from DFO -----------------------------
-#data only available by year
+#data only available by year, only up to 2015
 alpi_1900_2015<-read.csv(curl('https://open.canada.ca/data/dataset/4bb821ce-bef7-46d3-95d2-064065f1bda4/resource/d7406b43-7e64-4dbe-9cf1-b932e88a3a14/download/alpi_1900_2015_en.csv')) %>%  as_tibble()
 alpi_simple <- alpi_1900_2015 %>% rename(year = YEAR, 
                                             cov_ALPI_yearly_mean = ALEUTIAN.LOW.PRESSURE.INDEX..ALPI.) %>% 
@@ -158,7 +164,8 @@ Lightstations_location<-Lightstations %>% rename(Station_ID = LIGHSTATIO, lat = 
                                           filter(DATA_COLLE == "ACTIVE") %>% 
                                           dplyr::select(Station_ID, lat, long)  %>% as_tibble
 
-list_of_files<-list.files('DATA_-_Active_Sites', pattern='Sea_Surface_Temperature_and_Salinity.+2021.csv', recursive=TRUE, full.names = T)
+#manually added Bonilla here bc it didnt have 2022 data
+list_of_files<-list.files('DATA_-_Active_Sites', pattern=c('Sea_Surface_Temperature_and_Salinity.+2022.csv|Bonilla_Island_-_Daily_Sea_Surface_Temperature_and_Salinity_1960-2021.csv'), recursive=TRUE, full.names = T)
 station_names<-list(Lightstations_location$Station_ID)
 
 #could do this cleaner with a loop
@@ -275,9 +282,9 @@ dfo_meds_buoys_combined<-merge(dfo_meds_buoys_year, dfo_meds_buoys_year_summer) 
 dfo_meds_buoys_combined
 
 # Zooplankton biomass from IOS --------------------------------------------
-
+#only updated to 2018 # get file from Akash Sastri
 #ios_zoop_base<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Zooplankton/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv')) %>%  as_tibble()
-ios_zoop_base<-read.csv("Inputs/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv")
+ios_zoop_base<-read.csv("Inputs/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv", fileEncoding = "Latin1")
 
 ios_zoop <- ios_zoop_base  %>% filter(Mesh..µm. <300, Net != "Bongo ONH") %>% 
                                mutate(Euphausiacea = case_when(Twilight == "Daylight" ~ Euphausiacea*3), 
@@ -295,6 +302,20 @@ ios_zoop <- ios_zoop_base  %>% filter(Mesh..µm. <300, Net != "Bongo ONH") %>%
                                 as_tibble()
 
 ios_zoop
+
+
+# Herring Spawn Index --------------------------------------------
+
+herring_spawn<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Herring_Spawn_Index_Data/Pacific_herring_spawn_index_data_EN.csv')) %>%  as_tibble()
+
+herring_spawn <- herring_spawn %>% filter(Method == "Surface") %>% 
+  mutate(Date = as_date(StartDate, format = "%Y-%m-%d"),
+         year = lubridate::year(Date), 
+         month = lubridate::month(Date), 
+         day = lubridate::day(Date)) %>% 
+  as_tibble()
+
+herring_spawn 
 
 
 # Model EVs ---------------------------------------------------------------
