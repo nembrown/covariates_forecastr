@@ -8,7 +8,7 @@ library(ggplot2)
 pdo_simple
 oni_simple
 soi_simple
-npi_simple
+#npi_simple
 npgo_simple
 epnp_simple
 alpi_simple
@@ -16,22 +16,25 @@ alpi_simple
 
 #take out the station ID parts
 #temperature from MEDS buoys #464, since 1989
-dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore)) %>% filter(year!=2022)
+dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore)) %>% filter(year!=2023)
 
 #temp and salinity from lightstations #752, since 1900 but active lighthouses since 1976
-Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lightstation) %>% filter(year!=2022)
+Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lightstation) %>% filter(year!=2023)
 
 #zooplankton from ios, since 1980
-ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2022)
+ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2023)
 
 #model_EVs_stocks
 model_EVs_stocks
+
+#herring
+herring_spawn_matched
 
 # Join all together -------------------------------------------------------
 
 #start with atmospheric bc longer time series usually and no stocks
 fcs_covariates_atm<- merge(oni_simple, soi_simple, by=c("year"), all=TRUE) %>% as_tibble()
-fcs_covariates_atm<- merge(fcs_covariates_atm, npi_simple, by=c("year"), all=TRUE) %>% as_tibble()
+#fcs_covariates_atm<- merge(fcs_covariates_atm, npi_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, pdo_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, npgo_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, epnp_simple, by=c("year"), all=TRUE) %>% as_tibble()
@@ -41,16 +44,16 @@ fcs_covariates_atm
 #Then join stock-wise
 fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble()
 fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
-fcs_covariates<- merge(fcs_covariates,model_EVs_stocks, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
+fcs_covariates<- merge(fcs_covariates,herring_spawn_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates
-
+View(fcs_covariates)
 
 #then combine atmospheric and by-stock - data frame year and stock 
 stocks_year <- stocks_loc_simple_1 %>% dplyr::select(-c(lat, long)) %>% add_column(year = c(1970:2024))
-stocks_year <- stocks_year %>% expand(Stock_ERA, year) %>% filter(year<2022)
+stocks_year <- stocks_year %>% expand(Stock_ERA, year) %>% filter(year<2023)
 stocks_year 
 
-unique(stocks_year $Stock_ERA)
+
 
 fcs_covariates_combined<-merge(stocks_year, fcs_covariates, all=TRUE) %>% as_tibble()
 fcs_covariates_combined<-merge(fcs_covariates_combined, fcs_covariates_atm , by=c("year"), all=TRUE) %>% as_tibble()
@@ -83,10 +86,10 @@ cov_meta <- cov_meta  %>%
             add_row(cov_name="cov_SST_MEDS_terminal_summer_mean",  cov_type="Temperature", cov_source_station_type="MEDS buoys", cov_source="DFO", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Sea surface temperature",match_type="Point", match_spatial="terminal", date_range= "1989-present")  %>% 
             add_row(cov_name="cov_SST_MEDS_offshore_yearly_mean",  cov_type="Temperature", cov_source_station_type="MEDS buoys", cov_source="DFO", cov_temporal="Year", cov_unit="Sea surface temperature",match_type="Point", match_spatial="offshore", date_range= "1989-present")  %>%
             add_row(cov_name="cov_SST_MEDS_offshore_summer_mean",  cov_type="Temperature", cov_source_station_type="MEDS buoys", cov_source="DFO", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Sea surface temperature",match_type="Point", match_spatial="offshore", date_range= "1989-present")  %>%
-            add_row(cov_name="cov_zoop_winter_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Winter (Dec - Feb inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
-            add_row(cov_name="cov_zoop_spring_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Spring (March - May inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
-            add_row(cov_name="cov_zoop_summer_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Summer (June - Aug inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
-            add_row(cov_name="cov_zoop_fall_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Fall (Sept - Nov inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_winter_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Winter (Dec - Feb inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (500km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_spring_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Spring (March - May inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (500km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_summer_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Summer (June - Aug inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (500km)", match_spatial="terminal", date_range= "1980-present")  %>%
+            add_row(cov_name="cov_zoop_fall_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Fall (Sept - Nov inclusive)", cov_unit="Zooplankton biomass anomaly",match_type="Radius (500km)", match_spatial="terminal", date_range= "1980-present")  %>%
             add_row(cov_name="cov_zoop_year_anomaly",  cov_type="Zooplankton", cov_source_station_type="IOS Stations", cov_source="DFO", cov_temporal="Year", cov_unit="Zooplankton biomass anomaly",match_type="Radius (100km)", match_spatial="terminal", date_range= "1980-present")  %>%
             add_row(cov_name="cov_SOI_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Tahiti and Darwin", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Southern Oscillation Index",match_type="none", match_spatial="basin", date_range= "1951-present")  %>%
             add_row(cov_name="cov_SOI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Tahiti and Darwin", cov_source="NOAA", cov_temporal="Year", cov_unit="Southern Oscillation Index",match_type="none", match_spatial="basin", date_range= "1951-present")  %>%
@@ -104,7 +107,7 @@ cov_meta <- cov_meta  %>%
             add_row(cov_name="cov_ALPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Surry and King", cov_source="DFO", cov_temporal="Year", cov_unit="Aleutian Low Pressure Index",match_type="none", match_spatial="basin", date_range= "1900-2015")  %>%
             add_row(cov_name="cov_EPNP_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Year", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present") %>% 
-            add_row(cov_name="cov_model_EVs",  cov_type="Model Evs", cov_source_method="2104B.EVO", cov_source="CTC", cov_temporal="Year", cov_unit="Chinook Model environmental variables",match_type="none", match_spatial="basin", date_range= "1974-present")
+            add_row(cov_name="cov_herring_spawn_index",  cov_type="Herring Spawn Index", cov_source_method="Spawn Index R package", cov_source="DFO", cov_temporal="Year", cov_unit="Herring Spawn Index",match_type="Radius (500km)", match_spatial="terminal", date_range= "1950-present")
 
   
 
