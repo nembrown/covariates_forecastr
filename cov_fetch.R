@@ -313,6 +313,7 @@ herring_spawn <- herring_spawn %>% filter(Method == "Surface") %>%
          year = lubridate::year(Date), 
          month = lubridate::month(Date), 
          day = lubridate::day(Date)) %>% 
+         filter(year > 1969)
   as_tibble()
 
 herring_spawn 

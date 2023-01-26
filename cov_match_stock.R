@@ -250,6 +250,5 @@ herring_spawn_stocks
 #Apply matching to data
 herring_spawn_matched <- left_join(herring_spawn_stocks, herring_spawn)
 
-herring_spawn_matched<- herring_spawn_matched %>% group_by(Year, Stock_ERA) %>% mutate(herring_spawn_index = sum(Surface, na.rm=TRUE))
-
+herring_spawn_matched<- herring_spawn_matched %>% group_by(year, Stock_ERA) %>% summarize(cov_herring_spawn_index = sum(Surface, na.rm=TRUE))
 
