@@ -61,35 +61,35 @@ soi_simple<- soi_1951_present %>% dplyr::select(year, cov_SOI_summer_mean, cov_S
 
 # NPI (North Pacific Index) from NOAA ---------------------------------------------------------------------
 #note 2023: can't find this - it's a broken link 
-npi_1899_present<-read.table("https://climatedataguide.ucar.edu/sites/default/files/npindex_monthly.txt",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
-#This is only updated to 2021 April, so cut out 2022
-names(npi_1899_present)<-c("year_month", "NPI")
-npi_1899_present<- npi_1899_present %>% separate(year_month, c("year", "month"), sep=4) %>% 
-                                        mutate_if(is.character, as.numeric) 
-
-npi_simple1<-npi_1899_present %>% filter(year < 2021) %>% 
-                                  group_by(year) %>% 
-                                  summarise_if(is.numeric, mean) %>% 
-                                  rename(cov_NPI_yearly_mean= NPI)%>% 
-                                  filter(year>1969) %>% 
-                                  dplyr::select(-month)
-
-npi_simple2<-npi_1899_present %>% filter(year < 2021, month %in% c(5,6,7,8, 9)) %>% 
-                                  group_by(year) %>% 
-                                  summarise_if(is.numeric, mean) %>% 
-                                  rename(cov_NPI_summer_mean= NPI)%>% 
-                                  filter(year>1969) %>% 
-                                  dplyr::select(-month)
-
-npi_simple<-merge(npi_simple1, npi_simple2) %>% as_tibble
-
-#anomaly data only available by year
-npi_anomaly_1899_present<-read.table("https://climatedataguide.ucar.edu/sites/default/files/npindex_anom_ndjfm.txt",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
-names(npi_anomaly_1899_present)<-c("year", "cov_NPI_yearly_anomaly")
-npi_anomaly_simple<- npi_anomaly_1899_present %>% filter(year>1969)
-
-npi_simple<-merge(npi_simple, npi_anomaly_simple) %>% as_tibble
-npi_simple  
+# npi_1899_present<-read.table("https://climatedataguide.ucar.edu/sites/default/files/npindex_monthly.txt",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
+# #This is only updated to 2021 April, so cut out 2022
+# names(npi_1899_present)<-c("year_month", "NPI")
+# npi_1899_present<- npi_1899_present %>% separate(year_month, c("year", "month"), sep=4) %>% 
+#                                         mutate_if(is.character, as.numeric) 
+# 
+# npi_simple1<-npi_1899_present %>% filter(year < 2021) %>% 
+#                                   group_by(year) %>% 
+#                                   summarise_if(is.numeric, mean) %>% 
+#                                   rename(cov_NPI_yearly_mean= NPI)%>% 
+#                                   filter(year>1969) %>% 
+#                                   dplyr::select(-month)
+# 
+# npi_simple2<-npi_1899_present %>% filter(year < 2021, month %in% c(5,6,7,8, 9)) %>% 
+#                                   group_by(year) %>% 
+#                                   summarise_if(is.numeric, mean) %>% 
+#                                   rename(cov_NPI_summer_mean= NPI)%>% 
+#                                   filter(year>1969) %>% 
+#                                   dplyr::select(-month)
+# 
+# npi_simple<-merge(npi_simple1, npi_simple2) %>% as_tibble
+# 
+# #anomaly data only available by year
+# npi_anomaly_1899_present<-read.table("https://climatedataguide.ucar.edu/sites/default/files/npindex_anom_ndjfm.txt",  header=FALSE, skip = 1, fill=TRUE) %>% as_tibble()
+# names(npi_anomaly_1899_present)<-c("year", "cov_NPI_yearly_anomaly")
+# npi_anomaly_simple<- npi_anomaly_1899_present %>% filter(year>1969)
+# 
+# npi_simple<-merge(npi_simple, npi_anomaly_simple) %>% as_tibble
+# npi_simple  
 
 # NPGO (North Pacific Gyre Oscillation) from E. Di Lorenzo ---------------------------------------------------------------------
 npgo_1950_present<-read.table("http://www.o3d.org/npgo/npgo.php",  header=FALSE, skip = 22, fill=TRUE) %>% as_tibble()
@@ -320,9 +320,9 @@ herring_spawn
 
 
 # Model EVs ---------------------------------------------------------------
-col_names_list<-c("stock", paste(1974:2024))
-model_EVs<-read.table("Inputs/2104B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
-model_stocks<-read.csv("Inputs/stockCodes.csv")
-model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
-model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2022) %>% as_tibble
-model_EVs_stocks
+# col_names_list<-c("stock", paste(1974:2024))
+# model_EVs<-read.table("Inputs/2104B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
+# model_stocks<-read.csv("Inputs/stockCodes.csv")
+# model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
+# model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2022) %>% as_tibble
+# model_EVs_stocks
