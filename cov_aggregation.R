@@ -25,7 +25,7 @@ Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lights
 ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2023)
 
 #model_EVs_stocks
-model_EVs_stocks
+#model_EVs_stocks
 
 #herring
 herring_spawn_matched
