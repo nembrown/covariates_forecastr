@@ -10,12 +10,13 @@ fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_wit
   mutate(var_cat = case_when(
     str_detect(Covariate, "SST") ~ "Temperature", 
     str_detect(Covariate, "PPT") ~ "Salinity",
-    str_detect(Covariate, "zoop") ~ "Zooplankton", 
+    str_detect(Covariate, "zoop") ~ "Zooplankton",
+    str_detect(Covariate, "herring") ~ "Herring",
     str_detect(Covariate, "ALPI") ~ "ALPI", 
     str_detect(Covariate, "PDO") ~ "PDO", 
     str_detect(Covariate, "SOI") ~ "SOI", 
     str_detect(Covariate, "ONI") ~ "ONI", 
-    str_detect(Covariate, "NPI") ~ "NPI", 
+    #str_detect(Covariate, "NPI") ~ "NPI", 
     str_detect(Covariate, "NPGO") ~ "NPGO", 
     str_detect(Covariate, "EPNP") ~ "EPNP", 
     str_detect(Covariate, "EVs") ~ "Model EVs")) %>% 
@@ -36,9 +37,8 @@ fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_wit
 
 fcs_covariates_long_meta<- merge(fcs_covariates_long, cov_meta, by.x=c("Covariate"), by.y=c("cov_name")) %>% as_tibble
 fcs_covariates_long_meta<- merge(fcs_covariates_long_meta, stations_meta %>% dplyr::select(Region, Stock_ERA))  %>% as_tibble
-fcs_covariates_long_meta$var_cat <- factor(fcs_covariates_long_meta$var_cat, levels = c("Zooplankton", "Temperature", "Salinity", "PDO", "ONI", "SOI", "NPI", "EPNP", "NPGO", "ALPI", "Model EVs"))
+fcs_covariates_long_meta$var_cat <- factor(fcs_covariates_long_meta$var_cat, levels = c("Zooplankton", "Temperature", "Salinity", "Herring", "PDO", "ONI", "SOI", "ALPI", "EPNP", "NPGO", "Model EVs"))
 fcs_covariates_long_meta
-
 #BC
 ggplot(fcs_covariates_long_meta %>% filter(Region == "BC"), aes(x=year, y=var_cat, size=value, col=var_cat))+ geom_point() +
   scale_size(range = c(1,1)) + theme(legend.position = "none")+facet_wrap(~Stock_ERA, scales="free") + ggtitle("BC")
