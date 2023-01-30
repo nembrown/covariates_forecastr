@@ -284,7 +284,7 @@ dfo_meds_buoys_combined
 # Zooplankton biomass from IOS --------------------------------------------
 #only updated to 2018 # get file from Akash Sastri
 #ios_zoop_base<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Zooplankton/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv')) %>%  as_tibble()
-ios_zoop_base<-read.csv("Inputs/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv", fileEncoding = "Latin1")
+ios_zoop_base<-read.csv("Inputs/IOS_zoop_vnh_biomass_major_taxa_1980_2022.csv", fileEncoding = "Latin1")
 
 ios_zoop <- ios_zoop_base  %>% filter(Mesh..µm. <300, Net != "Bongo ONH") %>% 
                                mutate(Euphausiacea = case_when(Twilight == "Daylight" ~ Euphausiacea*3), 
