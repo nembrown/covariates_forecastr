@@ -24,6 +24,10 @@ Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lights
 #zooplankton from ios, since 1980
 ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2023)
 
+#Hydro stations, take out 
+hydro_stations_matched<-hy_annual_wide_matched %>% rename(year = Year) %>% select(-STATION_NUMBER) %>% filter(year!=2023)
+
+
 #model_EVs_stocks
 #model_EVs_stocks
 
@@ -45,6 +49,7 @@ fcs_covariates_atm
 fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble()
 fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates<- merge(fcs_covariates,herring_spawn_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
+fcs_covariates<- merge(fcs_covariates,hydro_stations_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates
 View(fcs_covariates)
 
@@ -107,10 +112,9 @@ cov_meta <- cov_meta  %>%
             add_row(cov_name="cov_ALPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Surry and King", cov_source="DFO", cov_temporal="Year", cov_unit="Aleutian Low Pressure Index",match_type="none", match_spatial="basin", date_range= "1900-2015")  %>%
             add_row(cov_name="cov_EPNP_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Year", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present") %>% 
-            add_row(cov_name="cov_herring_spawn_index",  cov_type="Herring Spawn Index", cov_source_method="Spawn Index R package", cov_source="DFO", cov_temporal="Year", cov_unit="Herring Spawn Index",match_type="Radius (500km)", match_spatial="terminal", date_range= "1950-present")
-
-  
-
+            add_row(cov_name="cov_herring_spawn_index",  cov_type="Herring Spawn Index", cov_source_method="Spawn Index R package", cov_source="DFO", cov_temporal="Year", cov_unit="Herring Spawn Index",match_type="Radius (500km)", match_spatial="terminal", date_range= "1950-present") %>% 
+            add_row(cov_name="cov_water_level_yearly_mean",  cov_type="Hydrographic", cov_source_method="tidyhydat package", cov_source="Water Survey of Canada", cov_temporal="Year", cov_unit="Water level",match_type="Point", match_spatial="terminal", date_range= "1900-present") %>% 
+            add_row(cov_name="cov_water_flow_yearly_mean",  cov_type="Hydrographic", cov_source_method="tidyhydat package", cov_source="Water Survey of Canada", cov_temporal="Year", cov_unit="Water level",match_type="Point", match_spatial="terminal", date_range= "1900-present") 
 
 # Metadata locations ------------------------------------------------------
 #Lightstations

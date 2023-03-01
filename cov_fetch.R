@@ -319,6 +319,26 @@ herring_spawn <- herring_spawn %>% filter(Method == "Surface") %>%
 herring_spawn 
 
 
+
+# Hydat -------------------------------------------------------------------
+
+install.packages("tidyhydat")
+library(tidyhydat)
+#download_hydat()
+
+hy_annual<-hy_annual_stats(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))
+hy_annual_wide<- hy_annual %>% filter(Sum_stat == "MEAN") %>% 
+                               select(-Date, -Symbol) %>% 
+                               pivot_wider(names_from = c(Parameter, Sum_stat), values_from = Value) %>% 
+                               rename(cov_water_level_yearly_mean='Water Level_MEAN', 
+                                      cov_water_flow_yearly_mean = Flow_MEAN) %>% 
+                              select(-c('Sediment in mg/L_MEAN', 'Daily Mean Tonnes_MEAN')) %>% 
+                              filter(Year>1969)
+
+#realtime_stations<-realtime_stations(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))
+
+View(hy_annual_wide)
+
 # Model EVs ---------------------------------------------------------------
 # col_names_list<-c("stock", paste(1974:2024))
 # model_EVs<-read.table("Inputs/2104B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
