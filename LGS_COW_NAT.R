@@ -191,8 +191,8 @@ oceanic_yearly_Covariate_plots_LGS_NAT_run_year <- pluck(Covariate_plots_LGS_NAT
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_ONI_yearly_mean")+
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_ONI_yearly_anomaly") + 
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_SOI_yearly_mean") +
-  pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPI_yearly_mean") +
-  pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPI_yearly_anomaly") +
+ # pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPI_yearly_mean") +
+#  pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPI_yearly_anomaly") +
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_EPNP_yearly_mean") +
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_ALPI_yearly_mean") +
@@ -208,7 +208,7 @@ oceanic_summer_Covariate_plots_LGS_NAT_run_year <-  pluck(Covariate_plots_LGS_NA
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_ONI_summer_mean") + 
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_ONI_summer_anomaly") + 
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_SOI_summer_mean") + 
-  pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPI_summer_mean") + 
+ # pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPI_summer_mean") + 
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_NPGO_summer_mean") +
   pluck(Covariate_plots_LGS_NAT_run_year, "cov_EPNP_summer_mean") +
   guide_area()+

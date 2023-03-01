@@ -85,7 +85,7 @@ corr_MGS_brood_year<-MGS_sample_age_covariates_wide_brood_year %>% select(Averag
 corr_MGS_brood_lag1_year<-MGS_sample_age_covariates_wide_brood_lag1_year %>% select(Average_Escapement, starts_with("cov"))  
 corr_MGS_brood_lag2_year<-MGS_sample_age_covariates_wide_brood_lag2_year %>% select(Average_Escapement, starts_with("cov")) 
 
-
+View(MGS_sample_age_covariates_wide_brood_year )
 #Full correlations
 corr_var(corr_MGS_run_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Run Year/Sync/corr_MGS_run_year.tiff")
 corr_var(corr_MGS_run_lead1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Run Year/Lead1/corr_MGS_run_year_lead1.tiff")
@@ -93,6 +93,15 @@ corr_var(corr_MGS_run_lead2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsa
 corr_var(corr_MGS_brood_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Sync/corr_MGS_brood_year.tiff")
 corr_var(corr_MGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Lag1/corr_MGS_brood_year_lag1.tiff")
 corr_var(corr_MGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Lag2/corr_MGS_brood_year_lag2.tiff")
+
+corr_var(corr_MGS_run_year,Average_Escapement, plot=TRUE, top=40, method="spearman") %>% ggsave(file="Plots/MGS/Run Year/Sync/corr_MGS_run_year_spearman.tiff")
+corr_var(corr_MGS_run_lead1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Run Year/Lead1/corr_MGS_run_year_lead1.tiff")
+corr_var(corr_MGS_run_lead2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Run Year/Lead2/corr_MGS_run_year_lead2.tiff")
+corr_var(corr_MGS_brood_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Sync/corr_MGS_brood_year.tiff")
+corr_var(corr_MGS_brood_lag1_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Lag1/corr_MGS_brood_year_lag1.tiff")
+corr_var(corr_MGS_brood_lag2_year,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file="Plots/MGS/Brood Year/Lag2/corr_MGS_brood_year_lag2.tiff")
+
+
 
 #Significant p-values only - need to save the plots
 corr_var(corr_MGS_run_year,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05, pvalue=TRUE, SAVE=TRUE)  %>% ggsave(file="Plots/MGS/Run Year/Sync/corr_MGS_run_year_sigp.png")
@@ -131,42 +140,42 @@ Covariate_plots_MGS_brood_lag2_year = list()
 #Run Year
 for(Covariate_ in macthes_MGS_run_year) {
   Covariate_plots_MGS_run_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_run_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
-    geom_point() + geom_smooth()+
+    geom_point() + geom_smooth(method="gam")+
     ggtitle(MGS_sample_age_covariates_run_year$Covariate[MGS_sample_age_covariates_run_year$Covariate== Covariate_])
 }
 
 #Run Year lead 1
 for(Covariate_ in macthes_MGS_run_lead1_year) {
   Covariate_plots_MGS_run_lead1_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_run_lead1_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
-    geom_point() + geom_smooth()+
+    geom_point() + geom_smooth(method="gam")+
     ggtitle(MGS_sample_age_covariates_run_lead1_year$Covariate[MGS_sample_age_covariates_run_lead1_year$Covariate== Covariate_])
 }
 
 #Run Year lead 2
 for(Covariate_ in macthes_MGS_run_lead2_year) {
   Covariate_plots_MGS_run_lead2_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_run_lead2_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
-    geom_point() + geom_smooth()+
+    geom_point() + geom_smooth(method="gam")+
     ggtitle(MGS_sample_age_covariates_run_lead2_year$Covariate[MGS_sample_age_covariates_run_lead2_year$Covariate== Covariate_])
 }
 
 #Brood Year
 for(Covariate_ in macthes_MGS_brood_year) {
   Covariate_plots_MGS_brood_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_brood_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
-    geom_point() + geom_smooth()+
+    geom_point() + geom_smooth(method="gam")+
     ggtitle(MGS_sample_age_covariates_brood_year$Covariate[MGS_sample_age_covariates_brood_year$Covariate== Covariate_])
 }
 
 #Brood Year lag 1
 for(Covariate_ in macthes_MGS_brood_lag1_year) {
   Covariate_plots_MGS_brood_lag1_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_brood_lag1_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
-    geom_point() + geom_smooth()+
+    geom_point() + geom_smooth(method="gam")+
     ggtitle(MGS_sample_age_covariates_brood_lag1_year$Covariate[MGS_sample_age_covariates_brood_lag1_year$Covariate== Covariate_])
 }
 
 #Brood Year lag 2
 for(Covariate_ in macthes_MGS_brood_lag2_year) {
   Covariate_plots_MGS_brood_lag2_year[[Covariate_]] = ggplot(MGS_sample_age_covariates_brood_lag2_year %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
-    geom_point() + geom_smooth()+
+    geom_point() + geom_smooth(method="gam")+
     ggtitle(MGS_sample_age_covariates_brood_lag2_year$Covariate[MGS_sample_age_covariates_brood_lag2_year$Covariate== Covariate_])
 }
 
@@ -509,3 +518,41 @@ salinity_Covariate_plots_MGS_brood_lag2_year <-  pluck(Covariate_plots_MGS_brood
   pluck(Covariate_plots_MGS_brood_lag2_year, "cov_PPT_lighthouse_summer_mean") + 
   plot_layout(guides = 'collect', ncol=2)
 ggsave(salinity_Covariate_plots_MGS_brood_lag2_year, file="Plots/MGS/Brood Year/Lag2/salinity_Covariate_plots_MGS_brood_lag2_year.tiff")
+
+
+
+
+
+###### One off
+
+ggplot(MGS_sample_age_covariates_brood_lag1_year %>% filter(Covariate == "cov_EPNP_summer_mean"), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+  geom_point() + geom_smooth(method="gam") + ggtitle("cov_EPNP_summer_mean: Brood year + 1")
+
+
+ggplot(MGS_sample_age_covariates_run_lead1_year %>% filter(Covariate == "cov_PDO_yearly_mean"), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+  geom_point() + geom_smooth(method="gam")+ ggtitle("cov_PDO_yearly_mean: Run year - 1")
+
+#+facet_wrap(~as.factor(Age_Class), scales="free")
+
+
+
+ggplot(MGS_sample_age_covariates_brood_year %>% filter(Covariate == "cov_model_EVs"), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+  geom_point() + geom_smooth(method="gam") + ggtitle("cov_model_EVs: Brood year")
+
++facet_wrap(~as.factor(Age_Class), scales="free")
+
+ggplot(MGS_sample_age_covariates_brood_year %>% filter(Covariate == "cov_model_EVs"), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+  geom_point() + geom_smooth(method="gam")+xlim(0,2.5) +facet_wrap(~as.factor(Age_Class), scales="free")
+
+
+ggplot(MGS_sample_age_covariates_brood_year %>% filter(Covariate == "cov_EPNP_summer_mean"), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+  geom_point() + geom_smooth(method="gam") + ggtitle("cov_EPNP_summer_mean: Brood year")+facet_wrap(~as.factor(Age_Class), scales="free")
+
+
+ggplot(MGS_4_sample_age_covariates_brood_year %>% filter(Covariate == "cov_EPNP_summer_mean"), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+  geom_point() + geom_smooth(method="gam") + ggtitle("cov_EPNP_summer_mean: Brood year")+facet_wrap(~as.factor(Age_Class), scales="free")
+
+ggplot(MGS_4_sample_age_covariates_brood_year %>% filter(Covariate == "cov_zoop_summer_anomaly"), aes( x=value, y=Average_Escapement, col=as.factor(Age_Class), fill=as.factor(Age_Class))) + 
+  geom_point() + geom_smooth(method="gam") + ggtitle("cov_zoop_summer_anomaly: Brood year")+facet_wrap(~as.factor(Age_Class), scales="free")
+
+
