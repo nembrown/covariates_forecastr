@@ -213,14 +213,14 @@ Data_Lightstations_year_summer_PPT<-  Data_Lightstations_month_PPT %>%
                                       dplyr::select(-Month) %>% 
                                       group_by(Location, year) %>% 
                                       dplyr::summarise(cov_PPT_lighthouse_summer_mean = mean(monthly_PPT, na.rm=TRUE), n_month = n()) %>% 
-                                      filter(n_month == 5)  %>% 
+                                     # filter(n_month == 5)  %>% 
                                       dplyr::select(-n_month)
 
 Data_Lightstations_year_PPT<- Data_Lightstations_month_PPT %>%  
                               dplyr::select(-Month) %>% 
                               group_by(Location, year) %>% 
                               dplyr::summarise(cov_PPT_lighthouse_yearly_mean = mean(monthly_PPT, na.rm=TRUE), n_month = n()) %>% 
-                              filter(n_month == 12)  %>% 
+                              #filter(n_month == 12)  %>% 
                               dplyr::select(-n_month)
                                       
 Data_Lightstations_month_SST<-  Data_Lightstations_month %>%  dplyr::select(Location, year, Month, monthly_SST) %>% drop_na()
@@ -229,14 +229,14 @@ Data_Lightstations_year_summer_SST<-  Data_Lightstations_month_SST %>%
                                       dplyr::select(-Month) %>% 
                                       group_by(Location, year) %>% 
                                       dplyr::summarise(cov_SST_lighthouse_summer_mean = mean(monthly_SST, na.rm=TRUE), n_month = n()) %>% 
-                                      filter(n_month == 5)  %>% 
+                                     # filter(n_month == 5)  %>% 
                                       dplyr::select(-n_month)
 
 Data_Lightstations_year_SST<- Data_Lightstations_month_SST %>%  
                               dplyr::select(-Month) %>% 
                               group_by(Location, year) %>% 
                               dplyr::summarise(cov_SST_lighthouse_yearly_mean = mean(monthly_SST, na.rm=TRUE), n_month = n()) %>% 
-                              filter(n_month == 12)  %>% 
+                             # filter(n_month == 12)  %>% 
                               dplyr::select(-n_month)
 
 
@@ -270,12 +270,12 @@ dfo_meds_buoys_month<- dfo_meds_buoys_small %>%  group_by(STN_ID, year, month) %
 dfo_meds_buoys_year_summer<- dfo_meds_buoys_month %>%  filter(month %in% c(5,6,7,8,9)) %>% 
                                                        group_by(STN_ID, year) %>% 
                                                        dplyr::summarise(mean_summer_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
-                                                       filter(n_month == 5) %>% 
+                                                      # filter(n_month == 5) %>% 
                                                        dplyr::select(-n_month)
 
 dfo_meds_buoys_year<- dfo_meds_buoys_month  %>% group_by(STN_ID, year) %>% 
                                                 dplyr::summarise(mean_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
-                                                filter(n_month == 12) %>% 
+                                               # filter(n_month == 12) %>% 
                                                 dplyr::select(-n_month)
 
 dfo_meds_buoys_combined<-merge(dfo_meds_buoys_year, dfo_meds_buoys_year_summer) %>% as_tibble()
@@ -336,8 +336,6 @@ hy_annual_wide<- hy_annual %>% filter(Sum_stat == "MEAN") %>%
                               filter(Year>1969)
 
 #realtime_stations<-realtime_stations(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))
-
-View(hy_annual_wide)
 
 # Model EVs ---------------------------------------------------------------
 # col_names_list<-c("stock", paste(1974:2024))

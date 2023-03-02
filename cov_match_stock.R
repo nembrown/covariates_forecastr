@@ -254,52 +254,101 @@ herring_spawn_matched<- herring_spawn_matched %>% group_by(year, Stock_ERA) %>% 
 
 
 # River discharge ---------------------------------------------------------
+stocks_loc_simple_1_by_year<-stocks_loc_simple_1 %>% expand(Stock_ERA, lat, long, year=1970:2023)
+
+
 library(tidyhydat)
-pacific_data_station_range<-hy_stn_data_range(station_number = NULL,
+pacific_data_station_range_flow<-hy_stn_data_range(station_number = NULL,
                                               hydat_path = NULL,
                                               prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID")) %>% 
-                                              filter(DATA_TYPE == "Q", Year_to > 2000)
+                                              filter(DATA_TYPE == "Q")
 
 
-pacific_stations<-hy_stations(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID")) %>% filter(HYD_STATUS == "ACTIVE") %>% 
-  left_join(pacific_data_station_range) %>% filter(RECORD_LENGTH > 15)
+pacific_stations_flow<-hy_stations(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))  %>% 
+  left_join(pacific_data_station_range_flow) %>% filter(RECORD_LENGTH > 20)
 
-pacific_stations_locations<- pacific_stations %>% dplyr::select(STATION_NUMBER, LATITUDE, LONGITUDE) %>% 
+pacific_stations_flow_locations<- pacific_stations_flow %>% dplyr::select(STATION_NUMBER, LATITUDE, LONGITUDE) %>% 
   rename(Site_name=STATION_NUMBER, 
          lat = LATITUDE, 
          long = LONGITUDE) %>% 
   add_column(site_type = "Hydro")
 
 #new dataframe that can be changed into a spatial object
-pacific_stations_loc<-as.data.frame(pacific_stations_locations)
-coordinates(pacific_stations_loc) <- c("long", "lat")
+pacific_stations_flow_loc<-as.data.frame(pacific_stations_flow_locations)
+coordinates(pacific_stations_flow_loc) <- c("long", "lat")
+
+###level data
+pacific_data_station_range_level<-hy_stn_data_range(station_number = NULL,
+                                                   hydat_path = NULL,
+                                                   prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID")) %>% 
+  filter(DATA_TYPE == "H")
+
+
+pacific_stations_level<-hy_stations(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))  %>% 
+  left_join(pacific_data_station_range_level) %>% filter(RECORD_LENGTH > 20)
+
+pacific_stations_level_locations<- pacific_stations_level %>% dplyr::select(STATION_NUMBER, LATITUDE, LONGITUDE) %>% 
+  rename(Site_name=STATION_NUMBER, 
+         lat = LATITUDE, 
+         long = LONGITUDE) %>% 
+  add_column(site_type = "Hydro")
+
+#new dataframe that can be changed into a spatial object
+pacific_stations_level_loc<-as.data.frame(pacific_stations_level_locations)
+coordinates(pacific_stations_level_loc) <- c("long", "lat")
+
 
 # Define these vectors, used in the loop.
-closestStock_ERAVec_hydro <- vector(mode = "numeric",length = nrow(stocks_loc_simple))
-minDistVec_hydro    <- vector(mode = "numeric",length = nrow(stocks_loc_simple))
+closestStock_ERAVec_flow <- vector(mode = "numeric",length = nrow(stocks_loc_simple_1))
+minDistVec_flow    <- vector(mode = "numeric",length = nrow(stocks_loc_simple_1))
 
 for (i in 1 : nrow(stocks_loc_simple))
 {
-  distVec_hydro <- spDistsN1(pacific_stations_loc,stocks_loc_simple[i,],longlat = TRUE)
-  minDistVec_hydro[i] <- min(distVec_hydro)
-  closestStock_ERAVec_hydro[i] <- which.min(distVec_hydro)
+  distVec_flow <- spDistsN1(pacific_stations_flow_loc,stocks_loc_simple[i,],longlat = TRUE)
+  minDistVec_flow[i] <- min(distVec_flow)
+  closestStock_ERAVec_flow[i] <- which.min(distVec_flow)
 }
 
-PointAssignTemps_hydro <- as(pacific_stations_loc[closestStock_ERAVec_hydro,]$Site_name,"character")
+PointAssignTemps_flow <- as(pacific_stations_flow_loc[closestStock_ERAVec_flow,]$Site_name,"character")
 
-loc_matching_hydro = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_hydro,minDistVec_hydro,PointAssignTemps_hydro)
-names(loc_matching_hydro) <- c("Stock_long","Stock_lat","Stock_ERA","Region","closestStock_ERAVec_hyrdo","Distance","Site_name")
+loc_matching_flow = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_flow,minDistVec_flow,PointAssignTemps_flow)
+names(loc_matching_flow) <- c("Stock_long","Stock_lat","Stock_ERA","Region","closestStock_ERAVec_hyrdo","Distance","Site_name")
+
+#### hydro to level
+# Define these vectors, used in the loop.
+closestStock_ERAVec_level <- vector(mode = "numeric",length = nrow(stocks_loc_simple_1))
+minDistVec_level    <- vector(mode = "numeric",length = nrow(stocks_loc_simple_1))
+
+for (i in 1 : nrow(stocks_loc_simple))
+{
+  distVec_level <- spDistsN1(pacific_stations_level_loc,stocks_loc_simple[i,],longlat = TRUE)
+  minDistVec_level[i] <- min(distVec_level)
+  closestStock_ERAVec_level[i] <- which.min(distVec_level)
+}
+
+PointAssignTemps_level <- as(pacific_stations_level_loc[closestStock_ERAVec_level,]$Site_name,"character")
+
+loc_matching_level = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_level,minDistVec_level,PointAssignTemps_level)
+names(loc_matching_level) <- c("Stock_long","Stock_lat","Stock_ERA","Region","closestStock_ERAVec_hyrdo","Distance","Site_name")
+
 
 
 #All stocks including American
-loc_matching_hydro<- loc_matching_hydro %>% arrange(desc(Distance)) %>% as_tibble()
+loc_matching_flow<- loc_matching_flow %>% arrange(desc(Distance)) %>% as_tibble()
+loc_matching_level<- loc_matching_level %>% arrange(desc(Distance)) %>% as_tibble()
 
-#only BC stocks
-loc_matching_hydro_BC<- loc_matching_hydro %>% filter(Region == "BC")
+
 
 #All stocks, including American within 200km 
-loc_matching_hydro_simple<-loc_matching_hydro %>% filter(Distance<200) %>% dplyr::select(Stock_ERA, Site_name) %>% rename(STATION_NUMBER = Site_name)
-loc_matching_hydro_simple
+loc_matching_flow_simple<-loc_matching_flow %>% filter(Distance<200) %>% dplyr::select(Stock_ERA, Site_name) %>% rename(STATION_NUMBER = Site_name)
+loc_matching_flow_simple
+
+loc_matching_level_simple<-loc_matching_level %>% filter(Distance<200) %>% dplyr::select(Stock_ERA, Site_name) %>% rename(STATION_NUMBER = Site_name)
+loc_matching_level_simple
 
 # Combing the match file to the data file (from cov_fetch)
-hy_annual_wide_matched<-  hy_annual_wide %>% right_join(loc_matching_hydro_simple) 
+level_annual_wide_matched <-  hy_annual_wide %>% select(-cov_water_flow_yearly_mean) %>% right_join(loc_matching_level_simple) %>% select(-STATION_NUMBER)
+flow_annual_wide_matched <-  hy_annual_wide %>% select(-cov_water_level_yearly_mean) %>% right_join(loc_matching_flow_simple) %>% select(-STATION_NUMBER)
+
+hydro_annual_wide_matched<- merge(level_annual_wide_matched, flow_annual_wide_matched)
+
