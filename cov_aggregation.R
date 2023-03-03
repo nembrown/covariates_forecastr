@@ -11,7 +11,7 @@ soi_simple
 #npi_simple
 npgo_simple
 epnp_simple
-alpi_simple
+#alpi_simple
 
 
 #take out the station ID parts
@@ -42,7 +42,7 @@ fcs_covariates_atm<- merge(oni_simple, soi_simple, by=c("year"), all=TRUE) %>% a
 fcs_covariates_atm<- merge(fcs_covariates_atm, pdo_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, npgo_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, epnp_simple, by=c("year"), all=TRUE) %>% as_tibble()
-fcs_covariates_atm<- merge(fcs_covariates_atm, alpi_simple, by=c("year"), all=TRUE) %>% as_tibble()
+#fcs_covariates_atm<- merge(fcs_covariates_atm, alpi_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm
 
 #Then join stock-wise
@@ -101,14 +101,14 @@ cov_meta <- cov_meta  %>%
             add_row(cov_name="cov_ONI_yearly_anomaly",  cov_type="Atmospheric Index", cov_source_method="Nino 3.4", cov_source="NOAA", cov_temporal="Year", cov_unit="Ocean Nino Index anomaly",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_ONI_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Nino 3.4", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Ocean Nino Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_ONI_summer_anomaly",  cov_type="Atmospheric Index", cov_source_method="Nino 3.4", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Ocean Nino Index anomaly",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
-            add_row(cov_name="cov_NPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Year", cov_unit="North Pacific Index",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
-            add_row(cov_name="cov_NPI_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Summer (May - Sept inclusive)", cov_unit="North Pacific Index",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
-            add_row(cov_name="cov_NPI_yearly_anomaly",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Year", cov_unit="North Pacific Index anomaly",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
+            #add_row(cov_name="cov_NPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Year", cov_unit="North Pacific Index",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
+            #add_row(cov_name="cov_NPI_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Summer (May - Sept inclusive)", cov_unit="North Pacific Index",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
+            #add_row(cov_name="cov_NPI_yearly_anomaly",  cov_type="Atmospheric Index", cov_source_method="Trenberth and Hurrell", cov_source="NCAR", cov_temporal="Year", cov_unit="North Pacific Index anomaly",match_type="none", match_spatial="basin", date_range= "1899-present")  %>%
             add_row(cov_name="cov_PDO_summer_mean",  cov_type="Atmospheric Index", cov_source_method="ERSST Version 5", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="Pacific Decadal Oscillation",match_type="none", match_spatial="basin", date_range= "1854-present")  %>%
             add_row(cov_name="cov_PDO_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="ERSST Version 5", cov_source="NOAA", cov_temporal="Year", cov_unit="Pacific Decadal Oscillation",match_type="none", match_spatial="basin", date_range= "1854-present")  %>%
             add_row(cov_name="cov_NPGO_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="AVISO Satellite SSHa", cov_source="E. di Loranzo", cov_temporal="Year", cov_unit="North Pacific Gyre Oscillation",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_NPGO_summer_mean",  cov_type="Atmospheric Index", cov_source_method="AVISO Satellite SSHa", cov_source="E. di Loranzo", cov_temporal="Summer (May - Sept inclusive)", cov_unit="North Pacific Gyre Oscillation",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
-            add_row(cov_name="cov_ALPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Surry and King", cov_source="DFO", cov_temporal="Year", cov_unit="Aleutian Low Pressure Index",match_type="none", match_spatial="basin", date_range= "1900-2015")  %>%
+            #add_row(cov_name="cov_ALPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Surry and King", cov_source="DFO", cov_temporal="Year", cov_unit="Aleutian Low Pressure Index",match_type="none", match_spatial="basin", date_range= "1900-2015")  %>%
             add_row(cov_name="cov_EPNP_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Year", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present") %>% 
             add_row(cov_name="cov_herring_spawn_index",  cov_type="Herring Spawn Index", cov_source_method="Spawn Index R package", cov_source="DFO", cov_temporal="Year", cov_unit="Herring Spawn Index",match_type="Radius (500km)", match_spatial="terminal", date_range= "1950-present") %>% 

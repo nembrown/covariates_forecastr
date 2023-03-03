@@ -16,7 +16,7 @@ fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_wit
     str_detect(Covariate, "zoop") ~ "Zooplankton",
     str_detect(Covariate, "herring") ~ "Herring",
     str_detect(Covariate, "water") ~ "Hydrographic",
-    str_detect(Covariate, "ALPI") ~ "ALPI", 
+   # str_detect(Covariate, "ALPI") ~ "ALPI", 
     str_detect(Covariate, "PDO") ~ "PDO", 
     str_detect(Covariate, "SOI") ~ "SOI", 
     str_detect(Covariate, "ONI") ~ "ONI", 

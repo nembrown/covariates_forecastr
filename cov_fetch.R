@@ -139,13 +139,13 @@ epnp_simple
 
 
 # ALPI (Aleutian Low Pressure Index) from DFO -----------------------------
-#data only available by year, only up to 2015
-alpi_1900_2015<-read.csv(curl('https://open.canada.ca/data/dataset/4bb821ce-bef7-46d3-95d2-064065f1bda4/resource/d7406b43-7e64-4dbe-9cf1-b932e88a3a14/download/alpi_1900_2015_en.csv')) %>%  as_tibble()
-alpi_simple <- alpi_1900_2015 %>% rename(year = YEAR, 
-                                            cov_ALPI_yearly_mean = ALEUTIAN.LOW.PRESSURE.INDEX..ALPI.) %>% 
-                                            filter(year>1969)
-
-alpi_simple 
+#data only available by year, only up to 2015, took out until we can get more up to date data
+# alpi_1900_2015<-read.csv(curl('https://open.canada.ca/data/dataset/4bb821ce-bef7-46d3-95d2-064065f1bda4/resource/d7406b43-7e64-4dbe-9cf1-b932e88a3a14/download/alpi_1900_2015_en.csv')) %>%  as_tibble()
+# alpi_simple <- alpi_1900_2015 %>% rename(year = YEAR, 
+#                                             cov_ALPI_yearly_mean = ALEUTIAN.LOW.PRESSURE.INDEX..ALPI.) %>% 
+#                                             filter(year>1969)
+# 
+# alpi_simple 
 
 # Temp and salinity from Lightstations -----------------------------------------------------------
 
@@ -337,10 +337,19 @@ hy_annual_wide<- hy_annual %>% filter(Sum_stat == "MEAN") %>%
 
 #realtime_stations<-realtime_stations(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))
 
-# Model EVs ---------------------------------------------------------------
-# col_names_list<-c("stock", paste(1974:2024))
-# model_EVs<-read.table("Inputs/2104B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
-# model_stocks<-read.csv("Inputs/stockCodes.csv")
-# model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
-# model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2022) %>% as_tibble
-# model_EVs_stocks
+#just for certain stations
+get_water_office_flow_2021_2022<-read.csv(curl('https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=08HA005&stations[]=08CF003&stations[]=08DD001&stations[]=08HA010&stations[]=08MH029&stations[]=08MH153&stations[]=09AA010&stations[]=08MH152&stations[]=08DC006&stations[]=08BB005&stations[]=08MH156&stations[]=08HD006&stations[]=08MH026&stations[]=08FB004&stations[]=08EG016&stations[]=08HB032&stations[]=08HB048&stations[]=08HA003&stations[]=08HB011&stations[]=08HD003&stations[]=08HB001&parameters[]=47&start_date=2021-01-01%2000:00:00&end_date=2022-12-31%2023:59:59')) %>% as_tibble 
+get_water_office_flow_2021_2022<-get_water_office_flow_2021_2022 %>%                           
+                                 rename(STATION_NUMBER = X.ID) %>% 
+                                 mutate(Year=lubridate::year(Date)) %>% 
+                                 group_by(STATION_NUMBER, Year) %>% 
+                                 summarise(cov_water_flow_yearly_mean = mean(Value.Valeur))
+
+
+
+get_water_office_level_2021_2022<-read.csv(curl('https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=10AC001&stations[]=08EF001&stations[]=08MH029&stations[]=08BB003&stations[]=08FA007&stations[]=09AA003&stations[]=08HA009&stations[]=08HD022&stations[]=08HA038&stations[]=08HB015&stations[]=08HB082&parameters[]=46&start_date=2021-01-01%2000:00:00&end_date=2022-12-31%2023:59:59')) %>% as_tibble
+get_water_office_level_2021_2022<-get_water_office_level_2021_2022 %>%                           
+                                 rename(STATION_NUMBER = X.ID) %>% 
+                                 mutate(Year=lubridate::year(Date)) %>% 
+                                 group_by(STATION_NUMBER, Year) %>% 
+                                 summarise(cov_water_level_yearly_mean = mean(Value.Valeur))
