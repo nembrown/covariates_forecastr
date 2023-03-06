@@ -9,7 +9,7 @@ fcs_covariates_combined
 fcs_covariates_combined<- read.csv("fcs_covariates.csv")
 
 
-fcs_covariates_long<- fcs_covariates_combined %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
+fcs_covariates_long<- fcs_covariates_combined_interpolated %>% pivot_longer(cols = starts_with("cov"), names_to = "Covariate", values_to = "value") %>% 
   mutate(var_cat = case_when(
     str_detect(Covariate, "SST") ~ "Temperature", 
     str_detect(Covariate, "PPT") ~ "Salinity",
