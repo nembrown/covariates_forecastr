@@ -11,16 +11,16 @@ library(lares)
 library(purrr)
 
 
-## create
-
-
 # Read in cov_data for covariate and Av escapement  ------------------------------------------------------------
 
-correlate_covs(cov_data="fcs_covariates.csv",
-               escapement_data = "Inputs/UGS_Esc_upto2021.csv",
-               modelstock = "UGS",
-               stock= "QUI",
-               year_match="Brood_Year_Lag1")
+correlate_covs(cov_data="fcs_covariates_interpolated.csv",
+               escapement_data = "Inputs/LGS_Esc_upto2021.csv",
+               modelstock = "LGS",
+               stock= "COW",
+               year_match="Brood_Year_Lag1", 
+               escapement_type="Average Escapement",
+               age_specific=TRUE, 
+               age_class=4)
 
 
 correlate_covs<-function(cov_data,
@@ -28,7 +28,9 @@ correlate_covs<-function(cov_data,
                          modelstock = NA_character_, 
                          stock= NA_character_, 
                          year_match= NA_character_,
-                         age_specific=FALSE){
+                         escapement_type=NA_character_,
+                         age_specific=FALSE, 
+                         age_class = NA_integer_){
 
   cov_data<-read.csv(cov_data) %>% as_tibble()
   escapement_data<-read.csv(escapement_data) %>% as_tibble()
@@ -66,8 +68,15 @@ cov_data_long<- cov_data %>% pivot_longer(cols = starts_with("cov"), names_to = 
 cov_data_long_stock<-cov_data_long %>% filter(Stock_ERA == stock)
 cov_data_stock<-cov_data %>% filter(Stock_ERA == stock)
 
+if(escapement_type=="Terminal Run"){
+  escapement_data<-escapement_data %>% rename(Escapement_type=Terminal_Run)
+}else if (escapement_type=="Average Escapement"){
+  escapement_data<-escapement_data %>% rename(Escapement_type=Average_Escapement)
+}
 
-escapement_data<-escapement_data %>%  select(Run_Year, Average_Escapement) %>% 
+if(age_specific==FALSE){
+
+escapement_data<-escapement_data %>%  select(Run_Year, Escapement_type) %>% 
                                       mutate(Run_Year_Lead1 = Run_Year - 1) %>% 
                                       mutate(Run_Year_Lead2 = Run_Year - 2) %>% 
                                       mutate(Brood_Year = Run_Year - 4) %>% 
@@ -97,30 +106,43 @@ cov_data_stock_roll_long<- cov_data_stock_roll %>% pivot_longer(cols = starts_wi
     str_detect(Covariate, "offshore") ~ "offshore", 
     str_detect(Covariate, "terminal") ~ "terminal", 
     TRUE ~ "terminal")) 
+} else
+{escapement_data<-escapement_data %>%  select(Brood_Year, Run_Year, Escapement_type, Age_Class) %>% 
+  mutate(Run_Year_Lead1 = Run_Year - 1) %>% 
+  mutate(Run_Year_Lead2 = Run_Year - 2) %>% 
+  mutate(Brood_Year_Lag1 = Brood_Year + 1) %>% 
+  mutate(Brood_Year_Lag2 = Brood_Year + 2) 
+}
 
 # Matching escapement to covariates ---------------------------------------
 
 #1. Long files - for use in visualization plotting 
 #matching to Run Year + time lags
-if(year_match %in%  c("Run_Year", "Run_Year_Lead1", "Run_Year_Lead2")) {
-  escapement_data_covariates<-merge(escapement_data, cov_data_long_stock, by.x=year_match, by.y=c("year")) %>% as_tibble
-  escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock, by.x=year_match, by.y=c("year")) %>% as_tibble
-  
-  } else if (year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
-  escapement_data_covariates<-merge(escapement_data,cov_data_stock_roll_long, by.x=year_match, by.y=c("year")) %>% as_tibble
-  escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock_roll, by.x=year_match, by.y=c("year")) %>% as_tibble
+if(age_specific==FALSE & year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
+  escapement_data_covariates<-merge(escapement_data,cov_data_stock_roll_long, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock_roll, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  } else {
+    escapement_data_covariates<-merge(escapement_data, cov_data_long_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+    escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
   }
 
 
-# Correlation with Average Escapement -------------------------------------
+#Filter for age class
+if(age_specific==TRUE){
+  escapement_data_covariates<- escapement_data_covariates %>% filter(Age_Class == age_class)
+  escapement_data_covariates_wide<- escapement_data_covariates_wide %>% filter(Age_Class == age_class)
+  }
 
-corr_stock<-escapement_data_covariates_wide %>% select(Average_Escapement, starts_with("cov")) 
+# Correlation with Escapement type -------------------------------------
+
+corr_stock<-escapement_data_covariates_wide %>% select(Escapement_type, starts_with("cov")) 
 
 #Full correlations
-corr_var(corr_stock,Average_Escapement, plot=TRUE, top=40) %>% ggsave(file=paste0("Plots/", modelstock, "/corr_", year_match, "_", modelstock, ".tiff"))
+corr_var(corr_stock,Escapement_type, plot=TRUE, top=40) %>% ggsave(file=paste0("Plots/", modelstock, "/corr_", year_match, "_", modelstock, "_Age_",age_class, ".tiff"))
 
 #Significant p-values only - need to save the plots
-corr_var(corr_stock,Average_Escapement, plot=TRUE, top=40, max_pvalue=0.05,SAVE=TRUE)%>% ggsave(file=paste0("Plots/", modelstock, "/corr_psig_", year_match,"_", modelstock, ".tiff"))
+corr_var(corr_stock,Escapement_type, plot=TRUE, top=40, max_pvalue=0.05,SAVE=TRUE)%>% ggsave(file=paste0("Plots/", modelstock, "/corr_psig_", year_match,"_", modelstock, "_Age_",age_class,".tiff"))
+
 
 # Plotting ----------------------------------------------------------------
 #setting up
@@ -130,11 +152,12 @@ Covariate_plots_stock = list()
 
 #For loops
 
-#Run Year
 for(Covariate_ in matches_stock) {
-  Covariate_plots_stock[[Covariate_]] = ggplot(escapement_data_covariates %>% filter(Covariate == Covariate_), aes( x=value, y=Average_Escapement)) + 
+  Covariate_plots_stock[[Covariate_]] = ggplot(escapement_data_covariates %>% filter(Covariate == Covariate_), aes( x=value, y=Escapement_type)) + 
     geom_point() + geom_smooth(method="lm")+
-    ggtitle(escapement_data_covariates$Covariate[escapement_data_covariates$Covariate== Covariate_])
+    ylab(paste0(escapement_type))+
+    xlab(paste0(escapement_data_covariates$Covariate[escapement_data_covariates$Covariate== Covariate_]))+
+    ggtitle(paste0("Age = ", age_class))
 }
 
 ########### Covariate_plots_stock
@@ -147,13 +170,13 @@ oceanic_yearly_Covariate_plots_stock <- pluck(Covariate_plots_stock, "cov_PDO_ye
   # pluck(Covariate_plots_stock, "cov_NPI_yearly_anomaly") +
   pluck(Covariate_plots_stock, "cov_NPGO_yearly_mean") +
   pluck(Covariate_plots_stock, "cov_EPNP_yearly_mean") +
-  pluck(Covariate_plots_stock, "cov_ALPI_yearly_mean") +
-  pluck(Covariate_plots_stock, "cov_model_EVs") +
+ # pluck(Covariate_plots_stock, "cov_ALPI_yearly_mean") +
+ # pluck(Covariate_plots_stock, "cov_model_EVs") +
   guide_area()+
-  plot_layout(guides = 'collect', ncol=4)
+  plot_layout(guides = 'collect', ncol=3)
 
 oceanic_yearly_Covariate_plots_stock 
-ggsave(oceanic_yearly_Covariate_plots_stock , file=paste0("Plots/", modelstock, "/oceanic_yearly_", year_match,"_", modelstock, ".tiff"))
+ggsave(oceanic_yearly_Covariate_plots_stock , file=paste0("Plots/", modelstock, "/oceanic_yearly_", year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #oceanic summer plot
 oceanic_summer_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_PDO_summer_mean") + 
@@ -164,8 +187,8 @@ oceanic_summer_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_PDO_s
   pluck(Covariate_plots_stock, "cov_NPGO_summer_mean") +
   pluck(Covariate_plots_stock, "cov_EPNP_summer_mean") +
   guide_area()+
-  plot_layout(guides = 'collect', ncol=4)
-ggsave(oceanic_summer_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/oceanic_summer_", year_match,"_", modelstock, ".tiff"))
+  plot_layout(guides = 'collect', ncol=3)
+ggsave(oceanic_summer_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/oceanic_summer_", year_match,"_", modelstock,  "_Age_",age_class,".tiff"))
 
 ##Zooplankton
 zoop_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_zoop_yearly_anomaly") + 
@@ -174,31 +197,32 @@ zoop_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_zoop_yearly_ano
   pluck(Covariate_plots_stock, "cov_zoop_spring_anomaly") + 
   pluck(Covariate_plots_stock, "cov_zoop_fall_anomaly") + 
   plot_layout(guides = 'collect', ncol=3)
-ggsave(zoop_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/zoop_",  year_match,"_", modelstock, ".tiff"))
+ggsave(zoop_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/zoop_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #Temperature
-temp_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_yearly_mean") + 
-  pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_summer_mean") + 
-  pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_yearly_mean") + 
-  pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_summer_mean") +
+temp_Covariate_plots_stock <- 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_yearly_mean") + 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_summer_mean") + 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_yearly_mean") + 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_summer_mean") +
   pluck(Covariate_plots_stock, "cov_SST_lighthouse_yearly_mean") + 
   pluck(Covariate_plots_stock, "cov_SST_lighthouse_summer_mean") + 
-  plot_layout(guides = 'collect', ncol=3)
-ggsave(temp_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/temperature_",  year_match,"_", modelstock, ".tiff"))
+  plot_layout(guides = 'collect', ncol=2)
+ggsave(temp_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/temperature_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #Salinity
 salinity_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_PPT_lighthouse_yearly_mean") + 
   pluck(Covariate_plots_stock, "cov_PPT_lighthouse_summer_mean") + 
   plot_layout(guides = 'collect', ncol=2)
-ggsave(salinity_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/salinity_",  year_match,"_", modelstock, ".tiff"))
+ggsave(salinity_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/salinity_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #Herring
-herring_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_herring_spawn_index")
-ggsave(herring_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/herring_", year_match,"_", modelstock, ".tiff"))
+herring_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_herring_spawn_index_mean")
+ggsave(herring_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/herring_", year_match,"_", modelstock,  "_Age_",age_class,".tiff"))
 
 #Hydrographic variables
 hydro_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_water_flow_yearly_mean")+
-  pluck(Covariate_plots_stock, "cov_water_level_yearly_mean")+ 
+  pluck(Covariate_plots_stock, "cov_water_flow_yearly_max")+ 
   plot_layout(guides = 'collect', ncol=2)
-ggsave(hydro_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/hydro_",  year_match,"_", modelstock, ".tiff"))
+ggsave(hydro_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/hydro_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 }
