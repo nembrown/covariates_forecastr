@@ -1,5 +1,6 @@
 library(tidyverse)
 library(ggplot2)
+library(tsibble)
 
 
 # Check each of the datasets have been calculated properly ----------------
@@ -16,7 +17,7 @@ epnp_simple
 
 #take out the station ID parts
 #temperature from MEDS buoys #464, since 1989
-dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore)) %>% filter(year!=2023)
+#dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore)) %>% filter(year!=2023)
 
 #temp and salinity from lightstations #752, since 1900 but active lighthouses since 1976
 Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lightstation) %>% filter(year!=2023)
@@ -25,7 +26,7 @@ Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lights
 ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2023)
 
 #Hydro stations, take out 
-hydro_stations_matched<-hy_annual_wide_matched %>% rename(year = Year) %>% select(-STATION_NUMBER) %>% filter(year!=2023)
+hydro_stations_matched<-hydro_annual_wide_matched %>% rename(year = Year) 
 
 
 #model_EVs_stocks
@@ -46,8 +47,7 @@ fcs_covariates_atm<- merge(fcs_covariates_atm, epnp_simple, by=c("year"), all=TR
 fcs_covariates_atm
 
 #Then join stock-wise
-fcs_covariates<- merge(Data_Lightstations_matched, dfo_meds_buoys_matched_combined, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble()
-fcs_covariates<- merge(fcs_covariates,ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
+fcs_covariates<- merge(Data_Lightstations_matched, ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates<- merge(fcs_covariates,herring_spawn_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates<- merge(fcs_covariates,hydro_stations_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates
@@ -63,9 +63,23 @@ fcs_covariates_combined<-merge(stocks_year, fcs_covariates, all=TRUE) %>% as_tib
 fcs_covariates_combined<-merge(fcs_covariates_combined, fcs_covariates_atm , by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_combined
 
-fcs_covariates_combined<- fcs_covariates_combined %>% relocate(Stock_ERA, year) %>% arrange(Stock_ERA, year) 
+fcs_covariates_combined<- fcs_covariates_combined %>% relocate(Stock_ERA, year) %>% 
+                          arrange(Stock_ERA, year) %>% 
+                          filter(year>1978)
 
 write.csv(fcs_covariates_combined, "fcs_covariates.csv", row.names = FALSE)
+
+
+#### Interpolation of missing values
+
+# fcs_covariates_combined_ts<-fcs_covariates_combined %>% as_tsibble(key=c(Stock_ERA), index=year)
+# fcs_covariates_combined_ts_interpolated<- fcs_covariates_combined_ts %>% model(arima = MEAN(cov_herring_spawn_index_mean ~ trend())) %>% interpolate(fcs_covariates_combined_ts)
+
+fcs_covariates_combined_interpolated<- fcs_covariates_combined %>% group_by(Stock_ERA) %>% arrange(Stock_ERA, year) %>% mutate_at(vars(starts_with("cov")), funs(na.approx(., maxgap=3, rule=2)))
+
+
+write.csv(fcs_covariates_combined_interpolated, "fcs_covariates_interpolated.csv", row.names = FALSE)
+
 
 # Add in metadata------------------------------------------------------
 
@@ -111,7 +125,7 @@ cov_meta <- cov_meta  %>%
             #add_row(cov_name="cov_ALPI_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Surry and King", cov_source="DFO", cov_temporal="Year", cov_unit="Aleutian Low Pressure Index",match_type="none", match_spatial="basin", date_range= "1900-2015")  %>%
             add_row(cov_name="cov_EPNP_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Year", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present") %>% 
-            add_row(cov_name="cov_herring_spawn_index",  cov_type="Herring Spawn Index", cov_source_method="Spawn Index R package", cov_source="DFO", cov_temporal="Year", cov_unit="Herring Spawn Index",match_type="Radius (500km)", match_spatial="terminal", date_range= "1950-present") %>% 
+            add_row(cov_name="cov_herring_spawn_index_mean",  cov_type="Herring Spawn Index", cov_source_method="Spawn Index R package", cov_source="DFO", cov_temporal="Year", cov_unit="Herring Spawn Index",match_type="Radius (500km)", match_spatial="terminal", date_range= "1950-present") %>% 
             add_row(cov_name="cov_water_level_yearly_mean",  cov_type="Hydrographic", cov_source_method="tidyhydat package", cov_source="Water Survey of Canada", cov_temporal="Year", cov_unit="Water level",match_type="Point", match_spatial="terminal", date_range= "1900-present") %>% 
             add_row(cov_name="cov_water_flow_yearly_mean",  cov_type="Hydrographic", cov_source_method="tidyhydat package", cov_source="Water Survey of Canada", cov_temporal="Year", cov_unit="Water level",match_type="Point", match_spatial="terminal", date_range= "1900-present") 
 
