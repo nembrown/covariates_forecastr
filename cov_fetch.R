@@ -5,7 +5,7 @@ library(curl)
 library(lubridate)
 library(sf)
 library(data.table)
-
+library(tidyhydat)
 
 # PDO (Pacific Decadal Oscillation) from NOAA ---------------------------------------------------------------------
 
@@ -164,7 +164,7 @@ Lightstations_location<-Lightstations %>% rename(Station_ID = LIGHSTATIO, lat = 
                                           filter(DATA_COLLE == "ACTIVE") %>% 
                                           dplyr::select(Station_ID, lat, long)  %>% as_tibble
 
-#manually added Bonilla here bc it didnt have 2022 data
+#manually added Bonilla here bc it didnt have 2022 data - apparently folder badly named - will be changed in future. 
 list_of_files<-list.files('DATA_-_Active_Sites', pattern=c('Sea_Surface_Temperature_and_Salinity.+2022.csv|Bonilla_Island_-_Daily_Sea_Surface_Temperature_and_Salinity_1960-2021.csv'), recursive=TRUE, full.names = T)
 station_names<-list(Lightstations_location$Station_ID)
 
@@ -249,37 +249,37 @@ Data_Lightstations_combined<- Data_Lightstations_combined %>% filter(year>1969) 
 Data_Lightstations_combined
 
 
-# Temp from MEDS_buoys ----------------------------------------------------
-dfo_meds_buoys<- tabledap('DFO_MEDS_BUOYS',  url = "https://data.cioospacific.ca/erddap/", 
-                          fields = c('latitude', 'longitude', 'time', 'STN_ID', 'SSTP', 'SSTP_flags', 'Q_FLAG', 'SSTP_UQL'), 
-                          'time>=1970-01-01', 'SSTP!=NaN', 'SSTP_flags!=1')
-
-dfo_meds_buoys_small <- dfo_meds_buoys %>% as_tibble %>% 
-                                           filter(SSTP_UQL %in% c(1,2)) %>% 
-                                           filter(Q_FLAG != 4) %>% 
-                                           mutate(year = lubridate::year(time), 
-                                                  month = lubridate::month(time), 
-                                                  day = lubridate::day(time), 
-                                                  SSTP = as.numeric(SSTP))
-
-#want to do yearly sums of only complete monthly data, so first summarize by month
-dfo_meds_buoys_month<- dfo_meds_buoys_small %>%  group_by(STN_ID, year, month) %>% 
-                                                 dplyr::summarise(monthly_SSTP = mean(SSTP, na.rm=TRUE))  %>% 
-                                                 drop_na()
-
-dfo_meds_buoys_year_summer<- dfo_meds_buoys_month %>%  filter(month %in% c(5,6,7,8,9)) %>% 
-                                                       group_by(STN_ID, year) %>% 
-                                                       dplyr::summarise(mean_summer_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
-                                                      # filter(n_month == 5) %>% 
-                                                       dplyr::select(-n_month)
-
-dfo_meds_buoys_year<- dfo_meds_buoys_month  %>% group_by(STN_ID, year) %>% 
-                                                dplyr::summarise(mean_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
-                                               # filter(n_month == 12) %>% 
-                                                dplyr::select(-n_month)
-
-dfo_meds_buoys_combined<-merge(dfo_meds_buoys_year, dfo_meds_buoys_year_summer) %>% as_tibble()
-dfo_meds_buoys_combined
+# Temp from MEDS_buoys took out bc better coverage from lighthouse data ----------------------------------------------------
+# dfo_meds_buoys<- tabledap('DFO_MEDS_BUOYS',  url = "https://data.cioospacific.ca/erddap/", 
+#                           fields = c('latitude', 'longitude', 'time', 'STN_ID', 'SSTP', 'SSTP_flags', 'Q_FLAG', 'SSTP_UQL'), 
+#                           'time>=1970-01-01', 'SSTP!=NaN', 'SSTP_flags!=1')
+# 
+# dfo_meds_buoys_small <- dfo_meds_buoys %>% as_tibble %>% 
+#                                            filter(SSTP_UQL %in% c(1,2)) %>% 
+#                                            filter(Q_FLAG != 4) %>% 
+#                                            mutate(year = lubridate::year(time), 
+#                                                   month = lubridate::month(time), 
+#                                                   day = lubridate::day(time), 
+#                                                   SSTP = as.numeric(SSTP))
+# 
+# #want to do yearly sums of only complete monthly data, so first summarize by month
+# dfo_meds_buoys_month<- dfo_meds_buoys_small %>%  group_by(STN_ID, year, month) %>% 
+#                                                  dplyr::summarise(monthly_SSTP = mean(SSTP, na.rm=TRUE))  %>% 
+#                                                  drop_na()
+# 
+# dfo_meds_buoys_year_summer<- dfo_meds_buoys_month %>%  filter(month %in% c(5,6,7,8,9)) %>% 
+#                                                        group_by(STN_ID, year) %>% 
+#                                                        dplyr::summarise(mean_summer_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
+#                                                       # filter(n_month == 5) %>% 
+#                                                        dplyr::select(-n_month)
+# 
+# dfo_meds_buoys_year<- dfo_meds_buoys_month  %>% group_by(STN_ID, year) %>% 
+#                                                 dplyr::summarise(mean_SSTP = mean(monthly_SSTP), n_month=n()) %>% 
+#                                                # filter(n_month == 12) %>% 
+#                                                 dplyr::select(-n_month)
+# 
+# dfo_meds_buoys_combined<-merge(dfo_meds_buoys_year, dfo_meds_buoys_year_summer) %>% as_tibble()
+# dfo_meds_buoys_combined
 
 # Zooplankton biomass from IOS --------------------------------------------
 #only updated to 2018 # get file from Akash Sastri
@@ -313,8 +313,7 @@ herring_spawn <- herring_spawn %>% filter(Method == "Surface") %>%
          year = lubridate::year(Date), 
          month = lubridate::month(Date), 
          day = lubridate::day(Date)) %>% 
-         filter(year > 1969)
-  as_tibble()
+         filter(year > 1969) 
 
 herring_spawn 
 
@@ -322,34 +321,26 @@ herring_spawn
 
 # Hydat -------------------------------------------------------------------
 
-install.packages("tidyhydat")
-library(tidyhydat)
+
 #download_hydat()
 
 hy_annual<-hy_annual_stats(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))
-hy_annual_wide<- hy_annual %>% filter(Sum_stat == "MEAN") %>% 
+hy_annual_wide<- hy_annual %>% filter(Sum_stat %in%  c("MEAN", "MAX"), Parameter %in%  c("Flow")) %>% 
                                select(-Date, -Symbol) %>% 
                                pivot_wider(names_from = c(Parameter, Sum_stat), values_from = Value) %>% 
-                               rename(cov_water_level_yearly_mean='Water Level_MEAN', 
-                                      cov_water_flow_yearly_mean = Flow_MEAN) %>% 
-                              select(-c('Sediment in mg/L_MEAN', 'Daily Mean Tonnes_MEAN')) %>% 
-                              filter(Year>1969)
-
-#realtime_stations<-realtime_stations(prov_terr_state_loc = c("BC", "YT", "AK", "WA", "ID"))
+                               rename(cov_water_flow_yearly_mean = Flow_MEAN, 
+                                      cov_water_flow_yearly_max = Flow_MAX) %>% 
+                              filter(Year>1969) %>% 
+                              drop_na()
 
 #just for certain stations
-get_water_office_flow_2021_2022<-read.csv(curl('https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=08HA005&stations[]=08CF003&stations[]=08DD001&stations[]=08HA010&stations[]=08MH029&stations[]=08MH153&stations[]=09AA010&stations[]=08MH152&stations[]=08DC006&stations[]=08BB005&stations[]=08MH156&stations[]=08HD006&stations[]=08MH026&stations[]=08FB004&stations[]=08EG016&stations[]=08HB032&stations[]=08HB048&stations[]=08HA003&stations[]=08HB011&stations[]=08HD003&stations[]=08HB001&parameters[]=47&start_date=2021-01-01%2000:00:00&end_date=2022-12-31%2023:59:59')) %>% as_tibble 
+get_water_office_flow_2021_2022<-read.csv(curl('https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=08BB001&stations[]=08BB002&stations[]=08BB005&stations[]=08CE001&stations[]=08CF001&stations[]=08CF003&stations[]=08CG001&stations[]=08CG004&stations[]=08DA005&stations[]=08DB001&stations[]=08DC006&stations[]=08DD001&stations[]=08EF001&stations[]=08FA002&stations[]=08FB011&stations[]=08FC003&stations[]=08GA022&stations[]=08GD004&stations[]=08GE002&stations[]=08HA001&stations[]=08HA010&stations[]=08HA011&stations[]=08HA034&stations[]=08HA037&stations[]=08HA039&stations[]=08HA047&stations[]=08HA059&stations[]=08HA065&stations[]=08HB006&stations[]=08HB010&stations[]=08HB014&stations[]=08HB017&stations[]=08HB034&stations[]=08HB092&stations[]=08HC001&stations[]=08HD003&stations[]=08HD035&stations[]=08KA004&stations[]=08KH001&stations[]=08LC002&stations[]=08LE031&stations[]=08LF051&stations[]=08MB012&stations[]=08MC018&stations[]=08MD013&stations[]=08MF005&stations[]=08MF035&stations[]=08MH001&stations[]=08MH024&stations[]=08MH103&stations[]=08MH126&stations[]=08ND011&stations[]=08ND025&stations[]=08NH118&stations[]=08NH119&stations[]=08NL022&stations[]=08NL038&stations[]=08NL071&stations[]=08NM127&stations[]=08NN012&stations[]=08NN026&stations[]=09AA012&stations[]=09AA013&stations[]=09AA014&stations[]=09AA015&parameters[]=47&start_date=2021-01-01%2000:00:00&end_date=2022-12-31%2023:59:59')) %>% as_tibble 
 get_water_office_flow_2021_2022<-get_water_office_flow_2021_2022 %>%                           
                                  rename(STATION_NUMBER = X.ID) %>% 
                                  mutate(Year=lubridate::year(Date)) %>% 
                                  group_by(STATION_NUMBER, Year) %>% 
-                                 summarise(cov_water_flow_yearly_mean = mean(Value.Valeur))
+                                 summarise(cov_water_flow_yearly_mean = mean(Value.Valeur, na.rm=TRUE), 
+                                           cov_water_flow_yearly_max = max(Value.Valeur, na.rm=TRUE)) %>% 
+                                drop_na()
 
 
-
-get_water_office_level_2021_2022<-read.csv(curl('https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=10AC001&stations[]=08EF001&stations[]=08MH029&stations[]=08BB003&stations[]=08FA007&stations[]=09AA003&stations[]=08HA009&stations[]=08HD022&stations[]=08HA038&stations[]=08HB015&stations[]=08HB082&parameters[]=46&start_date=2021-01-01%2000:00:00&end_date=2022-12-31%2023:59:59')) %>% as_tibble
-get_water_office_level_2021_2022<-get_water_office_level_2021_2022 %>%                           
-                                 rename(STATION_NUMBER = X.ID) %>% 
-                                 mutate(Year=lubridate::year(Date)) %>% 
-                                 group_by(STATION_NUMBER, Year) %>% 
-                                 summarise(cov_water_level_yearly_mean = mean(Value.Valeur))
