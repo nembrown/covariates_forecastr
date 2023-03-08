@@ -14,13 +14,14 @@ library(purrr)
 # Read in cov_data for covariate and Av escapement  ------------------------------------------------------------
 
 correlate_covs(cov_data="fcs_covariates_interpolated.csv",
-               escapement_data = "Inputs/LGS_Esc_upto2021.csv",
-               modelstock = "LGS",
-               stock= "COW",
-               year_match="Brood_Year_Lag1", 
+               escapement_data = "Inputs/PPS_Esc_no_age_upto2022.csv",
+               modelstock = "PPS",
+               stock= "PPS",
+               year_match="Brood_Year_Lag2", 
                escapement_type="Average Escapement",
-               age_specific=TRUE, 
-               age_class=4)
+               age_specific=FALSE, 
+               age_combine=FALSE,
+               age_class=NA)
 
 
 correlate_covs<-function(cov_data,
@@ -29,7 +30,8 @@ correlate_covs<-function(cov_data,
                          stock= NA_character_, 
                          year_match= NA_character_,
                          escapement_type=NA_character_,
-                         age_specific=FALSE, 
+                         age_specific=FALSE,
+                         age_combine=FALSE,
                          age_class = NA_integer_){
 
   cov_data<-read.csv(cov_data) %>% as_tibble()
@@ -81,7 +83,8 @@ escapement_data<-escapement_data %>%  select(Run_Year, Escapement_type) %>%
                                       mutate(Run_Year_Lead2 = Run_Year - 2) %>% 
                                       mutate(Brood_Year = Run_Year - 4) %>% 
                                       mutate(Brood_Year_Lag1 = Run_Year - 3) %>% 
-                                      mutate(Brood_Year_Lag2 = Run_Year - 2) 
+                                      mutate(Brood_Year_Lag2 = Run_Year - 2) %>% 
+                                      select(Escapement_type, all_of(c(year_match)))
 
 cov_data_stock_roll<- zoo::rollmean(cov_data_stock %>% select(-Stock_ERA), k=3) %>% as_tibble()
 #Brood year
@@ -106,12 +109,25 @@ cov_data_stock_roll_long<- cov_data_stock_roll %>% pivot_longer(cols = starts_wi
     str_detect(Covariate, "offshore") ~ "offshore", 
     str_detect(Covariate, "terminal") ~ "terminal", 
     TRUE ~ "terminal")) 
-} else
-{escapement_data<-escapement_data %>%  select(Brood_Year, Run_Year, Escapement_type, Age_Class) %>% 
+} else if (age_combine==TRUE  & year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
+           escapement_data<-escapement_data %>%  group_by(Brood_Year) %>%
+           summarise(Escapement_type = sum(Escapement_type, na.rm=TRUE)) %>% 
+           mutate(Brood_Year_Lag1 = Brood_Year + 1) %>% 
+           mutate(Brood_Year_Lag2 = Brood_Year + 2) %>% 
+           select(Escapement_type, all_of(c(year_match)))
+} else if (age_combine==TRUE){
+           escapement_data<-escapement_data %>%  group_by(Run_Year) %>%
+           summarise(Escapement_type = sum(Escapement_type, na.rm=TRUE)) %>% 
+           mutate(Run_Year_Lead1 = Run_Year - 1) %>% 
+           mutate(Run_Year_Lead2 = Run_Year - 2) %>% 
+           select(Escapement_type, all_of(c(year_match)))
+} else {
+  escapement_data<-escapement_data %>%  select(Brood_Year, Run_Year, Escapement_type, Age_Class) %>% 
   mutate(Run_Year_Lead1 = Run_Year - 1) %>% 
   mutate(Run_Year_Lead2 = Run_Year - 2) %>% 
   mutate(Brood_Year_Lag1 = Brood_Year + 1) %>% 
-  mutate(Brood_Year_Lag2 = Brood_Year + 2) 
+  mutate(Brood_Year_Lag2 = Brood_Year + 2) %>% 
+  select(Escapement_type, Age_Class, all_of(c(year_match)))
 }
 
 # Matching escapement to covariates ---------------------------------------
@@ -119,16 +135,16 @@ cov_data_stock_roll_long<- cov_data_stock_roll %>% pivot_longer(cols = starts_wi
 #1. Long files - for use in visualization plotting 
 #matching to Run Year + time lags
 if(age_specific==FALSE & year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
-  escapement_data_covariates<-merge(escapement_data,cov_data_stock_roll_long, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates<-merge(escapement_data ,cov_data_stock_roll_long, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
   escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock_roll, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
-  } else {
-    escapement_data_covariates<-merge(escapement_data, cov_data_long_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
-    escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
-  }
+} else  {
+  escapement_data_covariates<-merge(escapement_data, cov_data_long_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+}
 
 
 #Filter for age class
-if(age_specific==TRUE){
+if(age_specific==TRUE & age_combine==FALSE){
   escapement_data_covariates<- escapement_data_covariates %>% filter(Age_Class == age_class)
   escapement_data_covariates_wide<- escapement_data_covariates_wide %>% filter(Age_Class == age_class)
   }
