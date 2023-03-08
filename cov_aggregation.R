@@ -59,13 +59,12 @@ stocks_year
 
 
 
-fcs_covariates_combined<-merge(stocks_year, fcs_covariates, all=TRUE) %>% as_tibble()
+fcs_covariates_combined<-merge(stocks_year, fcs_covariates, all.x=TRUE) %>% as_tibble()
 fcs_covariates_combined<-merge(fcs_covariates_combined, fcs_covariates_atm , by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_combined
 
 fcs_covariates_combined<- fcs_covariates_combined %>% relocate(Stock_ERA, year) %>% 
-                          arrange(Stock_ERA, year) %>% 
-                          filter(year>1978)
+                          arrange(Stock_ERA, year)
 
 write.csv(fcs_covariates_combined, "fcs_covariates.csv", row.names = FALSE)
 
@@ -126,7 +125,7 @@ cov_meta <- cov_meta  %>%
             add_row(cov_name="cov_EPNP_yearly_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Year", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present")  %>%
             add_row(cov_name="cov_EPNP_summer_mean",  cov_type="Atmospheric Index", cov_source_method="Bell and Janowiak", cov_source="NOAA", cov_temporal="Summer (May - Sept inclusive)", cov_unit="East Pacific - North Pacific Index",match_type="none", match_spatial="basin", date_range= "1950-present") %>% 
             add_row(cov_name="cov_herring_spawn_index_mean",  cov_type="Herring Spawn Index", cov_source_method="Spawn Index R package", cov_source="DFO", cov_temporal="Year", cov_unit="Herring Spawn Index",match_type="Radius (500km)", match_spatial="terminal", date_range= "1950-present") %>% 
-            add_row(cov_name="cov_water_level_yearly_mean",  cov_type="Hydrographic", cov_source_method="tidyhydat package", cov_source="Water Survey of Canada", cov_temporal="Year", cov_unit="Water level",match_type="Point", match_spatial="terminal", date_range= "1900-present") %>% 
+            add_row(cov_name="cov_water_flow_yearly_max",  cov_type="Hydrographic", cov_source_method="tidyhydat package", cov_source="Water Survey of Canada", cov_temporal="Year", cov_unit="Water level",match_type="Point", match_spatial="terminal", date_range= "1900-present") %>% 
             add_row(cov_name="cov_water_flow_yearly_mean",  cov_type="Hydrographic", cov_source_method="tidyhydat package", cov_source="Water Survey of Canada", cov_temporal="Year", cov_unit="Water level",match_type="Point", match_spatial="terminal", date_range= "1900-present") 
 
 # Metadata locations ------------------------------------------------------
