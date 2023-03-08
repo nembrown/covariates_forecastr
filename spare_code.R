@@ -1,3 +1,25 @@
+######
+if(age_specific==FALSE & year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
+  escapement_data_covariates<-merge(escapement_data %>% select(Escapement_type, contains(c(year_match))),cov_data_stock_roll_long, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates_wide<-merge(escapement_data%>% select(Escapement_type, contains(c(year_match))), cov_data_stock_roll, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+} else if (age_specific==TRUE) {
+  escapement_data_covariates<-merge(escapement_data%>% select(Escapement_type, Age_Class, contains(c(year_match))), cov_data_long_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates_wide<-merge(escapement_data%>% select(Escapement_type, Age_Class, contains(c(year_match))), cov_data_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+} else {
+  escapement_data_covariates<-merge(escapement_data%>% select(Escapement_type,contains(c(year_match))), cov_data_long_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates_wide<-merge(escapement_data%>% select(Escapement_type, contains(c(year_match))), cov_data_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+}
+
+#OR
+if(age_specific==FALSE & year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
+  escapement_data_covariates<-merge(escapement_data ,cov_data_stock_roll_long, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock_roll, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+} else  {
+  escapement_data_covariates<-merge(escapement_data, cov_data_long_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+  escapement_data_covariates_wide<-merge(escapement_data, cov_data_stock, by.x=year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble
+}
+
+
 ####
 ios_zoop_winter_COW<-ios_zoop_matched %>% filter(season == "winter", Stock_ERA=="COW", year==2014)
 View(ios_zoop_winter_COW)
