@@ -6,6 +6,13 @@ library(lubridate)
 library(sf)
 library(data.table)
 library(tidyhydat)
+library(sjmisc)
+
+
+# California current data -------------------------------------------------
+calicur_1998_present<-read.csv("Inputs/OEI-spotlight-cvs-2022-NWFSC.csv", check.names = FALSE)
+calicur_1998_present_long<- rotate_df(calicur_1998_present, rn="year", cn=TRUE) %>% as_tibble()
+calicur_1998_present_long
 
 # PDO (Pacific Decadal Oscillation) from NOAA ---------------------------------------------------------------------
 
@@ -342,5 +349,8 @@ get_water_office_flow_2021_2022<-get_water_office_flow_2021_2022 %>%
                                  summarise(cov_water_flow_yearly_mean = mean(Value.Valeur, na.rm=TRUE), 
                                            cov_water_flow_yearly_max = max(Value.Valeur, na.rm=TRUE)) %>% 
                                 drop_na()
+
+
+
 
 
