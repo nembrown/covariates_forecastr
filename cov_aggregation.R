@@ -13,7 +13,7 @@ soi_simple
 npgo_simple
 epnp_simple
 #alpi_simple
-
+calicur_1998_present_long
 
 #take out the station ID parts
 #temperature from MEDS buoys #464, since 1989
@@ -39,7 +39,7 @@ herring_spawn_matched
 
 #start with atmospheric bc longer time series usually and no stocks
 fcs_covariates_atm<- merge(oni_simple, soi_simple, by=c("year"), all=TRUE) %>% as_tibble()
-#fcs_covariates_atm<- merge(fcs_covariates_atm, npi_simple, by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_atm<- merge(fcs_covariates_atm, calicur_1998_present_long, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, pdo_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, npgo_simple, by=c("year"), all=TRUE) %>% as_tibble()
 fcs_covariates_atm<- merge(fcs_covariates_atm, epnp_simple, by=c("year"), all=TRUE) %>% as_tibble()
@@ -81,6 +81,7 @@ write.csv(fcs_covariates_combined_interpolated, "fcs_covariates_interpolated.csv
 
 
 # Add in metadata------------------------------------------------------
+#this needs to be updated
 
 #Summary table
 cov_meta <- data.frame(cov_name=character(), 
