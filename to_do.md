@@ -18,7 +18,6 @@ output: html_document
 - 2021 cut off to just read in the NAs and then filter out if not complete
 
 #### Nomenclature
-- cov to Cov in output
 - Lag change to + 1, lead to -1
 
 #### Further development
