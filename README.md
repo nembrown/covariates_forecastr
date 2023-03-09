@@ -19,7 +19,7 @@ Repository of code for gathering environmental and biological covariates to feed
 
 #### Next, match and plot average escapement of a model stock to covariates from an indicator stock:
 
-[LGS_COW_NAT.R](https://github.com/nembrown/covariates_forecastr/blob/main/LGS_COW_NAT.R) - For example use this code for Lower Georgia Strait, matched to data from Cowichan indicator stock. Before running this script, create directories (as indicated) under a plotting folder. Running this script (and those like it) will match the covariate data to average escapement (or terminal run) by either brood year (with either a synced time series (sync), brood year + 1 (Lag1), or brood year + 2 (Lag2)) or run year (with either a synced time series, run year - 1 (Lead1), or run year - 2 (Lead2)). The script will then spit out plots in corresponding folders. These plots are intended for visualization and to help select a suite of 3 correlated covariates to use in ForecastR. 
+[cov_correlate.R](https://github.com/nembrown/covariates_forecastr/blob/main/cov_correlate.R) - Run the function and then specify the inputs. The script will then spit out plots in corresponding folders. These plots are intended for visualization and to help select a suite of 3 correlated covariates to use in ForecastR. 
 
 These plots are of two types: 
 
@@ -29,5 +29,4 @@ These plots are of two types:
 
 #### After selecting covariates for forecasting, you can create and save a ForecastR-shiny-ready file:
 
-This is demonstrated with an example here: 
-[shiny_formatting.R](https://github.com/nembrown/covariates_forecastr/blob/main/shiny_formatting.R). Select and rename covariates as desired. Remember to include if the covariate is matched to run or brood year, and any lead or lag of years. Naming convention Cov_ with an uppercase "C" is required for ForecastR to read as a covariate. ForecastR can not tolerate missing values at this time. 
+[cov_select.R](https://github.com/nembrown/covariates_forecastr/blob/main/cov_select.R). Select and rename covariates as desired. Remember to include if the covariate is matched to run or brood year, and any lead or lag of years. 
