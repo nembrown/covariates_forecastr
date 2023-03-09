@@ -17,7 +17,7 @@ correlate_covs(cov_data="fcs_covariates_interpolated.csv",
                escapement_data = "Inputs/PPS_Esc_no_age_upto2022.csv",
                modelstock = "PPS",
                stock= "PPS",
-               year_match="Brood_Year_Lag2", 
+               year_match="Brood_Year_Lag1", 
                escapement_type="Average Escapement",
                age_specific=FALSE, 
                age_combine=FALSE,
@@ -149,6 +149,12 @@ if(age_specific==TRUE & age_combine==FALSE){
   escapement_data_covariates_wide<- escapement_data_covariates_wide %>% filter(Age_Class == age_class)
   }
 
+
+### drop columns with NAs
+escapement_data_covariates_wide<-  escapement_data_covariates_wide %>% select(Escapement_type, contains("Brood"), contains("Run"), (contains("cov") & where(~! any(is.na(.)))))
+escapement_data_covariates<-  escapement_data_covariates %>% group_by(Covariate) %>% filter(!is.na(sum(value))) %>% ungroup()
+
+
 # Correlation with Escapement type -------------------------------------
 
 corr_stock<-escapement_data_covariates_wide %>% select(Escapement_type, starts_with("cov")) 
@@ -178,16 +184,16 @@ for(Covariate_ in matches_stock) {
 
 ########### Covariate_plots_stock
 #Oceanic indices by year
-oceanic_yearly_Covariate_plots_stock <- pluck(Covariate_plots_stock, "cov_PDO_yearly_mean") + 
-  pluck(Covariate_plots_stock, "cov_ONI_yearly_mean")+
-  pluck(Covariate_plots_stock, "cov_ONI_yearly_anomaly") + 
-  pluck(Covariate_plots_stock, "cov_SOI_yearly_mean") +
-  # pluck(Covariate_plots_stock, "cov_NPI_yearly_mean") +
-  # pluck(Covariate_plots_stock, "cov_NPI_yearly_anomaly") +
-  pluck(Covariate_plots_stock, "cov_NPGO_yearly_mean") +
-  pluck(Covariate_plots_stock, "cov_EPNP_yearly_mean") +
- # pluck(Covariate_plots_stock, "cov_ALPI_yearly_mean") +
- # pluck(Covariate_plots_stock, "cov_model_EVs") +
+oceanic_yearly_Covariate_plots_stock <- pluck(Covariate_plots_stock, "cov_PDO_yearly_mean", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_ONI_yearly_mean", .default=plot_spacer())+
+  pluck(Covariate_plots_stock, "cov_ONI_yearly_anomaly", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_SOI_yearly_mean", .default=plot_spacer()) +
+  # pluck(Covariate_plots_stock, "cov_NPI_yearly_mean", .default=plot_spacer()) +
+  # pluck(Covariate_plots_stock, "cov_NPI_yearly_anomaly", .default=plot_spacer()) +
+  pluck(Covariate_plots_stock, "cov_NPGO_yearly_mean", .default=plot_spacer()) +
+  pluck(Covariate_plots_stock, "cov_EPNP_yearly_mean", .default=plot_spacer()) +
+ # pluck(Covariate_plots_stock, "cov_ALPI_yearly_mean", .default=plot_spacer()) +
+ # pluck(Covariate_plots_stock, "cov_model_EVs", .default=plot_spacer()) +
   guide_area()+
   plot_layout(guides = 'collect', ncol=3)
 
@@ -195,50 +201,50 @@ oceanic_yearly_Covariate_plots_stock
 ggsave(oceanic_yearly_Covariate_plots_stock , file=paste0("Plots/", modelstock, "/oceanic_yearly_", year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #oceanic summer plot
-oceanic_summer_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_PDO_summer_mean") + 
-  pluck(Covariate_plots_stock, "cov_ONI_summer_mean") + 
-  pluck(Covariate_plots_stock, "cov_ONI_summer_anomaly") + 
-  pluck(Covariate_plots_stock, "cov_SOI_summer_mean") + 
-  # pluck(Covariate_plots_stock, "cov_NPI_summer_mean") + 
-  pluck(Covariate_plots_stock, "cov_NPGO_summer_mean") +
-  pluck(Covariate_plots_stock, "cov_EPNP_summer_mean") +
+oceanic_summer_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_PDO_summer_mean", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_ONI_summer_mean", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_ONI_summer_anomaly", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_SOI_summer_mean", .default=plot_spacer()) + 
+  # pluck(Covariate_plots_stock, "cov_NPI_summer_mean", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_NPGO_summer_mean", .default=plot_spacer()) +
+  pluck(Covariate_plots_stock, "cov_EPNP_summer_mean", .default=plot_spacer()) +
   guide_area()+
   plot_layout(guides = 'collect', ncol=3)
 ggsave(oceanic_summer_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/oceanic_summer_", year_match,"_", modelstock,  "_Age_",age_class,".tiff"))
 
 ##Zooplankton
-zoop_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_zoop_yearly_anomaly") + 
-  pluck(Covariate_plots_stock, "cov_zoop_winter_anomaly") + 
-  pluck(Covariate_plots_stock, "cov_zoop_summer_anomaly")+
-  pluck(Covariate_plots_stock, "cov_zoop_spring_anomaly") + 
-  pluck(Covariate_plots_stock, "cov_zoop_fall_anomaly") + 
+zoop_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_zoop_yearly_anomaly", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_zoop_winter_anomaly", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_zoop_summer_anomaly", .default=plot_spacer())+
+  pluck(Covariate_plots_stock, "cov_zoop_spring_anomaly", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_zoop_fall_anomaly", .default=plot_spacer()) + 
   plot_layout(guides = 'collect', ncol=3)
 ggsave(zoop_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/zoop_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #Temperature
 temp_Covariate_plots_stock <- 
-  #pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_yearly_mean") + 
-  #pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_summer_mean") + 
-  #pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_yearly_mean") + 
-  #pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_summer_mean") +
-  pluck(Covariate_plots_stock, "cov_SST_lighthouse_yearly_mean") + 
-  pluck(Covariate_plots_stock, "cov_SST_lighthouse_summer_mean") + 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_yearly_mean", .default=plot_spacer()) + 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_terminal_summer_mean", .default=plot_spacer()) + 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_yearly_mean", .default=plot_spacer()) + 
+  #pluck(Covariate_plots_stock, "cov_SST_MEDS_offshore_summer_mean", .default=plot_spacer()) +
+  pluck(Covariate_plots_stock, "cov_SST_lighthouse_yearly_mean", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_SST_lighthouse_summer_mean", .default=plot_spacer()) + 
   plot_layout(guides = 'collect', ncol=2)
 ggsave(temp_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/temperature_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #Salinity
-salinity_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_PPT_lighthouse_yearly_mean") + 
-  pluck(Covariate_plots_stock, "cov_PPT_lighthouse_summer_mean") + 
+salinity_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_PPT_lighthouse_yearly_mean", .default=plot_spacer()) + 
+  pluck(Covariate_plots_stock, "cov_PPT_lighthouse_summer_mean", .default=plot_spacer()) + 
   plot_layout(guides = 'collect', ncol=2)
 ggsave(salinity_Covariate_plots_stock, file=paste0("Plots/", modelstock, "/salinity_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 
 #Herring
-herring_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_herring_spawn_index_mean")
+herring_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_herring_spawn_index_mean", .default=plot_spacer())
 ggsave(herring_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/herring_", year_match,"_", modelstock,  "_Age_",age_class,".tiff"))
 
 #Hydrographic variables
-hydro_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_water_flow_yearly_mean")+
-  pluck(Covariate_plots_stock, "cov_water_flow_yearly_max")+ 
+hydro_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_water_flow_yearly_mean", .default=plot_spacer())+
+  pluck(Covariate_plots_stock, "cov_water_flow_yearly_max", .default=plot_spacer())+ 
   plot_layout(guides = 'collect', ncol=2)
 ggsave(hydro_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/hydro_",  year_match,"_", modelstock, "_Age_",age_class, ".tiff"))
 }
