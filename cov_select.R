@@ -7,14 +7,14 @@ library(tidyverse)
 
 
 select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
-            escapement_data_file = "Inputs/PPS_Esc_no_age_upto2022.csv",
-            output_file_name = "Outputs/PPS/PPS_Esc_no_age_upto2022_cov.csv" , 
-            modelstock = "PPS",
-            stock= "PPS",
+            escapement_data_file = "Inputs/WVH_TR_upto2022.csv",
+            output_file_name = "Outputs/MGS/MGS_Esc_upto2022_cov_age4.csv" , 
+            modelstock = "MGS",
+            stock= "BQR",
             escapement_type="Average Escapement",
-            age_specific=FALSE,
+            age_specific=TRUE,
             age_combine=FALSE,
-            age_class=NA,
+            age_class=4,
             cov1 = "cov_NPGO_summer_mean", 
             cov1_year_match = "Brood_Year_Lag2", 
             cov2 = "cov_ONI_yearly_anomaly", 
@@ -22,7 +22,7 @@ select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
             cov3 = "cov_EPNP_yearly_mean", 
             cov3_year_match = "Run_Year_Lead2")
 
-
+#Laura don't touch
 select_covs<-function(cov_data_file,
                          escapement_data_file,
                          output_file_name,
@@ -151,12 +151,19 @@ if(age_specific==FALSE & cov2_year_match %in%  c("Brood_Year", "Brood_Year_Lag1"
                                          left_join(escapement_data_cov2_wide %>% select(-all_of(c(cov2_year_match)))) %>% 
                                          left_join(escapement_data_cov3_wide %>% select(-all_of(c(cov3_year_match)))) %>% 
                                          rename_with(str_to_title, starts_with("cov")) 
-  }else if (age_specific==TRUE & age_combine == FALSE){
+  }else if (age_specific==TRUE & age_combine == FALSE & is.na(age_class)){
     escapement_data_original_format_covs<- escapement_data_original_format %>% 
                                            left_join(escapement_data_cov1_wide %>% select(-all_of(c(cov1_year_match)))) %>% 
                                            left_join(escapement_data_cov2_wide %>% select(-all_of(c(cov2_year_match)))) %>% 
                                            left_join(escapement_data_cov3_wide %>% select(-all_of(c(cov3_year_match)))) %>% 
-                                           rename_with(str_to_title, starts_with("cov")) 
+                                           rename_with(str_to_title, starts_with("cov"))
+  } else if (age_specific==TRUE & age_combine == FALSE & !is.na(age_class)){
+                                           escapement_data_original_format_covs<- escapement_data_original_format %>% 
+                                           left_join(escapement_data_cov1_wide %>% select(-all_of(c(cov1_year_match)))) %>% 
+                                           left_join(escapement_data_cov2_wide %>% select(-all_of(c(cov2_year_match)))) %>% 
+                                           left_join(escapement_data_cov3_wide %>% select(-all_of(c(cov3_year_match)))) %>% 
+                                           rename_with(str_to_title, starts_with("cov")) %>% 
+                                           filter(Age_Class == age_class)
   }
 
 
