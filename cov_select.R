@@ -12,6 +12,7 @@ select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
             modelstock = "MGS",
             stock= "BQR",
             escapement_type="Average Escapement",
+            truncate_ts=NA,
             age_specific=TRUE,
             age_combine=FALSE,
             age_class=4,
@@ -29,6 +30,7 @@ select_covs<-function(cov_data_file,
                          modelstock = NA_character_, 
                          stock= NA_character_, 
                          escapement_type=NA_character_,
+                         truncate_ts=NA_integer_,
                          age_specific=FALSE, 
                          age_combine=FALSE,
                          age_class = NA_integer_, 
@@ -43,6 +45,10 @@ select_covs<-function(cov_data_file,
   escapement_data_original_format<-read.csv(escapement_data_file) %>% as_tibble() %>% select(-contains("Cov"))
   
   escapement_data<-read.csv(escapement_data_file) %>% as_tibble()
+  
+  if (!is.na(truncate_ts)){
+    escapement_data<-  escapement_data %>% filter(Brood_Year >= truncate_ts)
+  }
   
   rel_file_dir <- normalizePath(paste0("Outputs/", modelstock), mustWork = FALSE)
   
