@@ -30,7 +30,7 @@ hydro_stations_matched<-hydro_annual_wide_matched %>% rename(year = Year)
 
 
 #model_EVs_stocks
-#model_EVs_stocks
+model_EVs_stocks
 
 #herring
 herring_spawn_matched
@@ -50,6 +50,7 @@ fcs_covariates_atm
 fcs_covariates<- merge(Data_Lightstations_matched, ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates<- merge(fcs_covariates,herring_spawn_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates<- merge(fcs_covariates,hydro_stations_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
+fcs_covariates<- merge(fcs_covariates,model_EVs_stocks, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates
 
 #then combine atmospheric and by-stock - data frame year and stock 
