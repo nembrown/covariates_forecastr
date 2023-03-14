@@ -80,11 +80,11 @@ cov_data_long<- cov_data %>% pivot_longer(cols = starts_with("cov"), names_to = 
     TRUE ~ "terminal")) 
 
 # Restrict to only stock
-cov_data_long_stock<-cov_data_long %>% filter(Stock_ERA == stock)
-cov_data_stock<-cov_data %>% filter(Stock_ERA == stock)
+cov_data_long_stock<-cov_data_long %>% filter(Stock_ERA == stock, Stock_model == modelstock) %>% select(-Stock_model)
+cov_data_stock<-cov_data %>% filter(Stock_ERA == stock, Stock_model == modelstock) %>% select(-Stock_model)
 
 if(escapement_type=="Terminal Run"){
-  escapement_data<-escapement_data %>% rename(Escapement_type=Terminal_Run)
+  escapement_data<-escapement_data %>% rename(Escapement_type=Average_Terminal_Run)
 }else if (escapement_type=="Average Escapement"){
   escapement_data<-escapement_data %>% rename(Escapement_type=Average_Escapement)
 }

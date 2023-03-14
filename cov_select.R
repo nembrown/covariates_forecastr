@@ -8,14 +8,14 @@ library(tidyverse)
 
 select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
             escapement_data_file = "Inputs/WVN_TR_upto2022.csv",
-            output_file_name = "Outputs/WVN/WVN_TR_Age5_upto2022_cov_stupid.csv" ,
+            output_file_name = "Outputs/WVN/WVN_TR_Age5_upto2022_working_now.csv" ,
             modelstock = "WVN",
             stock= "RBT",
             escapement_type="Terminal Run",
             age_specific=TRUE,
             truncate_ts = NA,
-            cov1 = "cov_herring_spawn_index_mean",
-            cov1_year_match = "Brood_Year_Lag1",
+            cov1 = "cov_model_EVs",
+            cov1_year_match = "Brood_Year",
             cov2 = "cov_PPT_lighthouse_summer_mean",
             cov2_year_match = "Brood_Year_Lag2",
             cov3 = "cov_PDO_summer_mean",
@@ -54,11 +54,11 @@ select_covs<-function(cov_data_file,
   }
   
   # Restrict to only stock
-  cov_data_stock<-cov_data %>% filter(Stock_ERA == stock)
+  cov_data_stock<-cov_data %>% filter(Stock_ERA == stock & Stock_model== modelstock) %>% select(-Stock_model)
   cov_data_stock_select<- cov_data_stock %>% select(year, all_of(c(cov1, cov2, cov3)))
 
     if(escapement_type=="Terminal Run"){
-    escapement_data<-escapement_data %>% rename(Escapement_type=Terminal_Run)
+    escapement_data<-escapement_data %>% rename(Escapement_type=Average_Terminal_Run)
   } else if (escapement_type=="Average Escapement"){
     escapement_data<-escapement_data %>% rename(Escapement_type=Average_Escapement)
   }
@@ -114,9 +114,9 @@ select_covs<-function(cov_data_file,
     
   
   if(escapement_type=="Terminal Run"){
-    escapement_data_cov1_wide<-escapement_data_cov1_wide %>% rename(Terminal_Run=Escapement_type)
-    escapement_data_cov2_wide<-escapement_data_cov2_wide %>% rename(Terminal_Run=Escapement_type)
-    escapement_data_cov3_wide<-escapement_data_cov3_wide %>% rename(Terminal_Run=Escapement_type)
+    escapement_data_cov1_wide<-escapement_data_cov1_wide %>% rename(Average_Terminal_Run=Escapement_type)
+    escapement_data_cov2_wide<-escapement_data_cov2_wide %>% rename(Average_Terminal_Run=Escapement_type)
+    escapement_data_cov3_wide<-escapement_data_cov3_wide %>% rename(Average_Terminal_Run=Escapement_type)
     
       }else if (escapement_type=="Average Escapement"){
     escapement_data_cov1_wide<-escapement_data_cov1_wide %>% rename(Average_Escapement=Escapement_type)
