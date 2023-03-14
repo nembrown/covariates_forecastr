@@ -353,10 +353,10 @@ get_water_office_flow_2021_2022<-get_water_office_flow_2021_2022 %>%
 
 ### adding model EVs back in 
 # Model EVs ---------------------------------------------------------------
-# col_names_list<-c("stock", paste(1974:2025))
-# model_EVs<-read.table("Inputs/2203B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
-# model_stocks<-read.csv("Inputs/stockCodes.csv")
-# model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
-# model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2023) %>% as_tibble
-# model_EVs_stocks
-
+col_names_list<-c("stock", paste(1974:2025))
+model_EVs<-read.table("Inputs/2203B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
+model_stocks<-read.csv("Inputs/stockCodes.csv") 
+model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
+model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, Stock_model, year, cov_model_EVs) %>% filter(year< 2023) %>% as_tibble
+model_EVs_stocks<- model_EVs_stocks %>% complete(year=1970:2022, nesting(Stock_ERA, Stock_model))
+model_EVs_stocks

@@ -50,26 +50,16 @@ fcs_covariates_atm
 #Then join stock-wise
 fcs_covariates<- merge(Data_Lightstations_matched, ios_zoop_anomalies, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
 fcs_covariates<- merge(fcs_covariates,herring_spawn_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
-fcs_covariates<- merge(fcs_covariates,hydro_stations_matched, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
-#fcs_covariates<- merge(fcs_covariates,model_EVs_stocks, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble
+fcs_covariates<- merge(fcs_covariates,hydro_stations_matched, by=c("Stock_ERA","year"), all=TRUE) %>% as_tibble
+fcs_covariates<- merge(fcs_covariates, model_EVs_stocks, by=c("Stock_ERA", "year"), all=TRUE) %>% as_tibble %>% relocate(Stock_ERA, Stock_model, year)
 fcs_covariates
 
-#then combine atmospheric and by-stock - data frame year and stock 
-stocks_year <- stocks_loc_simple_1 %>% dplyr::select(-c(lat, long)) %>% add_column(year = c(1970:2024))
-stocks_year <- stocks_year %>% expand(Stock_ERA, year) %>% filter(year<2023)
-stocks_year 
-
-
-
-fcs_covariates_combined<-merge(stocks_year, fcs_covariates, all.x=TRUE) %>% as_tibble()
-fcs_covariates_combined<-merge(fcs_covariates_combined, fcs_covariates_atm , by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_combined<-merge(fcs_covariates, fcs_covariates_atm , by=c("year"), all=TRUE) %>% as_tibble()
+fcs_covariates_combined<- fcs_covariates_combined %>% complete(year, nesting(Stock_ERA, Stock_model)) %>% filter(year>1969)
+fcs_covariates_combined<- fcs_covariates_combined %>% arrange(Stock_ERA, Stock_model, year)
 fcs_covariates_combined
 
-fcs_covariates_combined<- fcs_covariates_combined %>% relocate(Stock_ERA, year) %>% 
-                          arrange(Stock_ERA, year)
-
 write.csv(fcs_covariates_combined, "fcs_covariates.csv", row.names = FALSE)
-
 
 #### Interpolation of missing values
 
@@ -159,16 +149,16 @@ cov_meta <- cov_meta  %>%
 loc_matching_light_meta<- merge(loc_matching_light, Data_Lightstations_locations) %>% dplyr::select(-closestStock_ERAVec_light) %>% as_tibble
 loc_matching_light_meta
 
-#Offshore meds buoys
-dfo_meds_buoys_locations_offshore<-dfo_meds_buoys_locations %>% filter(STN_ID %in% c("C46184", "C46004","C46036"))
-loc_matching_offshore_meta <- merge(loc_matching_offshore_1, dfo_meds_buoys_locations_offshore) %>%  dplyr::select(-closestStock_ERAVec_Offshore)  %>% mutate(site_type= "Offshore MEDS buoy") %>%  rename(Site_name = STN_ID)%>% as_tibble
-loc_matching_offshore_meta
+##Offshore meds buoys
+# dfo_meds_buoys_locations_offshore<-dfo_meds_buoys_locations %>% filter(STN_ID %in% c("C46184", "C46004","C46036"))
+# loc_matching_offshore_meta <- merge(loc_matching_offshore_1, dfo_meds_buoys_locations_offshore) %>%  dplyr::select(-closestStock_ERAVec_Offshore)  %>% mutate(site_type= "Offshore MEDS buoy") %>%  rename(Site_name = STN_ID)%>% as_tibble
+# loc_matching_offshore_meta
 
-#Terminal meds buoys
-loc_matching_meta <- merge(loc_matching, dfo_meds_buoys_locations) %>% dplyr::select(-closestStock_ERAVec)  %>%  rename(Site_name = STN_ID) %>% as_tibble
-loc_matching_meta
+##Terminal meds buoys
+# loc_matching_meta <- merge(loc_matching, dfo_meds_buoys_locations) %>% dplyr::select(-closestStock_ERAVec)  %>%  rename(Site_name = STN_ID) %>% as_tibble
+# loc_matching_meta
 
-stations_meta<-bind_rows(loc_matching_light_meta, loc_matching_offshore_meta, loc_matching_meta)
+stations_meta<-bind_rows(loc_matching_light_meta)
 stations_meta<- stations_meta %>% relocate(Region, Stock_ERA, Stock_long, Stock_lat, site_type, Site_name, long, lat, Distance ) %>% arrange(Region, Stock_ERA)
 stations_meta
 

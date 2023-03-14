@@ -12,7 +12,7 @@ library(tidyhydat)
 stocks_loc<-read.csv("data-raw/stocks.csv") 
 #note terminal - I manually mapped these, so that for eg. the fraser river stocks would map to the mouth of the fraser and not interior
 stocks_loc<- stocks_loc %>%  as_tibble() %>% 
-                             dplyr::select(Stock_ERA, StockName, SiteName, MapRegion,Lat, Long, Lat_terminal, Long_terminal) %>% 
+                             dplyr::select(Stock_ERA,StockName, SiteName, MapRegion,Lat, Long, Lat_terminal, Long_terminal) %>% 
                              rename(long=Long_terminal, lat=Lat_terminal) 
 
 #new dataframe that can be changed into a spatial object for distance matching 
@@ -21,11 +21,11 @@ coordinates(stocks_loc_simple) <- c("long", "lat")
 stocks_loc_simple
 
 #new dataframe that can be changed into spatial for radius matching 
-stocks_loc_simple_1 <- stocks_loc %>% dplyr::select(Stock_ERA, lat, long)
+stocks_loc_simple_1 <- stocks_loc %>% dplyr::select(Stock_ERA,  lat, long)
 stocks_loc_simple_1
 
 #new dataframe that can be changed into spatial for radius matching - using non terminal locations
-stocks_loc_simple_2 <- stocks_loc %>% dplyr::select(Stock_ERA, Lat, Long) %>% rename(lat=Lat, long=Long)
+stocks_loc_simple_2 <- stocks_loc %>% dplyr::select(Stock_ERA,  Lat, Long) %>% rename(lat=Lat, long=Long)
 stocks_loc_simple_2
 
 # Match Light stations to ERA Stocks --------------------------------------------
@@ -52,7 +52,7 @@ for (i in 1 : nrow(stocks_loc_simple))
 
 PointAssignTemps_light <- as(Data_Lightstations_loc[closestStock_ERAVec_light,]$Site_name,"character")
 
-loc_matching_light = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA,stocks_loc_simple$MapRegion,closestStock_ERAVec_light,minDistVec_light,PointAssignTemps_light)
+loc_matching_light = data.frame(coordinates(stocks_loc_simple),stocks_loc_simple$Stock_ERA, stocks_loc_simple$MapRegion,closestStock_ERAVec_light,minDistVec_light,PointAssignTemps_light)
 names(loc_matching_light) <- c("Stock_long","Stock_lat","Stock_ERA","Region","closestStock_ERAVec_light","Distance","Site_name")
 
 #All stocks including American
@@ -223,7 +223,7 @@ ios_zoop_allseasons<- ios_zoop_allseasons %>% mutate(cov_zoop_winter_anomaly = l
                                                      cov_zoop_spring_anomaly = log_spring_zoop - log_spring_zoop_mean, 
                                                      cov_zoop_summer_anomaly = log_summ_zoop - log_summ_zoop_mean, 
                                                      cov_zoop_fall_anomaly = log_fall_zoop - log_fall_zoop_mean)
-ios_zoop_anomalies<-ios_zoop_allseasons %>% dplyr::select(Stock_ERA, calc_year, cov_zoop_winter_anomaly, cov_zoop_spring_anomaly, cov_zoop_summer_anomaly, cov_zoop_fall_anomaly) %>% 
+ios_zoop_anomalies<-ios_zoop_allseasons %>% dplyr::select(Stock_ERA,  calc_year, cov_zoop_winter_anomaly, cov_zoop_spring_anomaly, cov_zoop_summer_anomaly, cov_zoop_fall_anomaly) %>% 
                                             mutate(cov_zoop_yearly_anomaly = rowMeans(across(cov_zoop_winter_anomaly:cov_zoop_fall_anomaly), na.rm=TRUE))
 ios_zoop_anomalies
 
@@ -293,8 +293,6 @@ water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_
                        summarize(cov_water_flow_yearly_max=max(cov_water_flow_yearly_max, na.rm=TRUE),  
                                  cov_water_flow_yearly_mean=max(cov_water_flow_yearly_mean, na.rm=TRUE))
 
-unique(pacific_stations_matched$STATION_NUMBER)   
-
 
 #08BB001,08BB002,08BB005,08CE001,08CF001,08CF003,08CG001,08CG004,08DA005,08DB001,08DC006,08DD001,08EF001,08FA002,08FB011,08FC003,08GA022,08GD004,08GE002,08HA001,08HA010,08HA011,08HA034,08HA037,08HA039,08HA047,08HA059,08HA065,08HB006,08HB010,08HB014,08HB017,08HB034,08HB092,08HC001,08HD003,08HD035,08KA004,08KH001,08LC002,08LE031,08LF051,08MB012,08MC018,08MD013,08MF005,08MF035,08MH001,08MH024,08MH103,08MH126,08ND011,08ND025,08NH118,08NH119,08NL022,08NL038,08NL071,08NM127,08NN012,08NN026,09AA012,09AA013,09AA014,09AA015
 
@@ -302,6 +300,6 @@ unique(pacific_stations_matched$STATION_NUMBER)
 # Combing the match file to the data file (from cov_fetch)
 hydro_annual_wide_matched <-  pacific_stations_matched %>% 
                               filter(Year %notin% c(2021, 2022)) %>% 
-                              full_join(water_office_matched) 
+                              full_join(water_office_matched) %>% drop_na()
 
 
