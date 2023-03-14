@@ -8,7 +8,7 @@ library(tidyverse)
 
 select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
             escapement_data_file = "Inputs/WVN_TR_upto2022.csv",
-            output_file_name = "Outputs/WVN/WVN_TR_Age5_upto2022_cov_age4.csv" ,
+            output_file_name = "Outputs/WVN/WVN_TR_Age5_upto2022_cov_stupid.csv" ,
             modelstock = "WVN",
             stock= "RBT",
             escapement_type="Terminal Run",
@@ -95,30 +95,22 @@ select_covs<-function(cov_data_file,
   } 
  
 #cov 2
-if(age_specific==FALSE & cov2_year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
-  escapement_data_cov2_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, all_of(c(cov2_year_match))), cov_data_stock_roll_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
-} else if(age_specific==FALSE){
-  escapement_data_cov2_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, all_of(c(cov2_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
-} else if(age_specific==TRUE & age_combine==FALSE){
-  escapement_data_cov2_wide<-merge(escapement_data %>% select(Escapement_type, Brood_Year, Run_Year, Age_Class, all_of(c(cov2_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
-} else if(age_specific==TRUE & age_combine==TRUE & cov2_year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
-  escapement_data_cov2_wide<-merge(escapement_data_brood %>% select(Escapement_type, Brood_Year, all_of(c(cov2_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
- } else {
-   escapement_data_cov2_wide<-merge(escapement_data_run %>% select(Escapement_type, Run_Year, all_of(c(cov2_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
-}
+  if(age_specific==FALSE & cov2_year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
+    escapement_data_cov2_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, all_of(c(cov2_year_match))), cov_data_stock_roll_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
+  } else if (age_specific==TRUE) {
+    escapement_data_cov2_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, Brood_Year, Age_Class, all_of(c(cov2_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
+  } else {
+    escapement_data_cov2_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, all_of(c(cov2_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov2))), by.x=cov2_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov2_year_match ), starts_with("cov"))
+  } 
   
 #cov 3
   if(age_specific==FALSE & cov3_year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
     escapement_data_cov3_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, all_of(c(cov3_year_match))), cov_data_stock_roll_select %>% select(year, all_of(c(cov3))), by.x=cov3_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov3_year_match ), starts_with("cov"))
-  }else if(age_specific==FALSE){ 
-    escapement_data_cov3_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, all_of(c(cov3_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov3))), by.x=cov3_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov3_year_match ), starts_with("cov"))
-  } else if (age_specific==TRUE & age_combine==FALSE){
-    escapement_data_cov3_wide<-merge(escapement_data %>% select(Escapement_type, Brood_Year, Run_Year, Age_Class, all_of(c(cov3_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov3))), by.x=cov3_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov3_year_match ), starts_with("cov"))
-  } else if(age_specific==TRUE & age_combine==TRUE & cov3_year_match %in%  c("Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2")){
-    escapement_data_cov3_wide<-merge(escapement_data_brood %>% select(Escapement_type, Brood_Year, all_of(c(cov3_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov3))), by.x=cov3_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov3_year_match ), starts_with("cov"))
+  } else if (age_specific==TRUE) {
+    escapement_data_cov3_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, Brood_Year, Age_Class, all_of(c(cov3_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov3))), by.x=cov3_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov3_year_match ), starts_with("cov"))
   } else {
-    escapement_data_cov3_wide<-merge(escapement_data_run %>% select(Escapement_type, Run_Year, all_of(c(cov3_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov3))), by.x=cov3_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov3_year_match ), starts_with("cov"))
-}
+    escapement_data_cov3_wide<-merge(escapement_data %>% select(Escapement_type, Run_Year, all_of(c(cov3_year_match))), cov_data_stock_select %>% select(year, all_of(c(cov3))), by.x=cov3_year_match, by.y=c("year"), all.x=TRUE) %>% as_tibble %>% rename_with(~paste0(., "_",cov3_year_match ), starts_with("cov"))
+  } 
     
   
   if(escapement_type=="Terminal Run"){
@@ -131,20 +123,13 @@ if(age_specific==FALSE & cov2_year_match %in%  c("Brood_Year", "Brood_Year_Lag1"
     escapement_data_cov2_wide<-escapement_data_cov2_wide %>% rename(Average_Escapement=Escapement_type)
     escapement_data_cov3_wide<-escapement_data_cov3_wide %>% rename(Average_Escapement=Escapement_type)
       }
-  
-  if(age_specific==FALSE){
-  escapement_data_original_format_covs<- escapement_data_original_format %>% 
-                                         left_join(escapement_data_cov1_wide %>% select(-all_of(c(cov1_year_match)))) %>% 
-                                         left_join(escapement_data_cov2_wide %>% select(-all_of(c(cov2_year_match)))) %>% 
-                                         left_join(escapement_data_cov3_wide %>% select(-all_of(c(cov3_year_match)))) %>% 
-                                         rename_with(str_to_title, starts_with("cov")) 
-  }else if (age_specific==TRUE & age_combine == FALSE){
+
     escapement_data_original_format_covs<- escapement_data_original_format %>% 
                                            left_join(escapement_data_cov1_wide %>% select(-all_of(c(cov1_year_match)))) %>% 
                                            left_join(escapement_data_cov2_wide %>% select(-all_of(c(cov2_year_match)))) %>% 
                                            left_join(escapement_data_cov3_wide %>% select(-all_of(c(cov3_year_match)))) %>% 
                                            rename_with(str_to_title, starts_with("cov"))
-  } 
+  
 
 
 write.csv(escapement_data_original_format_covs, file=output_file_name)
