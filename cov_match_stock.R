@@ -67,8 +67,9 @@ loc_matching_light_simple
 
 # Combing the match file to the data file (from cov_fetch)
 Data_Lightstations_matched<-left_join(loc_matching_light_simple, Data_Lightstations_combined)
-Data_Lightstations_matched<- Data_Lightstations_matched %>% rename(Lightstation = Location)
-Data_Lightstations_matched
+Data_Lightstations_matched<- Data_Lightstations_matched %>% rename(Lightstation = Location) %>% 
+  dplyr::select(-Lightstation) %>% filter(year!=2023) %>% filter(year>1969)
+
 
 
 

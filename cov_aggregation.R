@@ -20,8 +20,6 @@ calicur_1998_present_long
 #temperature from MEDS buoys #464, since 1989
 #dfo_meds_buoys_matched_combined<-dfo_meds_buoys_matched_combined %>% dplyr::select(-c(buoy_ID_terminal, buoy_ID_offshore)) %>% filter(year!=2023)
 
-#temp and salinity from lightstations #752, since 1900 but active lighthouses since 1976
-Data_Lightstations_matched<-Data_Lightstations_matched %>% dplyr::select(-Lightstation) %>% filter(year!=2023)
 
 #zooplankton from ios, since 1980
 ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2023)
