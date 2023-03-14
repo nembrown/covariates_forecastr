@@ -276,7 +276,7 @@ stocks_loc_simple.sf<-stocks_loc_simple.sf %>% st_transform(3035)
 stocks_loc_simple.sf
 
 #Buffer circles of 5000m, i.e.100km  -- creates polygons around the stocks
-dat_circles <- st_buffer(stocks_loc_simple.sf2, dist = 100000)
+dat_circles <- st_buffer(stocks_loc_simple.sf, dist = 100000)
 
 #which of the region_stations fall within 100km radius of each stock
 pacific_stations_stocks<- st_join(pacific_stations_locations.sf, dat_circles, left=FALSE) %>% st_set_geometry(NULL) %>% as_tibble()
