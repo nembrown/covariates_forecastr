@@ -171,8 +171,7 @@ Lightstations_location<-Lightstations %>% rename(Station_ID = LIGHSTATIO, lat = 
                                           filter(DATA_COLLE == "ACTIVE") %>% 
                                           dplyr::select(Station_ID, lat, long)  %>% as_tibble
 
-#manually added Bonilla here bc it didnt have 2022 data - apparently folder badly named - will be changed in future. 
-list_of_files<-list.files('DATA_-_Active_Sites', pattern=c('Sea_Surface_Temperature_and_Salinity.+2022.csv|Bonilla_Island_-_Daily_Sea_Surface_Temperature_and_Salinity_1960-2021.csv'), recursive=TRUE, full.names = T)
+list_of_files<-list.files('DATA_-_Active_Sites', pattern=c('Sea_Surface_Temperature_and_Salinity.+2022.csv'), recursive=TRUE, full.names = T)
 station_names<-list(Lightstations_location$Station_ID)
 
 #could do this cleaner with a loop
@@ -354,10 +353,10 @@ get_water_office_flow_2021_2022<-get_water_office_flow_2021_2022 %>%
 
 ### adding model EVs back in 
 # Model EVs ---------------------------------------------------------------
-col_names_list<-c("stock", paste(1974:2025))
-model_EVs<-read.table("Inputs/2203B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
-model_stocks<-read.csv("Inputs/stockCodes.csv")
-model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
-model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2023) %>% as_tibble
-model_EVs_stocks
+# col_names_list<-c("stock", paste(1974:2025))
+# model_EVs<-read.table("Inputs/2203B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
+# model_stocks<-read.csv("Inputs/stockCodes.csv")
+# model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
+# model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, year, cov_model_EVs) %>% filter(year< 2023) %>% as_tibble
+# model_EVs_stocks
 
