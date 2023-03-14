@@ -13,16 +13,15 @@ library(purrr)
 # Read in cov_data for covariate and Av escapement  ------------------------------------------------------------
 
 correlate_covs(cov_data_file="fcs_covariates_interpolated.csv",
-               escapement_data_file = "Inputs/MGS_Esc_upto2022.csv",
-               modelstock = "MGS",
-               stock= "BQR",
-               year_match=c("Run_Year_Lead1", "Run_Year_Lead2", "Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2"), 
-               escapement_type="Average Escapement",
+               escapement_data_file = "Inputs/WVN_TR_upto2022.csv",
+               modelstock = "WVN",
+               stock= "RBT",
+               year_match=c("Run_Year_Lead1", "Run_Year_Lead2", "Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2"),
+               escapement_type="Terminal Run",
                truncate_ts=NA,
-               age_specific=TRUE, 
-               age_combine=FALSE,
-               age_class=5)
-
+               age_specific=TRUE,
+               age_combine=TRUE,
+               age_class=NA)
 
 correlate_covs<-function(cov_data_file,
                          escapement_data_file,
@@ -70,7 +69,8 @@ cov_data_long<- cov_data %>% pivot_longer(cols = starts_with("cov"), names_to = 
     str_detect(Covariate, "ONI") ~ "ONI", 
     str_detect(Covariate, "NPI") ~ "NPI", 
     str_detect(Covariate, "NPGO") ~ "NPGO", 
-    str_detect(Covariate, "EPNP") ~ "EPNP"  )) %>% 
+    str_detect(Covariate, "EPNP") ~ "EPNP", 
+   str_detect(Covariate, "EV") ~ "EVs")) %>% 
   mutate(var_timing = case_when(
     str_detect(Covariate, "year") ~ "Year", 
     str_detect(Covariate, "summer") ~ "Summer")) %>% 
@@ -120,7 +120,8 @@ cov_data_stock_roll_long<- cov_data_stock_roll %>% pivot_longer(cols = starts_wi
     str_detect(Covariate, "ONI") ~ "ONI", 
     str_detect(Covariate, "NPI") ~ "NPI", 
     str_detect(Covariate, "NPGO") ~ "NPGO", 
-    str_detect(Covariate, "EPNP") ~ "EPNP"  )) %>% 
+    str_detect(Covariate, "EPNP") ~ "EPNP", 
+    str_detect(Covariate, "EV") ~ "EVs")) %>% 
   mutate(var_timing = case_when(
     str_detect(Covariate, "year") ~ "Year", 
     str_detect(Covariate, "summer") ~ "Summer")) %>% 
@@ -134,6 +135,7 @@ cov_data_stock_roll_long<- cov_data_stock_roll %>% pivot_longer(cols = starts_wi
            mutate(Brood_Year_Lag1 = Brood_Year + 1) %>% 
            mutate(Brood_Year_Lag2 = Brood_Year + 2) %>% 
            select(Escapement_type, all_of(c(year_match[[i]])))
+           
 } else if (age_combine==TRUE){
            escapement_data<-escapement_data %>%  group_by(Run_Year) %>%
            summarise(Escapement_type = sum(Escapement_type, na.rm=TRUE)) %>% 
@@ -336,5 +338,12 @@ if (pluck_exists(Covariate_plots_stock, "cov_water_flow_yearly_mean")==TRUE |
     pluck_exists(Covariate_plots_stock, "cov_water_flow_yearly_max")==TRUE ){
 ggsave(hydro_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/hydro_",  year_match[[i]],"_", modelstock, "_Age_",age_class, ".tiff"))
 }
+
+  #Evs
+ EV_Covariate_plots_stock <-  pluck(Covariate_plots_stock, "cov_model_EVs", .default=plot_spacer())
+  if (pluck_exists(Covariate_plots_stock, "cov_model_EVs")==TRUE) {
+    ggsave(EV_Covariate_plots_stock,  file=paste0("Plots/", modelstock, "/evs_",  year_match[[i]],"_", modelstock, "_Age_",age_class, ".tiff"))
+    }
+    
 }
 }
