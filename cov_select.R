@@ -7,19 +7,20 @@ library(tidyverse)
 
 
 select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
-            escapement_data_file = "Inputs/WVN_TR_upto2022.csv",
-            output_file_name = "Outputs/WVN/WVN_TR_Age5_upto2022_working_now.csv" ,
-            modelstock = "WVN",
-            stock= "RBT",
-            escapement_type="Terminal Run",
+            escapement_data_file = "Inputs/NOC for Norah use SRH cov/Tillamooknewbooks2023.csv",
+            output_file_name = "Outputs/NOC/Tillamooknewbooks2023_cov.csv" ,
+            modelstock = "NOC",
+            stock= "SRH",
+            stock_name="Tillamook",
+            escapement_type="Average Escapement",
             age_specific=TRUE,
-            truncate_ts = NA,
+            truncate_ts = 1998,
             cov1 = "cov_model_EVs",
             cov1_year_match = "Brood_Year",
-            cov2 = "cov_PPT_lighthouse_summer_mean",
-            cov2_year_match = "Brood_Year_Lag2",
-            cov3 = "cov_PDO_summer_mean",
-            cov3_year_match = "Brood_Year")
+            cov2 = "cov_NPGO_yearly_mean",
+            cov2_year_match = "Brood_Year_Lag1",
+            cov3 = "cov_Upper_20_m_T_May_Sept",
+            cov3_year_match = "Brood_Year_Lag1")
 
 #Laura don't touch
 select_covs<-function(cov_data_file,
@@ -27,6 +28,7 @@ select_covs<-function(cov_data_file,
                          output_file_name,
                          modelstock = NA_character_, 
                          stock= NA_character_, 
+                         stock_name= NA_character_,
                          escapement_type=NA_character_,
                          truncate_ts=NA_integer_,
                          age_specific=FALSE,
@@ -40,11 +42,24 @@ select_covs<-function(cov_data_file,
   cov_data<-read.csv(cov_data_file) %>% as_tibble()
   escapement_data_original_format<-read.csv(escapement_data_file) %>% as_tibble() %>% select(-contains("Cov"))
 
-    escapement_data<-read.csv(escapement_data_file) %>% as_tibble()
-  
-  if (!is.na(truncate_ts)){
-    escapement_data<-  escapement_data %>% filter(Brood_Year >= truncate_ts)
+  if (max(escapement_data_original_format$Run_Year)!= 2023) {
+    escapement_data_original_format<- escapement_data_original_format %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2020, Age_Class=3, Average_Escapement=NA) %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2019, Age_Class=4, Average_Escapement=NA) %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2018, Age_Class=5, Average_Escapement=NA) %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2017, Age_Class=6, Average_Escapement=NA)
   }
+  
+  escapement_data<-read.csv(escapement_data_file) %>% as_tibble()
+  
+  if (max(escapement_data$Run_Year)!= 2023) {
+    escapement_data<- escapement_data %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2020, Age_Class=3, Average_Escapement=NA) %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2019, Age_Class=4, Average_Escapement=NA) %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2018, Age_Class=5, Average_Escapement=NA) %>% 
+      add_row(Stock_Name = "", Stock_Species = "", Stock_Abundance = "", Forecasting_Year = NA, Run_Year=2023, Brood_Year=2017, Age_Class=6, Average_Escapement=NA)
+  }
+  
   
   rel_file_dir <- normalizePath(paste0("Outputs/", modelstock), mustWork = FALSE)
   
@@ -130,7 +145,22 @@ select_covs<-function(cov_data_file,
                                            left_join(escapement_data_cov3_wide %>% select(-all_of(c(cov3_year_match)))) %>% 
                                            rename_with(str_to_title, starts_with("cov"))
   
-
-
-write.csv(escapement_data_original_format_covs, file=output_file_name)
+    if (!is.na(truncate_ts)){
+      escapement_data_original_format_covs<-  escapement_data_original_format_covs %>% filter(Brood_Year >= truncate_ts) %>% 
+        mutate(Stock_Name = case_when(
+          Brood_Year == truncate_ts & Age_Class == 3 ~ stock_name,
+          TRUE ~ Stock_Name), 
+          Stock_Species = case_when(
+            Brood_Year == truncate_ts & Age_Class == 3 ~ "Chinook",
+            TRUE ~ Stock_Species), 
+          Stock_Abundance = case_when(
+            Brood_Year == truncate_ts & Age_Class == 3 ~ escapement_type, 
+            TRUE ~ Stock_Abundance), 
+          Forecasting_Year = case_when(
+            Brood_Year == truncate_ts & Age_Class == 3 ~ as.integer(2023), 
+            TRUE ~ NA_integer_)) 
+    }
+    
+    
+write.csv(escapement_data_original_format_covs, file=output_file_name, row.names = FALSE)
 }
