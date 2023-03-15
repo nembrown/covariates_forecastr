@@ -12,7 +12,7 @@ select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
             modelstock = "NOC",
             stock= "SRH",
             stock_name="Tillamook",
-            escapement_type="Average Escapement",
+            escapement_type="Escapement",
             age_specific=TRUE,
             truncate_ts = 1998,
             cov1 = "cov_model_EVs",
@@ -74,7 +74,7 @@ select_covs<-function(cov_data_file,
 
     if(escapement_type=="Terminal Run"){
     escapement_data<-escapement_data %>% rename(Escapement_type=Average_Terminal_Run)
-  } else if (escapement_type=="Average Escapement"){
+  } else if (escapement_type=="Escapement"){
     escapement_data<-escapement_data %>% rename(Escapement_type=Average_Escapement)
   }
   
@@ -133,7 +133,7 @@ select_covs<-function(cov_data_file,
     escapement_data_cov2_wide<-escapement_data_cov2_wide %>% rename(Average_Terminal_Run=Escapement_type)
     escapement_data_cov3_wide<-escapement_data_cov3_wide %>% rename(Average_Terminal_Run=Escapement_type)
     
-      }else if (escapement_type=="Average Escapement"){
+      }else if (escapement_type=="Escapement"){
     escapement_data_cov1_wide<-escapement_data_cov1_wide %>% rename(Average_Escapement=Escapement_type)
     escapement_data_cov2_wide<-escapement_data_cov2_wide %>% rename(Average_Escapement=Escapement_type)
     escapement_data_cov3_wide<-escapement_data_cov3_wide %>% rename(Average_Escapement=Escapement_type)

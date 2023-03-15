@@ -13,12 +13,12 @@ library(purrr)
 # Read in cov_data for covariate and Av escapement  ------------------------------------------------------------
 
 correlate_covs(cov_data_file="fcs_covariates_interpolated.csv",
-               escapement_data_file = "Inputs/WVN_TR_upto2022.csv",
-               modelstock = "WVN",
-               stock= "RBT",
+               escapement_data_file = "Inputs/MOC for Norah use ELK cov/Sixesnewbooks2023.csv",
+               modelstock = "MOC",
+               stock= "ELK",
                year_match=c("Run_Year_Lead1", "Run_Year_Lead2", "Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2"),
-               escapement_type="Terminal Run",
-               truncate_ts=NA,
+               escapement_type="Escapement",
+               truncate_ts=1998,
                age_specific=TRUE,
                age_combine=TRUE,
                age_class=NA)
@@ -85,7 +85,7 @@ cov_data_stock<-cov_data %>% filter(Stock_ERA == stock, Stock_model == modelstoc
 
 if(escapement_type=="Terminal Run"){
   escapement_data<-escapement_data %>% rename(Escapement_type=Average_Terminal_Run)
-}else if (escapement_type=="Average Escapement"){
+}else if (escapement_type=="Escapement"){
   escapement_data<-escapement_data %>% rename(Escapement_type=Average_Escapement)
 }
 
