@@ -10,7 +10,9 @@ library(sjmisc)
 
 
 # California current data -------------------------------------------------
-calicur_1998_present<-read.csv("Inputs/OEI-spotlight-cvs-2022-NWFSC.csv", check.names = FALSE)
+#this is from the stoplight data found here: https://www.fisheries.noaa.gov/west-coast/science-data/ocean-conditions-indicators-trends
+#add new data to the csv each year
+calicur_1998_present<-read.csv("Inputs/OEI-stoplight-cvs-2023-NWFSC.csv", check.names = FALSE)
 calicur_1998_present_long<- rotate_df(calicur_1998_present, rn="year", cn=TRUE) %>% as_tibble()
 calicur_1998_present_long
 
@@ -18,7 +20,7 @@ calicur_1998_present_long
 
 pdo_1854_present<-read.table("https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/index/ersst.v5.pdo.dat",  header=TRUE, skip=1, fill=TRUE) %>% as_tibble()
 pdo_1854_present<-pdo_1854_present %>% rename(year = Year) %>% 
-                                       filter(year!= 2023) %>% 
+                                       filter(year!= 2024) %>% 
                                        mutate_if(is.character, as.numeric) %>% 
                                        mutate(cov_PDO_summer_mean= rowMeans(dplyr::select(.,May, Jun, Jul, Aug, Sep)))  %>% 
                                        mutate(cov_PDO_yearly_mean = rowMeans(dplyr::select(.,Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)))
@@ -32,14 +34,14 @@ pdo_simple
 
 oni_1950_present<-read.table("https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",  header=TRUE,  fill=TRUE) %>% as_tibble()
 oni_simple1<-oni_1950_present %>% rename(year = YR) %>% 
-                                       filter(year!= 2023) %>% 
+                                       filter(year!= 2024) %>% 
                                        group_by(year) %>% 
                                        summarise_if(is.numeric, mean) %>% 
                                        rename(cov_ONI_yearly_mean= TOTAL, 
                                               cov_ONI_yearly_anomaly = ANOM)%>% 
                                        filter(year>1969)
 oni_simple2<-oni_1950_present %>% rename(year = YR) %>% 
-                                  filter(year!= 2023, SEAS %in% c("MJJ", "JJA", "JAS")) %>% 
+                                  filter(year!= 2024, SEAS %in% c("MJJ", "JJA", "JAS")) %>% 
                                   group_by(year) %>% 
                                   summarise_if(is.numeric, mean) %>% 
                                   rename(cov_ONI_summer_mean= TOTAL, 
@@ -104,13 +106,13 @@ names(npgo_1950_present)<-c("year", "month", "cov_NPGO_yearly_mean")
 npgo_1950_present<-npgo_1950_present %>% mutate(year = as.numeric(year)) 
 
 #updated to sept 2022 so can't use 2022 data for the year but can use for the summer
-npgo_simple1<- npgo_1950_present %>% filter(year!= 2022) %>% 
+npgo_simple1<- npgo_1950_present %>% filter(year!= 2024) %>% 
                                      group_by(year) %>% 
                                      summarise_if(is.numeric, mean) %>% 
                                      dplyr::select(-month) %>% 
                                      filter(year>1969)
 
-npgo_simple2<- npgo_1950_present %>% filter(year!= 2023, month %in% c(5,6,7,8)) %>% 
+npgo_simple2<- npgo_1950_present %>% filter(year!= 2024, month %in% c(5,6,7,8)) %>% 
                                      group_by(year) %>% 
                                      summarise_if(is.numeric, mean) %>% 
                                      rename(cov_NPGO_summer_mean= cov_NPGO_yearly_mean)%>% 
@@ -125,7 +127,7 @@ npgo_simple
 epnp_1950_present<-read.table("https://ftp.cpc.ncep.noaa.gov/wd52dg/data/indices/epnp_index.tim",  header=TRUE, skip = 8, fill=TRUE) %>% as_tibble()
 
 #take out the -99.90 values
-epnp_simple1<-epnp_1950_present %>% filter(YEAR!= 2023) %>% 
+epnp_simple1<-epnp_1950_present %>% filter(YEAR!= 2024) %>% 
                                     mutate(INDEX=ifelse(INDEX==-99.90, NA, INDEX)) %>% 
                                     rename(year = YEAR, cov_EPNP_yearly_mean=INDEX) %>% 
                                     group_by(year) %>% 
@@ -133,7 +135,7 @@ epnp_simple1<-epnp_1950_present %>% filter(YEAR!= 2023) %>%
                                     dplyr::select(-MONTH) %>% 
                                     filter(year>1969)
 
-epnp_simple2<-epnp_1950_present %>% filter(YEAR!= 2023, MONTH %in% c(5,6,7,8, 9)) %>% 
+epnp_simple2<-epnp_1950_present %>% filter(YEAR!= 2024, MONTH %in% c(5,6,7,8, 9)) %>% 
                                     mutate(INDEX=ifelse(INDEX==-99.90, NA, INDEX)) %>% 
                                     rename(year = YEAR, cov_EPNP_summer_mean=INDEX) %>% 
                                     group_by(year) %>% 
@@ -158,7 +160,7 @@ epnp_simple
 
 #Extracts and unzips folder into your working directory
 Lightstations_data_temp<-tempfile()
-download.file('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/BCLightstations/DATA_-_Active_Sites.zip', Lightstations_data_temp)
+download.file('https://api-proxy.edh.azure.cloud.dfo-mpo.gc.ca/catalogue/records/719955f2-bf8e-44f7-bc26-6bd623e82884/attachments/Data_Active_Sites_20230930.zip', Lightstations_data_temp)
 unzip(Lightstations_data_temp)
 
 Lightstations_shp_temp<-tempfile()
@@ -171,7 +173,7 @@ Lightstations_location<-Lightstations %>% rename(Station_ID = LIGHSTATIO, lat = 
                                           filter(DATA_COLLE == "ACTIVE") %>% 
                                           dplyr::select(Station_ID, lat, long)  %>% as_tibble
 
-list_of_files<-list.files('DATA_-_Active_Sites', pattern=c('Sea_Surface_Temperature_and_Salinity.+2022.csv'), recursive=TRUE, full.names = T)
+list_of_files<-list.files('Data_Active_Sites_20230930', pattern=c('Sea_Surface_Temperature_and_Salinity.+2023.csv'), recursive=TRUE, full.names = T)
 station_names<-list(Lightstations_location$Station_ID)
 
 #could do this cleaner with a loop
@@ -190,7 +192,7 @@ names(list_of_files)[12]<-station_names[[1]][12]
 
 Lightstation_data <- list_of_files %>% map_dfr(~fread(., skip=1), .id = "Location") %>% as_tibble 
 Lightstation_data<- Lightstation_data %>% rename(Date = `DATE (YYYY-MM-DD)`, 
-                                                 Salinity = `SALINITY (PSU)`, 
+                                                 Salinity = `SALINITY (PSS)`, 
                                                  SST = `TEMPERATURE ( C )`, 
                                                  Latitude = `LATITUDE (DECIMAL DEGREES)`, 
                                                  Longitude = `LONGITUDE (DECIMAL DEGREES)`) %>% 
@@ -340,8 +342,8 @@ hy_annual_wide<- hy_annual %>% filter(Sum_stat %in%  c("MEAN", "MAX"), Parameter
                               drop_na()
 
 #just for certain stations
-get_water_office_flow_2021_2022<-read.csv(curl('https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=08BB001&stations[]=08BB002&stations[]=08BB005&stations[]=08CE001&stations[]=08CF001&stations[]=08CF003&stations[]=08CG001&stations[]=08CG004&stations[]=08DA005&stations[]=08DB001&stations[]=08DC006&stations[]=08DD001&stations[]=08EF001&stations[]=08FA002&stations[]=08FB011&stations[]=08FC003&stations[]=08GA022&stations[]=08GD004&stations[]=08GE002&stations[]=08HA001&stations[]=08HA010&stations[]=08HA011&stations[]=08HA034&stations[]=08HA037&stations[]=08HA039&stations[]=08HA047&stations[]=08HA059&stations[]=08HA065&stations[]=08HB006&stations[]=08HB010&stations[]=08HB014&stations[]=08HB017&stations[]=08HB034&stations[]=08HB092&stations[]=08HC001&stations[]=08HD003&stations[]=08HD035&stations[]=08KA004&stations[]=08KH001&stations[]=08LC002&stations[]=08LE031&stations[]=08LF051&stations[]=08MB012&stations[]=08MC018&stations[]=08MD013&stations[]=08MF005&stations[]=08MF035&stations[]=08MH001&stations[]=08MH024&stations[]=08MH103&stations[]=08MH126&stations[]=08ND011&stations[]=08ND025&stations[]=08NH118&stations[]=08NH119&stations[]=08NL022&stations[]=08NL038&stations[]=08NL071&stations[]=08NM127&stations[]=08NN012&stations[]=08NN026&stations[]=09AA012&stations[]=09AA013&stations[]=09AA014&stations[]=09AA015&parameters[]=47&start_date=2021-01-01%2000:00:00&end_date=2022-12-31%2023:59:59')) %>% as_tibble 
-get_water_office_flow_2021_2022<-get_water_office_flow_2021_2022 %>%                           
+get_water_office_flow_2022_2023<-read.csv(curl('https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=08BB001&stations[]=08BB002&stations[]=08BB005&stations[]=08CE001&stations[]=08CF001&stations[]=08CF003&stations[]=08CG001&stations[]=08CG004&stations[]=08DA005&stations[]=08DB001&stations[]=08DC006&stations[]=08DD001&stations[]=08EF001&stations[]=08FA002&stations[]=08FB011&stations[]=08FC003&stations[]=08GA022&stations[]=08GD004&stations[]=08GE002&stations[]=08HA001&stations[]=08HA010&stations[]=08HA011&stations[]=08HA034&stations[]=08HA037&stations[]=08HA039&stations[]=08HA047&stations[]=08HA059&stations[]=08HA065&stations[]=08HB006&stations[]=08HB010&stations[]=08HB014&stations[]=08HB017&stations[]=08HB034&stations[]=08HB092&stations[]=08HC001&stations[]=08HD003&stations[]=08HD035&stations[]=08KA004&stations[]=08KH001&stations[]=08LC002&stations[]=08LE031&stations[]=08LF051&stations[]=08MB012&stations[]=08MC018&stations[]=08MD013&stations[]=08MF005&stations[]=08MF035&stations[]=08MH001&stations[]=08MH024&stations[]=08MH103&stations[]=08MH126&stations[]=08ND011&stations[]=08ND025&stations[]=08NH118&stations[]=08NH119&stations[]=08NL022&stations[]=08NL038&stations[]=08NL071&stations[]=08NM127&stations[]=08NN012&stations[]=08NN026&stations[]=09AA012&stations[]=09AA013&stations[]=09AA014&stations[]=09AA015&parameters[]=47&start_date=2022-01-01%2000:00:00&end_date=2023-12-31%2023:59:59')) %>% as_tibble 
+get_water_office_flow_2022_2023<-get_water_office_flow_2022_2023 %>%                           
                                  rename(STATION_NUMBER = X.ID) %>% 
                                  mutate(Year=lubridate::year(Date)) %>% 
                                  group_by(STATION_NUMBER, Year) %>% 
@@ -357,6 +359,6 @@ col_names_list<-c("stock", paste(1974:2025))
 model_EVs<-read.table("Inputs/2203B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
 model_stocks<-read.csv("Inputs/stockCodes.csv") 
 model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
-model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, Stock_model, year, cov_model_EVs) %>% filter(year< 2023) %>% as_tibble
-model_EVs_stocks<- model_EVs_stocks %>% complete(year=1970:2022, nesting(Stock_ERA, Stock_model))
+model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, Stock_model, year, cov_model_EVs) %>% filter(year< 2024) %>% as_tibble
+model_EVs_stocks<- model_EVs_stocks %>% complete(year=1970:2023, nesting(Stock_ERA, Stock_model))
 model_EVs_stocks
