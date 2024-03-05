@@ -289,7 +289,7 @@ pacific_stations_matched <- left_join(pacific_stations_stocks, hy_annual_wide) %
                            summarize(cov_water_flow_yearly_max=max(cov_water_flow_yearly_max, na.rm=TRUE),  
                                      cov_water_flow_yearly_mean=max(cov_water_flow_yearly_mean, na.rm=TRUE))
 
-water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_2021_2022) %>% drop_na() %>% 
+water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_2022_2023) %>% drop_na() %>% 
                        group_by(Year, Stock_ERA) %>% 
                        summarize(cov_water_flow_yearly_max=max(cov_water_flow_yearly_max, na.rm=TRUE),  
                                  cov_water_flow_yearly_mean=max(cov_water_flow_yearly_mean, na.rm=TRUE))
