@@ -13,9 +13,9 @@ library(purrr)
 # Read in cov_data for covariate and Av escapement  ------------------------------------------------------------
 
 correlate_covs(cov_data_file="fcs_covariates_interpolated.csv",
-               escapement_data_file = "Inputs/Elknewbooks2023.csv",
-               modelstock = "MOC",
-               stock= "ELK",
+               escapement_data_file = "Inputs/MGS_Esc_Age5_upto2023.csv",
+               modelstock = "MGS",
+               stock= "BQR",
                year_match=c("Run_Year_Lead1", "Run_Year_Lead2", "Brood_Year", "Brood_Year_Lag1", "Brood_Year_Lag2"),
                escapement_type="Escapement",
                truncate_ts=1998,
