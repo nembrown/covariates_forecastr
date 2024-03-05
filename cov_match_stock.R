@@ -284,12 +284,12 @@ pacific_stations_stocks<- st_join(pacific_stations_locations.sf, dat_circles, le
 pacific_stations_stocks
 
 #Apply matching to data
-pacific_stations_matched <- left_join(pacific_stations_stocks, hy_annual_wide) %>% 
+pacific_stations_matched <- left_join(pacific_stations_stocks, hy_annual_wide) %>% drop_na() %>% 
                            group_by(Year, Stock_ERA) %>% 
                            summarize(cov_water_flow_yearly_max=max(cov_water_flow_yearly_max, na.rm=TRUE),  
                                      cov_water_flow_yearly_mean=max(cov_water_flow_yearly_mean, na.rm=TRUE))
 
-water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_2021_2022) %>% 
+water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_2021_2022) %>% drop_na() %>% 
                        group_by(Year, Stock_ERA) %>% 
                        summarize(cov_water_flow_yearly_max=max(cov_water_flow_yearly_max, na.rm=TRUE),  
                                  cov_water_flow_yearly_mean=max(cov_water_flow_yearly_mean, na.rm=TRUE))
@@ -300,7 +300,7 @@ water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_
 
 # Combing the match file to the data file (from cov_fetch)
 hydro_annual_wide_matched <-  pacific_stations_matched %>% 
-                              filter(Year %notin% c(2021, 2022)) %>% 
+                              filter(Year %notin% c(2022, 2023)) %>% 
                               full_join(water_office_matched) %>% drop_na()
 
 

@@ -355,8 +355,8 @@ get_water_office_flow_2022_2023<-get_water_office_flow_2022_2023 %>%
 
 ### adding model EVs back in 
 # Model EVs ---------------------------------------------------------------
-col_names_list<-c("stock", paste(1974:2025))
-model_EVs<-read.table("Inputs/2203B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
+col_names_list<-c("stock", paste(1974:2026))
+model_EVs<-read.table("Inputs/2304B.EVO", skip=2, col.names= col_names_list, check.names = FALSE) %>% as_tibble()
 model_stocks<-read.csv("Inputs/stockCodes.csv") 
 model_EVs <- model_EVs %>% pivot_longer(cols = 2:52, names_to = "year", values_to = "cov_model_EVs") %>% mutate(year= as.numeric(year))
 model_EVs_stocks<-merge(model_EVs, model_stocks) %>% dplyr::select(Stock_ERA, Stock_model, year, cov_model_EVs) %>% filter(year< 2024) %>% as_tibble
