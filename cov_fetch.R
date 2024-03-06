@@ -203,9 +203,9 @@ Lightstation_data<- Lightstation_data %>% rename(Date = `DATE (YYYY-MM-DD)`,
                                                  Day = lubridate::day(Date)) 
 
 # Set all 999.99 values to NA
-Data_Lightstations <- Lightstation_data %>% dplyr::mutate(SST=ifelse(SST==999.9, NA, SST),
-                                                          Salinity=ifelse(Salinity==999.9, NA, Salinity),
-                                                          Longitude=ifelse(Longitude==999.9, NA, Longitude),
+Data_Lightstations <- Lightstation_data %>% dplyr::mutate(SST=ifelse(SST >99, NA, SST),
+                                                          Salinity=ifelse(Salinity>99, NA, Salinity),
+                                                          Longitude=ifelse(Longitude>999.9, NA, Longitude),
                                                           Latitude=ifelse(Latitude==999.9, NA, Latitude)) %>% 
                                             rename(year = Year) 
 
@@ -292,7 +292,7 @@ Data_Lightstations_combined
 # Zooplankton biomass from IOS --------------------------------------------
 #only updated to 2018 # get file from Akash Sastri
 #ios_zoop_base<-read.csv(curl('https://pacgis01.dfo-mpo.gc.ca/FGPPublic/Pacific_Zooplankton/IOS_zoop_vnh_biomass_major_taxa_1980_2018_V1.csv')) %>%  as_tibble()
-ios_zoop_base<-read.csv("Inputs/IOS_zoop_vnh_biomass_major_taxa_1980_2022.csv", fileEncoding = "Latin1")
+ios_zoop_base<-read.csv("Inputs/IOS Zoop biomass major taxa 1980-2023.csv", fileEncoding = "Latin1")
 
 ios_zoop <- ios_zoop_base  %>% filter(Mesh..µm. <300, Net != "Bongo ONH") %>% 
                                mutate(Euphausiacea = case_when(Twilight == "Daylight" ~ Euphausiacea*3), 
