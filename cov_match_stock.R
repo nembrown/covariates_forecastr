@@ -284,23 +284,23 @@ pacific_stations_stocks<- st_join(pacific_stations_locations.sf, dat_circles, le
 pacific_stations_stocks
 
 #Apply matching to data
-pacific_stations_matched <- left_join(pacific_stations_stocks, hy_annual_wide) %>% drop_na() %>% 
+pacific_stations_matched <- left_join(pacific_stations_stocks, hy_annual_wide) %>% drop_na() %>%
                            group_by(Year, Stock_ERA) %>% 
                            summarize(cov_water_flow_yearly_max=max(cov_water_flow_yearly_max, na.rm=TRUE),  
                                      cov_water_flow_yearly_mean=max(cov_water_flow_yearly_mean, na.rm=TRUE))
 
-water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_2022_2023) %>% drop_na() %>% 
+water_office_matched<- left_join(pacific_stations_stocks, get_water_office_flow_2023_2024) %>% drop_na() %>% 
                        group_by(Year, Stock_ERA) %>% 
                        summarize(cov_water_flow_yearly_max=max(cov_water_flow_yearly_max, na.rm=TRUE),  
                                  cov_water_flow_yearly_mean=max(cov_water_flow_yearly_mean, na.rm=TRUE))
 
-
+#Stations that have 2022 data, so they are current/active
 #08BB001,08BB002,08BB005,08CE001,08CF001,08CF003,08CG001,08CG004,08DA005,08DB001,08DC006,08DD001,08EF001,08FA002,08FB011,08FC003,08GA022,08GD004,08GE002,08HA001,08HA010,08HA011,08HA034,08HA037,08HA039,08HA047,08HA059,08HA065,08HB006,08HB010,08HB014,08HB017,08HB034,08HB092,08HC001,08HD003,08HD035,08KA004,08KH001,08LC002,08LE031,08LF051,08MB012,08MC018,08MD013,08MF005,08MF035,08MH001,08MH024,08MH103,08MH126,08ND011,08ND025,08NH118,08NH119,08NL022,08NL038,08NL071,08NM127,08NN012,08NN026,09AA012,09AA013,09AA014,09AA015
 
 
 # Combing the match file to the data file (from cov_fetch)
 hydro_annual_wide_matched <-  pacific_stations_matched %>% 
-                              filter(Year %notin% c(2022, 2023)) %>% 
+                              filter(Year %notin% c(2023, 2024)) %>% 
                               full_join(water_office_matched) %>% drop_na()
 
 
