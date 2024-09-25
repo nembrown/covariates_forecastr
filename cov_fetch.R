@@ -176,19 +176,34 @@ Lightstations_location<-Lightstations %>% rename(Station_ID = LIGHSTATIO, lat = 
 list_of_files<-list.files('Data_Active_Sites_20240620', pattern=c('Sea_Surface_Temperature_and_Salinity.+2024.csv'), recursive=TRUE, full.names = T)
 station_names<-list(Lightstations_location$Station_ID)
 
-#could do this cleaner with a loop
+
+###If Chrome island is still broken: 
 names(list_of_files)[1]<-station_names[[1]][1]
 names(list_of_files)[2]<-station_names[[1]][2]
-names(list_of_files)[3]<-station_names[[1]][3]
-names(list_of_files)[4]<-station_names[[1]][4]
-names(list_of_files)[5]<-station_names[[1]][5]
-names(list_of_files)[6]<-station_names[[1]][6]
-names(list_of_files)[7]<-station_names[[1]][7]
-names(list_of_files)[8]<-station_names[[1]][8]
-names(list_of_files)[9]<-station_names[[1]][9]
-names(list_of_files)[10]<-station_names[[1]][10]
-names(list_of_files)[11]<-station_names[[1]][11]
-names(list_of_files)[12]<-station_names[[1]][12]
+names(list_of_files)[3]<-station_names[[1]][4]
+names(list_of_files)[4]<-station_names[[1]][5]
+names(list_of_files)[5]<-station_names[[1]][6]
+names(list_of_files)[6]<-station_names[[1]][7]
+names(list_of_files)[7]<-station_names[[1]][8]
+names(list_of_files)[8]<-station_names[[1]][9]
+names(list_of_files)[9]<-station_names[[1]][10]
+names(list_of_files)[10]<-station_names[[1]][11]
+names(list_of_files)[11]<-station_names[[1]][12]
+
+
+#If Chrome island is fixed: 
+# names(list_of_files)[1]<-station_names[[1]][1]
+# names(list_of_files)[2]<-station_names[[1]][2]
+# names(list_of_files)[3]<-station_names[[1]][3]
+# names(list_of_files)[4]<-station_names[[1]][4]
+# names(list_of_files)[5]<-station_names[[1]][5]
+# names(list_of_files)[6]<-station_names[[1]][6]
+# names(list_of_files)[7]<-station_names[[1]][7]
+# names(list_of_files)[8]<-station_names[[1]][8]
+# names(list_of_files)[9]<-station_names[[1]][9]
+# names(list_of_files)[10]<-station_names[[1]][10]
+# names(list_of_files)[11]<-station_names[[1]][11]
+# names(list_of_files)[12]<-station_names[[1]][12]
 
 Lightstation_data <- list_of_files %>% map_dfr(~fread(., skip=1), .id = "Location") %>% as_tibble 
 Lightstation_data<- Lightstation_data %>% rename(Date = `DATE (YYYY-MM-DD)`, 

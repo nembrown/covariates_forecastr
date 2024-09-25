@@ -5,7 +5,7 @@ library(tidyverse)
 
 # Read in cov_data for covariate and Av escapement  ------------------------------------------------------------
 
-
+### run this second
 select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
             escapement_data_file = "Inputs/MOC for Norah use ELK cov/Elknewbooks2023.csv",
             output_file_name = "Outputs/MOC/Elknewbooks2023_cov.csv" ,
@@ -24,7 +24,7 @@ select_covs(cov_data_file ="fcs_covariates_interpolated.csv",
 )
             
 
-
+###Run this first
 #Laura don't touch
 select_covs<-function(cov_data_file,
                          escapement_data_file,

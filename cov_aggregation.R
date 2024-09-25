@@ -22,7 +22,7 @@ calicur_1998_present_long
 
 
 #zooplankton from ios, since 1980
-ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year!=2023)
+ios_zoop_anomalies<-ios_zoop_anomalies %>% rename(year = calc_year) %>% filter(year < 2025)
 
 #Hydro stations, take out 
 hydro_stations_matched<-hydro_annual_wide_matched %>% rename(year = Year) 

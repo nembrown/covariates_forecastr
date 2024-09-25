@@ -12,6 +12,7 @@ library(purrr)
 
 # Read in cov_data for covariate and Av escapement  ------------------------------------------------------------
 
+#Run this second
 correlate_covs(cov_data_file="fcs_covariates_interpolated.csv",
                escapement_data_file = "Inputs/MGS_Esc_Age5_upto2023.csv",
                modelstock = "MGS",
@@ -23,6 +24,7 @@ correlate_covs(cov_data_file="fcs_covariates_interpolated.csv",
                age_combine=TRUE,
                age_class=NA)
 
+#Run this first
 correlate_covs<-function(cov_data_file,
                          escapement_data_file,
                          modelstock = NA_character_, 
