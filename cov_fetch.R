@@ -18,8 +18,8 @@ calicur_1998_present_long
 
 # PDO (Pacific Decadal Oscillation) from NOAA ---------------------------------------------------------------------
 
-pdo_1854_present<-read.table("https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/index/ersst.v5.pdo.dat",  header=TRUE, skip=1, fill=TRUE) %>% as_tibble()
-pdo_1854_present<-pdo_1854_present %>% rename(year = Year) %>% 
+pdo_1854_present<-read.table("https://psl.noaa.gov/pdo/data/pdo.timeseries.ersstv5.data",  header=FALSE, skip=1, fill=TRUE) %>% as_tibble()
+pdo_1854_present<-pdo_1854_present %>% rename(year = V1, Jan = V2, Feb=V3, Mar=V4, Apr=V5, May=V6, Jun=V7, Jul = V8, Aug=V9, Sep=V10, Oct=V11, Nov=V12, Dec=V13) %>% 
                                        filter(year!= 2025) %>% 
                                        mutate_if(is.character, as.numeric) %>% 
                                        mutate(cov_PDO_summer_mean= rowMeans(dplyr::select(.,May, Jun, Jul, Aug, Sep)))  %>% 
